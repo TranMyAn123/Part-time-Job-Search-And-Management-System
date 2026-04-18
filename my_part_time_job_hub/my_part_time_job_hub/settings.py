@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
-from django.conf.global_settings import AUTH_USER_MODEL
+# from django.conf.global_settings import AUTH_USER_MODEL
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,6 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'users.User'
 
 # Application definition
 
@@ -41,7 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'onlinejobapp.apps.OnlinejobappConfig',
+    'users.apps.UsersConfig',
+    'payments.apps.PaymentsConfig',
+    'jobs.apps.JobsConfig',
     'ckeditor',
     'ckeditor_uploader',
     'rest_framework',
@@ -99,24 +102,23 @@ WSGI_APPLICATION = 'my_part_time_job_hub.wsgi.application'
 import pymysql
 pymysql.version_info = (2, 2, 1, 'final', 0)
 pymysql.install_as_MySQLdb()
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': '',
-#         'USER': 'root',
-#         'PASSWORD': 'root',
-#         'HOST': ''  # mặc định localhost
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'job_db',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': ''  # mặc định localhost
+    }
+}
 
-# AUTH_USER_MODEL = 'onlinejobapp.User'
 
 # Config Cloudinary
 import cloudinary.api
 cloudinary.config(
-    cloud_name = "",
-    api_key = "",
-    api_secret = "",
+    cloud_name = "duxz5ias9",
+    api_key = "685644779562593",
+    api_secret = "M7cWBMgvKH0VG5S__EZyOwOTac4",
 )
 
 

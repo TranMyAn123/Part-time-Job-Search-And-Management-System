@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path, include
+from django.views.generic import RedirectView
 
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -25,9 +26,9 @@ schema_view = get_schema_view(
     openapi.Info(
         title="Online Job API",
         default_version='v1',
-        description="APIs for CourseApp",
-        contact=openapi.Contact(email="thanh.dh@ou.edu.vn"),
-        license=openapi.License(name="Dương Hữu Thành@2025"),
+        description="APIs for JobApp",
+        contact=openapi.Contact(email="admin.com"),
+        license=openapi.License(name="Online Job Management System@2026"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,)
@@ -35,6 +36,7 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
+    path('',RedirectView.as_view(url='swagger/', permanent=False)),
     path('admin/', admin.site.urls),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',
             schema_view.without_ui(cache_timeout=0),
