@@ -7,7 +7,7 @@ User, Profile
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    phone_num = models.CharField(max_length=10, null=True, blank=True)
+    phone_num = models.CharField(max_length=10, null=True, blank=True, unique=True)
     avatar = CloudinaryField('avatar', null=True)
 
     def __str__(self):
@@ -17,7 +17,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     address = models.CharField(max_length=120, null=True, blank=True)
     dob = models.DateField(null=True, blank=True)
-    cityzenID = models.CharField(max_length=120, null=True, blank=True)
+    cityzenID = models.CharField(max_length=120, null=True, blank=True, unique=True)
 
     def __str__(self):
         return self.user.username

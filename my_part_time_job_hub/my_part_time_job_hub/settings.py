@@ -50,7 +50,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'oauth2_provider',
-    'corsheaders'
+    'corsheaders',
+    
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 CKEDITOR_UPLOAD_PATH = 'images/ckeditors/'
@@ -62,6 +67,11 @@ REST_FRAMEWORK = {
     )
 }
 
+OAUTH2_PROVIDER = {
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 7200,  
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 7200 
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -70,6 +80,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware'
 ]
 
 # Tùy chỉnh sau
@@ -107,8 +118,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'job_db',
         'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': ''  # mặc định localhost
+        'PASSWORD': '35715982',
+        'HOST': ''  
     }
 }
 
@@ -157,3 +168,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+CLIENT_KEY = 'M2rkr3E7v3g7nJw3bu1rtkD9rh2QYv1pPuBcHu2S'
+CLIENT_SECRET='ghmnsowUIvX8vfkh5CEwcZZCl3OyiUCUkurC4kSYssp4sTr21vbDYzkbP8E0BIgYWXwxGGbA0hU8N3eCsFgolTzLxjcGhWNrU4yoKy0WAFYKHugRZqUxuJirvwOL0Tg9'
