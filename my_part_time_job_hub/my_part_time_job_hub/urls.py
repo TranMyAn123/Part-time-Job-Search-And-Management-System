@@ -36,7 +36,8 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path('',RedirectView.as_view(url='swagger/', permanent=False)),
+    path('', include('users.urls')),
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('admin/', admin.site.urls),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',
             schema_view.without_ui(cache_timeout=0),
