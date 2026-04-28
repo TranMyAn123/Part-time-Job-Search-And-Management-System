@@ -2,14 +2,14 @@ from django.db import models
 from onlinejobapp.models import BaseActiveModel, TimeStampedModel
 
 from users.models import User
-
+from cloudinary.models import CloudinaryField
 '''
 Employer, Industry, Job, Comment, Application
 '''
 class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='employer_profile')
     company_name = models.CharField(max_length=150)
-    logo_company = models.CharField(max_length=150, null=True, blank=True)
+    logo_company = CloudinaryField('image', null=True, blank=True)
     is_verified = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
 
@@ -26,10 +26,10 @@ class Job(BaseActiveModel, TimeStampedModel):
     industry = models.ForeignKey(Industry, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=150)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
-    requirement = models.CharField(max_length=150)
+    requirement = models.TextField(null=False, blank=False)
     salary_min = models.DecimalField(max_digits=12, decimal_places=2)
     salary_max = models.DecimalField(max_digits=12, decimal_places=2)
-    benefic = models.TextField(null=True, blank=True)
+    benefits = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=150)
     available_date = models.DateField()
     is_premium = models.BooleanField(default=False)
@@ -41,12 +41,15 @@ class Application(models.Model):
         INTERVIEW = 'INTERVIEW', "Hẹn phỏng vấn"
         ACCEPTED = 'ACCEPTED', "Trúng tuyển"
         REJECTED = 'REJECTED', "Trượt"
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
+    job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True, related_name='applications')
     candidate = models.ForeignKey(User, on_delete=models.CASCADE, related_name='my_applications')
     apply_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.REVIEWING)
-    evaluation = models.CharField(max_length=25, null=True, blank=True)
+    evaluation = models.CharField(max_length=50, null=True, blank=True)
     note = models.TextField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('job', 'candidate')
 
 class Comment(TimeStampedModel):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='comments')
