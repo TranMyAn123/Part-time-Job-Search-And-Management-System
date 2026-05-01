@@ -52,10 +52,6 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'corsheaders',
     
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
 ]
 
 CKEDITOR_UPLOAD_PATH = 'images/ckeditors/'
@@ -64,6 +60,7 @@ CKEDITOR_UPLOAD_PATH = 'images/ckeditors/'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.SessionAuthentication',
     )
 }
 
@@ -71,6 +68,10 @@ OAUTH2_PROVIDER = {
     "ACCESS_TOKEN_EXPIRE_SECONDS": 7200,  
     "REFRESH_TOKEN_EXPIRE_SECONDS": 7200 
 }
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -80,13 +81,16 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware'
 ]
+
+OAUTH2_PROVIDER = {
+    "ROTATE_REFRESH_TOKEN": True,
+    "BLACKLIST_AFTER_ROTATION": True
+}
 
 # Tùy chỉnh sau
 CORS_ORIGIN_ALLOW_ALL = True
 
-# OAUTH2_PROVIDER = { 'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore' }
 
 ROOT_URLCONF = 'my_part_time_job_hub.urls'
 
@@ -132,6 +136,10 @@ cloudinary.config(
     api_secret = "M7cWBMgvKH0VG5S__EZyOwOTac4",
 )
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -169,5 +177,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-CLIENT_KEY = 'M2rkr3E7v3g7nJw3bu1rtkD9rh2QYv1pPuBcHu2S'
-CLIENT_SECRET='ghmnsowUIvX8vfkh5CEwcZZCl3OyiUCUkurC4kSYssp4sTr21vbDYzkbP8E0BIgYWXwxGGbA0hU8N3eCsFgolTzLxjcGhWNrU4yoKy0WAFYKHugRZqUxuJirvwOL0Tg9'
+CLIENT_KEY = os.getenv('CLIENT_KEY')
+CLIENT_SECRET=os.getenv('CLIENT_SECRET')
+
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+
