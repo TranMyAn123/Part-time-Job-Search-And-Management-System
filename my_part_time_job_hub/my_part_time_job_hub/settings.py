@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
-from django.conf.global_settings import AUTH_USER_MODEL
+# from django.conf.global_settings import AUTH_USER_MODEL
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,8 +29,11 @@ SECRET_KEY = 'django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.12',
+                 'localhost',
+                 '127.0.0.1']
 
+AUTH_USER_MODEL = 'users.User'
 
 # Application definition
 
@@ -41,13 +44,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'onlinejobapp.apps.OnlinejobappConfig',
+    'users.apps.UsersConfig',
+    'payments.apps.PaymentsConfig',
+    'jobs.apps.JobsConfig',
     'ckeditor',
     'ckeditor_uploader',
     'rest_framework',
     'drf_yasg',
     'oauth2_provider',
-    'corsheaders'
+    'corsheaders',
+    
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 CKEDITOR_UPLOAD_PATH = 'images/ckeditors/'
@@ -59,6 +69,11 @@ REST_FRAMEWORK = {
     )
 }
 
+OAUTH2_PROVIDER = {
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 7200,  
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 7200 
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -67,6 +82,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware'
 ]
 
 # Tùy chỉnh sau
@@ -99,24 +115,23 @@ WSGI_APPLICATION = 'my_part_time_job_hub.wsgi.application'
 import pymysql
 pymysql.version_info = (2, 2, 1, 'final', 0)
 pymysql.install_as_MySQLdb()
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': '',
-#         'USER': 'root',
-#         'PASSWORD': 'root',
-#         'HOST': ''  # mặc định localhost
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'job_db',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': ''  
+    }
+}
 
-# AUTH_USER_MODEL = 'onlinejobapp.User'
 
 # Config Cloudinary
 import cloudinary.api
 cloudinary.config(
-    cloud_name = "",
-    api_key = "",
-    api_secret = "",
+    cloud_name = "duxz5ias9",
+    api_key = "685644779562593",
+    api_secret = "M7cWBMgvKH0VG5S__EZyOwOTac4",
 )
 
 
@@ -155,3 +170,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+CLIENT_KEY = 'fZaqn13EyKtkjlqPjhi1pyDHrCUPSWlVppB0n95M'
+CLIENT_SECRET='lcELgdRBMcGvc74B5VbQo1WfVOR0dPSmANOT5T5YgYEnbaYmViBqEPpHHV44xHwpzBJ0DsH2EiUHJ9eYU9vq9FRDg60DIteaMK4sUnpgIi5VegcljEkVCWfO2654Ol9I'
