@@ -69,8 +69,9 @@ class AuthViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             validated_data = serializer.validated_data
 
-            token_url = 'http://127.0.0.1:8000/o/token/'
-            
+            # token_url = 'http://127.0.0.1:8000/o/token/'
+            token_url = 'http://192.168.1.12:8000/o/token/'
+
             data_send_oauth = {
                 "grant_type": "password",
                 "username": validated_data['username'],

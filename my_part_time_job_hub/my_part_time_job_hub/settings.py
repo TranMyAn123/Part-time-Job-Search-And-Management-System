@@ -29,7 +29,9 @@ SECRET_KEY = 'django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.12',
+                 'localhost',
+                 '127.0.0.1']
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -118,7 +120,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'job_db',
         'USER': 'root',
-        'PASSWORD': '35715982',
+        'PASSWORD': 'root',
         'HOST': ''  
     }
 }
@@ -169,5 +171,5 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-CLIENT_KEY = 'M2rkr3E7v3g7nJw3bu1rtkD9rh2QYv1pPuBcHu2S'
-CLIENT_SECRET='ghmnsowUIvX8vfkh5CEwcZZCl3OyiUCUkurC4kSYssp4sTr21vbDYzkbP8E0BIgYWXwxGGbA0hU8N3eCsFgolTzLxjcGhWNrU4yoKy0WAFYKHugRZqUxuJirvwOL0Tg9'
+CLIENT_KEY = 'fZaqn13EyKtkjlqPjhi1pyDHrCUPSWlVppB0n95M'
+CLIENT_SECRET='lcELgdRBMcGvc74B5VbQo1WfVOR0dPSmANOT5T5YgYEnbaYmViBqEPpHHV44xHwpzBJ0DsH2EiUHJ9eYU9vq9FRDg60DIteaMK4sUnpgIi5VegcljEkVCWfO2654Ol9I'
