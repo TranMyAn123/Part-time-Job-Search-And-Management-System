@@ -10,6 +10,8 @@ class AvatarSerializer(serializers.ModelSerializer):
         
         if instance.avatar:
             data['avatar'] = instance.avatar.url
+
+        return data
     
 class SimpleUserSerializer(AvatarSerializer):
     class Meta:
@@ -74,7 +76,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         username = value
         if not re.match(r'^[A-Za-z][0-9A-Za-z]{5,15}$', username):
             raise AuthenticationFailed( 
-                 "Username chỉ có nhiều hơn 6 ký tự và bao gồm cả chữ, số"
+                 "Username phải từ 6 ký tự và bao gồm cả chữ, số"
             )
             
         if User.objects.filter(username=username).exists():

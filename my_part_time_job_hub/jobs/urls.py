@@ -4,7 +4,7 @@ from jobs import views
 
 r = DefaultRouter()
 r.register('jobs', views.JobViewSet, 'job')
-r.register('industry', views.IndustryViewSet, 'industry')
+r.register('industrys', views.IndustryViewSet, 'industry')
 urlpatterns = [
     path('', include(r.urls)),
 ]
