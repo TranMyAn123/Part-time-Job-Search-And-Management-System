@@ -117,3 +117,6 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_replies(self, obj):
         children = obj.relies.all()
         return CommentSerializer(children, many=True).data
+
+
+# class JobNotificationSerializer(serializers.ModelSerializer):
