@@ -85,3 +85,5 @@ class ApplicationViewSet(
     def get_queryset(self):
         user = self.request.user
         return Application.objects.filter(candidate=user)
+    
+    

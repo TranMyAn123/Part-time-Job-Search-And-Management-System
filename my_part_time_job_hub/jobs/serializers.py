@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from jobs.models import Job, Application, Employer
+from jobs.models import Job, Application, Employer, Comment
 from jobs.utils import validators
 
 
@@ -33,7 +33,12 @@ class JobCreateSerializer(serializers.ModelSerializer):
 class EmployerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employer
-        fields = ["company_name", "logo_company", "description"]
+        fields = ["company_name", "logo_company", "description", "tax_code"]
+
+    def validate_tax_code(self, value):
+        if Employer.objects.filter(tax_code=value).exists():
+            raise serializers.ValidationError("Company's tax code is available!")
+        return value
 
     def validate(self, attrs):
         company_name = attrs.get("company_name")
@@ -42,19 +47,29 @@ class EmployerSerializer(serializers.ModelSerializer):
 
         if not validators.check_strip(company_name):
             raise serializers.ValidationError(
-                {"company_name": "Tên công ty không được để trống"}
+                {"company_name": "Company name can not empty!"}
             )
 
         if not validators.check_strip(logo_company):
             raise serializers.ValidationError(
-                {"logo_company": "Logo công ty không được để trống"}
+                {"logo_company": "Logo company can not empty!"}
             )
 
         if not validators.check_strip(description):
             raise serializers.ValidationError(
-                {"description": "Mô tả không được để trống"}
+                {"description": "Description can not empty!"}
             )
         return attrs
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        request = self.context["request"]
+        if request and request.user and request.user.is_authenticated:
+            data["is_followed"] = instance.followers.filter(
+                user=request.user, active=True
+            ).exists()
+        return data
 
 
 class ApplicationCreateSerializer(serializers.ModelSerializer):
@@ -68,7 +83,7 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
-    job = JobSerializer(read_only=True)  # hiện thông tin job luôn
+    job = JobSerializer(read_only=True)
 
     class Meta:
         model = Application
@@ -80,3 +95,25 @@ class ApplicationReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = ["status", "evaluation", "note"]
+
+    def update(self, instance, validated_data):
+        status = validated_data.get("status")
+        user = self.context["request"].user
+        try:
+            instance.transition_to(status, user)
+        except ValueError as e:
+            raise serializers.ValidationError(str(e))
+        return instance
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    replies = serializers.SerializerMethodField()
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = Comment
+        fields = ["id", "user", "content", "created_at", "replies"]
+
+    def get_replies(self, obj):
+        children = obj.relies.all()
+        return CommentSerializer(children, many=True).data
