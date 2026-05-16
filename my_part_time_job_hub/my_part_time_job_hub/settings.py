@@ -18,122 +18,120 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-MEDIA_ROOT = BASE_DIR / 'onlinejobapp/media/'
+MEDIA_ROOT = BASE_DIR / "onlinejobapp/media/"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g'
+SECRET_KEY = "django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'users.apps.UsersConfig',
-    'payments.apps.PaymentsConfig',
-    'jobs.apps.JobsConfig',
-    'ckeditor',
-    'ckeditor_uploader',
-    'rest_framework',
-    'drf_yasg',
-    'oauth2_provider',
-    'corsheaders',
-    
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "users.apps.UsersConfig",
+    "payments.apps.PaymentsConfig",
+    "jobs.apps.JobsConfig",
+    "ckeditor",
+    "ckeditor_uploader",
+    "rest_framework",
+    "drf_yasg",
+    "oauth2_provider",
+    "corsheaders",
 ]
 
-CKEDITOR_UPLOAD_PATH = 'images/ckeditors/'
+CKEDITOR_UPLOAD_PATH = "images/ckeditors/"
 
 # Rest Framework
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
+        "rest_framework.authentication.SessionAuthentication",
     )
 }
 
 OAUTH2_PROVIDER = {
-    "ACCESS_TOKEN_EXPIRE_SECONDS": 7200,  
-    "REFRESH_TOKEN_EXPIRE_SECONDS": 7200 
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 7200,
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 7200,
 }
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-OAUTH2_PROVIDER = {
-    "ROTATE_REFRESH_TOKEN": True,
-    "BLACKLIST_AFTER_ROTATION": True
-}
+OAUTH2_PROVIDER = {"ROTATE_REFRESH_TOKEN": True, "BLACKLIST_AFTER_ROTATION": True}
 
 # Tùy chỉnh sau
 CORS_ORIGIN_ALLOW_ALL = True
 
 
-ROOT_URLCONF = 'my_part_time_job_hub.urls'
+ROOT_URLCONF = "my_part_time_job_hub.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'my_part_time_job_hub.wsgi.application'
+WSGI_APPLICATION = "my_part_time_job_hub.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 import pymysql
-pymysql.version_info = (2, 2, 1, 'final', 0)
+
+pymysql.version_info = (2, 2, 1, "final", 0)
 pymysql.install_as_MySQLdb()
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'job_db',
-        'USER': 'root',
-        'PASSWORD': '35715982',
-        'HOST': ''  
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "job_db",
+        "USER": "root",
+        "PASSWORD": "35715982",
+        "HOST": "",
     }
 }
 
 
 # Config Cloudinary
 import cloudinary.api
+
 cloudinary.config(
-    cloud_name = "duxz5ias9",
-    api_key = "685644779562593",
-    api_secret = "M7cWBMgvKH0VG5S__EZyOwOTac4",
+    cloud_name="duxz5ias9",
+    api_key="685644779562593",
+    api_secret="M7cWBMgvKH0VG5S__EZyOwOTac4",
 )
 
 from dotenv import load_dotenv
@@ -146,16 +144,16 @@ load_dotenv()
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -163,9 +161,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -175,11 +173,38 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
-CLIENT_KEY = os.getenv('CLIENT_KEY')
-CLIENT_SECRET=os.getenv('CLIENT_SECRET')
+CLIENT_KEY = os.getenv("CLIENT_KEY")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
-GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
-GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
+# Config log để bắt lỗi
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "ERROR",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "errors.log",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+        "jobs": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+    },
+}
+
+# Dev: in mail ra console thay vì gửi thật
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

@@ -2,6 +2,7 @@ from django.db import models
 from onlinejobapp.models import BaseActiveModel, TimeStampedModel
 from django.utils import timezone
 from users.models import User
+from cloudinary.models import CloudinaryField
 
 """
 Employer, Industry, Job, Comment, Application
@@ -17,6 +18,7 @@ class Employer(models.Model):
     )
     company_name = models.CharField(max_length=150)
     logo_company = models.CharField(max_length=150, null=True, blank=True)
+    tax_code = models.CharField(max_length=14, unique=True)
     is_verified = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
 
@@ -35,6 +37,12 @@ class Job(BaseActiveModel, TimeStampedModel):
         OPENING = "OPENING", "Đã duyệt"
         CLOSED = "CLOSED", "Hết hạn"
 
+    VALID_TRANSITIONS = {
+        Status.PENDING: [Status.OPENING, Status.CLOSED],
+        Status.OPENING: [Status.CLOSED],
+        Status.CLOSED: [],
+    }
+
     employer = models.ForeignKey(
         Employer, on_delete=models.CASCADE, related_name="jobs"
     )
@@ -49,11 +57,22 @@ class Job(BaseActiveModel, TimeStampedModel):
     benefic = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=150)
     available_date = models.DateField()
-    is_premium = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
 
     def is_expired(self):
         return self.available_date < timezone.now().date()
+
+    def get_status_display(self):
+        return self.Status(self.status).label
+
+    def transition_to(self, new_status: Status):
+        if new_status not in self.VALID_TRANSITIONS[self.status]:
+            raise ValueError(
+                f"Cannot switch from '{self.get_status_display()}' "
+                f"to '{self.Status(new_status).label}'"
+            )
+        self.status = new_status
+        self.save()
 
 
 class Application(models.Model):
@@ -62,7 +81,27 @@ class Application(models.Model):
         INTERVIEW = "INTERVIEW", "Hẹn phỏng vấn"
         ACCEPTED = "ACCEPTED", "Trúng tuyển"
         REJECTED = "REJECTED", "Trượt"
+        WITHDRAWN = "WITHDRAWN", "Ứng viên rút đơn"
+        CANCELLED = "CANCELLED", "Đã hủy"
 
+    VALID_TRANSITIONS = {
+        Status.REVIEWING: [
+            Status.INTERVIEW,
+            Status.REJECTED,
+            Status.WITHDRAWN,
+            Status.CANCELLED,
+        ],
+        Status.INTERVIEW: [
+            Status.ACCEPTED,
+            Status.REJECTED,
+            Status.WITHDRAWN,
+            Status.CANCELLED,
+        ],
+        Status.ACCEPTED: [Status.CANCELLED, Status.WITHDRAWN],
+        Status.REJECTED: [],
+        Status.WITHDRAWN: [],
+        Status.CANCELLED: [],
+    }
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="applications")
     candidate = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="my_applications"
@@ -72,7 +111,26 @@ class Application(models.Model):
         max_length=20, choices=Status.choices, default=Status.REVIEWING
     )
     evaluation = models.CharField(max_length=25, null=True, blank=True)
+    cv_file = CloudinaryField("cv_file", null=False)
     note = models.TextField(null=True, blank=True)
+
+    def get_status_display(self):
+        return self.Status(self.status).label
+
+    def transition_to(self, new_status: Status, user: User):
+        if user.role != "EMPLOYER":
+            if new_status != "WITHDRAWN":
+                raise ValueError(f"No permission to perform this action!")
+        else:
+            if new_status == "WITHDRAWN":
+                raise ValueError(f"You cannot perform this action!")
+
+        if new_status not in self.VALID_TRANSITIONS[self.status]:
+            raise ValueError(
+                f"Cannot switch from '{self.get_status_display()}' to '{self.Status(new_status).label}'"
+            )
+        self.status = new_status
+        self.save()
 
 
 class Comment(TimeStampedModel):
@@ -82,3 +140,49 @@ class Comment(TimeStampedModel):
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="relies"
     )
     content = models.TextField(null=True, blank=True)
+
+
+class CompanyFollow(TimeStampedModel):
+    candidate = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="following_companies",
+        limit_choices_to={"role": "USER"},
+    )
+    employer = models.ForeignKey(
+        Employer,
+        on_delete=models.CASCADE,
+        related_name="followers",
+    )
+    notify_email = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ("candidate", "employer")
+        indexes = [
+            models.Index(fields=["employer"]),
+        ]
+
+
+class JobNotification(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Chờ gửi"
+        SENT = "SENT", "Đã gửi"
+        FAILED = "FAILED", "Lỗi"
+
+    follow = models.ForeignKey(
+        CompanyFollow,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.PENDING
+    )
+    sent_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ("follow", "job")
