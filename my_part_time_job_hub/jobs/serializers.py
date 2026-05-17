@@ -18,7 +18,7 @@ class JobCreateSerializer(serializers.ModelSerializer):
             "salary_min",
             "status",
             "salary_max",
-            "benefic",
+            "benefits",
             "location",
             "available_date",
             "industry",

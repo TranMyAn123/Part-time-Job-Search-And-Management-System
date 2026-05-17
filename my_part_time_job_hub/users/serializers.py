@@ -13,6 +13,7 @@ class AvatarSerializer(serializers.ModelSerializer):
         if instance.avatar:
             data["avatar"] = instance.avatar.url
 
+        return data
 
 class SimpleUserSerializer(AvatarSerializer):
     class Meta:
@@ -21,6 +22,10 @@ class SimpleUserSerializer(AvatarSerializer):
 
 
 class UserSerializer(SimpleUserSerializer):
+    address = serializers.SerializerMethodField()
+    dob = serializers.SerializerMethodField()
+    cityzenID = serializers.SerializerMethodField()
+
     class Meta:
         model = SimpleUserSerializer.Meta.model
         fields = SimpleUserSerializer.Meta.fields + [
@@ -28,15 +33,59 @@ class UserSerializer(SimpleUserSerializer):
             "username",
             "password",
             "email",
+            "address",
+            "dob",
+            "cityzenID",
         ]
         extra_kwargs = {"password": {"write_only": True}}
 
+    def get_address(self, obj):
+        try:
+            return obj.profile.address
+        except:
+            return None
+
+    def get_dob(self, obj):
+        try:
+            return str(obj.profile.dob) if obj.profile.dob else None
+        except:
+            return None
+
+    def get_cityzenID(self, obj):
+        try:
+            return obj.profile.cityzenID
+        except:
+            return None
+
 
 class ProfileSerializer(SimpleUserSerializer):
+    address = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    dob = serializers.DateField(required=False, allow_null=True)
+    cityzenID = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+
     class Meta:
         model = SimpleUserSerializer.Meta.model
         fields = SimpleUserSerializer.Meta.fields + ["address", "dob", "cityzenID"]
 
+    def update(self, instance, validated_data):
+        address = validated_data.pop('address', None)
+        dob = validated_data.pop('dob', None)
+        cityzenID = validated_data.pop('cityzenID', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        profile, _ = Profile.objects.get_or_create(user=instance)
+        if address is not None:
+            profile.address = address
+        if dob is not None:
+            profile.dob = dob
+        if cityzenID is not None:
+            profile.cityzenID = cityzenID
+        profile.save()
+
+        return instance
 
 class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
