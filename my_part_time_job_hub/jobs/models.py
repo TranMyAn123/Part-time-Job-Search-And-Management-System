@@ -70,7 +70,7 @@ class Job(BaseActiveModel, TimeStampedModel):
     requirement = models.CharField(max_length=150)
     salary_min = models.DecimalField(max_digits=12, decimal_places=2)
     salary_max = models.DecimalField(max_digits=12, decimal_places=2)
-    benefic = models.TextField(null=True, blank=True)
+    benefits = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=150)
     available_date = models.DateField()
     description = models.TextField(null=True, blank=True)
