@@ -68,10 +68,9 @@ class AuthViewSet(viewsets.ViewSet):
     @action(methods=["post"], url_path="login", detail=False)
     def login_user(self, request):
         data = request.data
-
         if not data:
             return Response(
-                {"message": "Yêu cầu là bắt buộc"}, status=status.HTTP_400_BAD_REQUEST
+                {"message": "Request is required !"}, status=status.HTTP_400_BAD_REQUEST
             )
         try:
             serializer = serializers.LoginSerializer(data=data)
@@ -99,7 +98,7 @@ class AuthViewSet(viewsets.ViewSet):
 
         if not data:
             return Response(
-                {"message": "Yêu cầu là bắt buộc"}, status=status.HTTP_400_BAD_REQUEST
+                {"message": "Request is required !"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
@@ -109,7 +108,7 @@ class AuthViewSet(viewsets.ViewSet):
 
             return Response(
                 {
-                    "message": "Đăng ký thành công",
+                    "message": "Sign up succeed !",
                 },
                 status=status.HTTP_201_CREATED,
             )
@@ -127,7 +126,7 @@ class AuthViewSet(viewsets.ViewSet):
 
         if not access_token_from_google:
             return Response(
-                {"Token của google chưa tồn tại"}, status=status.HTTP_404_NOT_FOUND
+                {"Google's token not available !"}, status=status.HTTP_404_NOT_FOUND
             )
 
         data = auth_services.get_google_user(access_token_from_google)
@@ -143,7 +142,7 @@ class AuthViewSet(viewsets.ViewSet):
 
         if AccessToken.objects.filter(user=user).exists():
             return Response(
-                {"message": "Đã tồn tại token"}, status=status.HTTP_400_BAD_REQUEST
+                {"message": "Token available !"}, status=status.HTTP_400_BAD_REQUEST
             )
         access_token, refresh_token = auth_services.create_token_from_social_login(
             user, app

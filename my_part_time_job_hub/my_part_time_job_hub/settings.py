@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "payments.apps.PaymentsConfig",
     "jobs.apps.JobsConfig",
+    "onlinejobapp.apps.OnlinejobappConfig",
     "ckeditor",
     "ckeditor_uploader",
     "rest_framework",
@@ -59,14 +60,18 @@ CKEDITOR_UPLOAD_PATH = "images/ckeditors/"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
-        "rest_framework.authentication.SessionAuthentication",
     )
 }
 
 OAUTH2_PROVIDER = {
     "ACCESS_TOKEN_EXPIRE_SECONDS": 7200,
-    "REFRESH_TOKEN_EXPIRE_SECONDS": 7200,
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 72000,
+    "ROTATE_REFRESH_TOKEN": False,
+    "OAUTH2_BACKEND_CLASS": "oauth2_provider.oauth2_backends.JSONOAuthLibCore",
 }
+
+# OAUTH2_PROVIDER = {"ROTATE_REFRESH_TOKEN": True, "BLACKLIST_AFTER_ROTATION": True}
+
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
@@ -82,7 +87,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-OAUTH2_PROVIDER = {"ROTATE_REFRESH_TOKEN": True, "BLACKLIST_AFTER_ROTATION": True}
 
 # Tùy chỉnh sau
 CORS_ORIGIN_ALLOW_ALL = True

@@ -21,6 +21,7 @@ from django.urls import path, re_path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from onlinejobapp.admin import admin_site
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -36,10 +37,9 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path("", include("users.urls")),
-    path("", include("jobs.urls")),
+    path("", include("onlinejobapp.urls")),
     path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
-    path("admin/", admin.site.urls),
+    path("admin/", admin_site.urls),
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
