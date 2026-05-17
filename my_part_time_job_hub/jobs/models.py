@@ -17,13 +17,27 @@ class Employer(models.Model):
         related_name="employer_profile",
     )
     company_name = models.CharField(max_length=150)
-    logo_company = models.CharField(max_length=150, null=True, blank=True)
+    logo_company = CloudinaryField(null=True, blank=True)
     tax_code = models.CharField(max_length=14, unique=True)
     is_verified = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
 
+    def __str__(self):
+        return self.company_name
 
-class Industry(models.Model):
+
+class WorkplaceImage(models.Model):
+    employer = models.ForeignKey(
+        Employer, on_delete=models.CASCADE, related_name="workplace_images"
+    )
+    image = CloudinaryField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image of {self.employer.company_name}"
+
+
+class Industry(BaseActiveModel, TimeStampedModel):
     name = models.CharField(max_length=150, unique=True)
     description = models.TextField(null=True, blank=True)
 
@@ -46,7 +60,9 @@ class Job(BaseActiveModel, TimeStampedModel):
     employer = models.ForeignKey(
         Employer, on_delete=models.CASCADE, related_name="jobs"
     )
-    industry = models.ForeignKey(Industry, on_delete=models.SET_NULL, null=True)
+    industry = models.ForeignKey(
+        Industry, on_delete=models.SET_NULL, null=True, related_name="jobs"
+    )
     title = models.CharField(max_length=150)
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.PENDING
@@ -74,8 +90,11 @@ class Job(BaseActiveModel, TimeStampedModel):
         self.status = new_status
         self.save()
 
+    def __str__(self):
+        return self.title
 
-class Application(models.Model):
+
+class Application(TimeStampedModel):
     class Status(models.TextChoices):
         REVIEWING = "REVIEWING", "Chờ xét duyệt"
         INTERVIEW = "INTERVIEW", "Hẹn phỏng vấn"
@@ -141,8 +160,11 @@ class Comment(TimeStampedModel):
     )
     content = models.TextField(null=True, blank=True)
 
+    def __str__(self):
+        return f"Comment của {self.user} có id là {self.pk}"
 
-class CompanyFollow(TimeStampedModel):
+
+class CompanyFollow(BaseActiveModel, TimeStampedModel):
     candidate = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

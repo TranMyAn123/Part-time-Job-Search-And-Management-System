@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from jobs.models import Job, Application, Employer, Comment
+from jobs.models import Job, Application, Employer, Comment, Industry, WorkplaceImage
 from jobs.utils import validators
+from django.db import transaction
 
 
 class JobSerializer(serializers.ModelSerializer):
@@ -31,13 +32,35 @@ class JobCreateSerializer(serializers.ModelSerializer):
 
 
 class EmployerSerializer(serializers.ModelSerializer):
+    workplace_images = serializers.ListField(
+        child=serializers.ImageField(), write_only=True
+    )
+
     class Meta:
         model = Employer
-        fields = ["company_name", "logo_company", "description", "tax_code"]
+        fields = [
+            "company_name",
+            "logo_company",
+            "description",
+            "tax_code",
+            "workplace_images",
+        ]
+
+    def validate_workplace_images(self, value):
+        if len(value) < 3:
+            raise serializers.ValidationError("Need at least 3 workplace images!")
+        return value
+
+    def validate_logo_company(self, value):
+        size = 1 * pow(1024, 2)
+
+        if value.size > size:
+            raise serializers.ValidationError("Can't upload image higher than 1MB !")
+        return value
 
     def validate_tax_code(self, value):
         if Employer.objects.filter(tax_code=value).exists():
-            raise serializers.ValidationError("Company's tax code is available!")
+            raise serializers.ValidationError("This tax code is already registered !")
         return value
 
     def validate(self, attrs):
@@ -50,7 +73,7 @@ class EmployerSerializer(serializers.ModelSerializer):
                 {"company_name": "Company name can not empty!"}
             )
 
-        if not validators.check_strip(logo_company):
+        if not logo_company:
             raise serializers.ValidationError(
                 {"logo_company": "Logo company can not empty!"}
             )
@@ -63,13 +86,30 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
         request = self.context["request"]
         if request and request.user and request.user.is_authenticated:
             data["is_followed"] = instance.followers.filter(
-                user=request.user, active=True
+                candidate=request.user, active=True
             ).exists()
         return data
+
+    def create(self, validated_data):
+        images = validated_data.pop("workplace_images")
+
+        with transaction.atomic():
+            employer = super().create(validated_data)
+            arrImg = []
+            for img in images:
+                arrImg.append(img)
+            WorkplaceImage.objects.bulk_create(arrImg)
+
+        return employer
+
+
+class IndustrSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Industry
+        fields = "__all__"
 
 
 class ApplicationCreateSerializer(serializers.ModelSerializer):
@@ -107,16 +147,32 @@ class ApplicationReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    replies = serializers.SerializerMethodField()
+    reply_count = serializers.IntegerField(read_only=True)
     user = serializers.StringRelatedField()
 
     class Meta:
         model = Comment
-        fields = ["id", "user", "content", "created_at", "replies"]
+        fields = ["id", "user", "content", "parent", "created_at", "reply_count"]
 
-    def get_replies(self, obj):
-        children = obj.relies.all()
-        return CommentSerializer(children, many=True).data
+        extra_kwargs = {
+            "id": {"read_only": True},
+            "created_at": {"read_only": True},
+            "parent": {"required": False},
+        }
+
+    def validate_parent(self, value):
+        if value is None:
+            return None
+
+        job_id = self.context["job_id"]
+
+        if value.job_id != int(job_id):
+            raise serializers.ValidationError("Can't reply comment from another job !")
+
+        if value.parent is not None:
+            raise serializers.ValidationError("Can't reply into this reply !")
+
+        return value
 
 
 # class JobNotificationSerializer(serializers.ModelSerializer):

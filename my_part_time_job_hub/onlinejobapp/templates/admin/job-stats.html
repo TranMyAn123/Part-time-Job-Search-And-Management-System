@@ -1,0 +1,192 @@
+<!-- templates/admin/statistics.html -->
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Thống kê hệ thống{% endblock %}
+
+{% block content %}
+
+<!-- Stat cards -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0">
+
+  <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:20px;text-align:center">
+    <div style="font-size:13px;color:#666;margin-bottom:8px">Tổng việc làm</div>
+    <div style="font-size:32px;font-weight:700;color:#417690">{{ total_jobs }}</div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:20px;text-align:center">
+    <div style="font-size:13px;color:#666;margin-bottom:8px">Ứng viên đã apply</div>
+    <div style="font-size:32px;font-weight:700;color:#2e7d32">{{ total_candidates }}</div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:20px;text-align:center">
+    <div style="font-size:13px;color:#666;margin-bottom:8px">Nhà tuyển dụng</div>
+    <div style="font-size:32px;font-weight:700;color:#f57c00">{{ total_employers }}</div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:20px;text-align:center">
+    <div style="font-size:13px;color:#666;margin-bottom:8px">Tổng đơn ứng tuyển</div>
+    <div style="font-size:32px;font-weight:700;color:#6a1b9a">{{ total_applications }}</div>
+  </div>
+
+</div>
+
+<!-- Tables side by side -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px">
+
+  <!-- Jobs by status -->
+  <div>
+    <h2 style="font-size:15px;margin-bottom:12px">Việc làm theo trạng thái</h2>
+    <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0">
+      <thead>
+        <tr style="background:#f8f8f8">
+          <th style="text-align:left;padding:10px 16px;font-size:13px;border-bottom:1px solid #e0e0e0">Trạng thái</th>
+          <th style="text-align:right;padding:10px 16px;font-size:13px;border-bottom:1px solid #e0e0e0">Số lượng</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in jobs_by_status %}
+        <tr>
+          <td style="padding:10px 16px;font-size:13px;border-bottom:1px solid #f0f0f0">
+            {% if item.status == "OPENING" %}
+              <span style="color:#2e7d32;font-weight:500">● Đang mở</span>
+            {% elif item.status == "PENDING" %}
+              <span style="color:#f57c00;font-weight:500">● Chờ duyệt</span>
+            {% else %}
+              <span style="color:#c62828;font-weight:500">● Đã đóng</span>
+            {% endif %}
+          </td>
+          <td style="padding:10px 16px;font-size:14px;font-weight:600;text-align:right;border-bottom:1px solid #f0f0f0">{{ item.count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Applications by status -->
+  <div>
+    <h2 style="font-size:15px;margin-bottom:12px">Đơn ứng tuyển theo trạng thái</h2>
+    <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0">
+      <thead>
+        <tr style="background:#f8f8f8">
+          <th style="text-align:left;padding:10px 16px;font-size:13px;border-bottom:1px solid #e0e0e0">Trạng thái</th>
+          <th style="text-align:right;padding:10px 16px;font-size:13px;border-bottom:1px solid #e0e0e0">Số lượng</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in applications_by_status %}
+        <tr>
+          <td style="padding:10px 16px;font-size:13px;border-bottom:1px solid #f0f0f0">{{ item.status }}</td>
+          <td style="padding:10px 16px;font-size:14px;font-weight:600;text-align:right;border-bottom:1px solid #f0f0f0">{{ item.count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px">
+
+  <!-- Donut: trạng thái ứng tuyển -->
+  <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:24px">
+    <h2 style="font-size:15px;margin-bottom:16px">Trạng thái ứng tuyển</h2>
+    <div style="position:relative;height:280px;display:flex;justify-content:center">
+      <canvas id="appStatusChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Bar: top 5 ngành -->
+  <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:24px">
+    <h2 style="font-size:15px;margin-bottom:16px">Top 5 ngành có nhiều việc làm nhất</h2>
+    <div style="position:relative;height:280px">
+      <canvas id="industryChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Donut — trạng thái ứng tuyển
+const appLabels = [];
+const appData = [];
+const appColors = [];
+const colorMap = {
+  REVIEWING: '#1565c0',
+  INTERVIEW: '#6a1b9a',
+  ACCEPTED:  '#2e7d32',
+  REJECTED:  '#c62828',
+  WITHDRAWN: '#888888',
+  CANCELLED: '#bbbbbb',
+};
+const labelMap = {
+  REVIEWING: 'Chờ duyệt',
+  INTERVIEW: 'Phỏng vấn',
+  ACCEPTED:  'Trúng tuyển',
+  REJECTED:  'Trượt',
+  WITHDRAWN: 'Rút đơn',
+  CANCELLED: 'Đã hủy',
+};
+{% for item in applications_by_status %}
+  appLabels.push(labelMap["{{ item.status }}"] );
+  appData.push({{ item.count }});
+  appColors.push(colorMap["{{ item.status }}"] || '#ccc');
+{% endfor %}
+
+new Chart(document.getElementById('appStatusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: appLabels,
+    datasets: [{
+      data: appData,
+      backgroundColor: appColors,
+      borderWidth: 2,
+      borderColor: '#fff',
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '60%',
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 12 } }
+    }
+  }
+});
+
+// Bar — top 5 ngành
+const industryLabels = [];
+const industryData = [];
+{% for item in top_industries %}
+  industryLabels.push("{{ item.name }}");
+  industryData.push({{ item.job_count }});
+{% endfor %}
+
+new Chart(document.getElementById('industryChart'), {
+  type: 'bar',
+  data: {
+    labels: industryLabels,
+    datasets: [{
+      label: 'Số việc làm',
+      data: industryData,
+      backgroundColor: ['#417690','#2e7d32','#f57c00','#6a1b9a','#c62828'],
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f0f0f0' } },
+      y: { grid: { display: false }, ticks: { font: { size: 12 } } }
+    }
+  }
+});
+</script>
+{% endblock %}

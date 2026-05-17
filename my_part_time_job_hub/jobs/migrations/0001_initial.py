@@ -10,78 +10,195 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('users', '0001_initial'),
+        ("users", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Employer',
+            name="Employer",
             fields=[
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='employer_profile', serialize=False, to=settings.AUTH_USER_MODEL)),
-                ('company_name', models.CharField(max_length=150)),
-                ('logo_company', models.CharField(blank=True, max_length=150, null=True)),
-                ('is_verified', models.BooleanField(default=False)),
-                ('description', models.TextField(blank=True, null=True)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        primary_key=True,
+                        related_name="employer_profile",
+                        serialize=False,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                ("company_name", models.CharField(max_length=150)),
+                (
+                    "logo_company",
+                    models.CharField(blank=True, max_length=150, null=True),
+                ),
+                ("is_verified", models.BooleanField(default=False)),
+                ("description", models.TextField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Industry',
+            name="Industry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150, unique=True)),
-                ('description', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=150, unique=True)),
+                ("description", models.TextField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Job',
+            name="Job",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=150)),
-                ('status', models.CharField(choices=[('PENDING', 'Chờ duyệt'), ('OPENING', 'Đã duyệt'), ('CLOSED', 'Hết hạn')], default='PENDING', max_length=20)),
-                ('requirement', models.CharField(max_length=150)),
-                ('salary_min', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('salary_max', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('benefic', models.TextField(blank=True, null=True)),
-                ('location', models.CharField(max_length=150)),
-                ('available_date', models.DateField()),
-                ('is_premium', models.BooleanField(default=False)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('employer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='jobs', to='jobs.employer')),
-                ('industry', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='jobs.industry')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=150)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDING", "Chờ duyệt"),
+                            ("OPENING", "Đã duyệt"),
+                            ("CLOSED", "Hết hạn"),
+                        ],
+                        default="PENDING",
+                        max_length=20,
+                    ),
+                ),
+                ("requirement", models.CharField(max_length=150)),
+                ("salary_min", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("salary_max", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("benefic", models.TextField(blank=True, null=True)),
+                ("location", models.CharField(max_length=150)),
+                ("available_date", models.DateField()),
+                ("is_premium", models.BooleanField(default=False)),
+                ("description", models.TextField(blank=True, null=True)),
+                (
+                    "employer",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="jobs",
+                        to="jobs.employer",
+                    ),
+                ),
+                (
+                    "industry",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="jobs.industry",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Comment',
+            name="Comment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('content', models.TextField(blank=True, null=True)),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='relies', to='jobs.comment')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='comments', to='jobs.job')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("content", models.TextField(blank=True, null=True)),
+                (
+                    "parent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="relies",
+                        to="jobs.comment",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "job",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="comments",
+                        to="jobs.job",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Application',
+            name="Application",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('apply_date', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('REVIEWING', 'Chờ xét duyệt'), ('INTERVIEW', 'Hẹn phỏng vấn'), ('ACCEPTED', 'Trúng tuyển'), ('REJECTED', 'Trượt')], default='REVIEWING', max_length=20)),
-                ('evaluation', models.CharField(blank=True, max_length=25, null=True)),
-                ('note', models.TextField(blank=True, null=True)),
-                ('candidate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='my_applications', to=settings.AUTH_USER_MODEL)),
-                ('job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='jobs.job')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("apply_date", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("REVIEWING", "Chờ xét duyệt"),
+                            ("INTERVIEW", "Hẹn phỏng vấn"),
+                            ("ACCEPTED", "Trúng tuyển"),
+                            ("REJECTED", "Trượt"),
+                        ],
+                        default="REVIEWING",
+                        max_length=20,
+                    ),
+                ),
+                ("evaluation", models.CharField(blank=True, max_length=25, null=True)),
+                ("note", models.TextField(blank=True, null=True)),
+                (
+                    "candidate",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="my_applications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "job",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="applications",
+                        to="jobs.job",
+                    ),
+                ),
             ],
         ),
     ]
