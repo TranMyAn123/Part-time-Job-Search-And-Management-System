@@ -8,8 +8,7 @@ from users.services import auth_services
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
 from django.conf import settings
 from oauth2_provider.models import AccessToken, Application
-from google.auth.transport import requests
-
+# from google.auth.transport import requests
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)
@@ -25,14 +24,14 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     def current_user(self, request):
         u = request.user
         if request.method.__eq__("PATCH"):
-            s = serializers.ProfileSerializer(u, data=request.data)
+            s = serializers.ProfileSerializer(u, data=request.data, partial=True)
             s.is_valid(raise_exception=True)
             u = s.save()
         return Response(serializers.UserSerializer(u).data, status=status.HTTP_200_OK)
 
     @action(
         methods=["patch"],
-        url_path="currnet_user/change_password",
+        url_path="current_user/change_password",
         detail=False,
         permission_classes=[permissions.IsAuthenticated],
     )
