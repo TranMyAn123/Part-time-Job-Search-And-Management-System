@@ -29,9 +29,10 @@ SECRET_KEY = "django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.12',
+ALLOWED_HOSTS = ['192.168.1.14',
                  'localhost',
-                 '127.0.0.1']
+                 '127.0.0.1',
+                 '0.0.0.0']
 
 AUTH_USER_MODEL = "users.User"
 
@@ -80,6 +81,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -125,7 +127,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "job_db",
         "USER": "root",
-        "PASSWORD": "35715982",
+        "PASSWORD": "root",
         "HOST": "",
     }
 }
