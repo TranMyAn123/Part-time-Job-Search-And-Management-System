@@ -1,11 +1,11 @@
-import { Image, ScrollView, Text, TouchableOpacity } from "react-native";
-import Styles from "../../styles/Styles";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import Styles, { inputTheme } from "../../styles/Styles";
 import { Button, HelperText, TextInput } from "react-native-paper";
 import * as ImgPicker from 'expo-image-picker';
 import { useState } from "react";
 import Apis, { endpoints } from "../../configs/Apis";
 import { useNavigation } from "@react-navigation/native";
-import UserStyles, { inputTheme } from "./Styles";
+import SocialLogin from "../../components/SocialLogin";
 
 const Register = () => {
     const userInfo = [{
@@ -37,7 +37,7 @@ const Register = () => {
     }];
 
     const [user, setUser] = useState({});
-    const [err, setErr] = useState();
+    const [err, setErr] = useState({});
     const [loading, setLoading] = useState(false);
     const nav = useNavigation();
     const [showPassword, setShowPassword] = useState({});
@@ -55,23 +55,23 @@ const Register = () => {
     }
 
     const validate = () => {
+        let newErr = {};
         for (var i of userInfo)
             if (!(i.field in user) || !user[i.field]) {
-                setErr(`Vui lòng nhập ${i.label}!`);
-                return false;
+                newErr[i.field] = `Vui lòng nhập ${i.label}!`;
             }
 
         if (user.password !== user.confirm) {
-            setErr("Mật khẩu không khớp");
-            return false;
+            newErr.confirm = "Mật khẩu không khớp";
         }
 
-        return true;
+        setErr(newErr);
+        return Object.keys(newErr).length === 0;
     }
 
     const register = async () => {
         if (validate() === true) {
-            setErr("");
+            setErr({});
             try {
                 setLoading(true);
 
@@ -100,7 +100,7 @@ const Register = () => {
                     alert("Hệ thống có lỗi!");
             } catch (ex) {
                 console.error(JSON.stringify(ex.response?.data));
-                setErr("Hệ thống có lỗi!");
+                setErr({ api: "Hệ thống có lỗi!" });
             } finally {
                 setLoading(false);
             }
@@ -108,9 +108,8 @@ const Register = () => {
     }
 
     return (
-        <ScrollView contentContainerStyle={[Styles.padding, Styles.gap, UserStyles.center]}>
-            {err && <HelperText type="error" visible={err}>{err}</HelperText>}
-
+        <ScrollView contentContainerStyle={[Styles.scrollContent, Styles.gap, Styles.center]}>
+            {err.api && <HelperText type="error" visible={true}>{err.api}</HelperText>}
             <TouchableOpacity onPress={picker} style={Styles.avatarPicker}>
                 {user.avatar
                     ? <Image source={{ uri: user.avatar.uri }} style={Styles.avatar} />
@@ -118,19 +117,38 @@ const Register = () => {
                 }
             </TouchableOpacity>
 
-            {userInfo.map(i => <TextInput key={i.field} style={[Styles.margin, UserStyles.input]}
-                contentStyle={UserStyles.inputContent} theme={inputTheme} mode="outlined"
-                value={user[i.field]} onChangeText={t => setUser({ ...user, [i.field]: t })}
-                label={i.label} outlineStyle={UserStyles.outlineStyle}
-                secureTextEntry={i.secureTextEntry && !showPassword[i.field]}
-                right={<TextInput.Icon
-                    icon={i.secureTextEntry ? (showPassword[i.field] ? 'eye-off' : 'eye') : i.icon}
-                    onPress={() => i.secureTextEntry && setShowPassword({ ...showPassword, [i.field]: !showPassword[i.field] })}
-                />} />)}
+            {userInfo.map(i => (
+                <View key={i.field}>
+                    <TextInput
+                        style={[Styles.margin, Styles.input]}
+                        contentStyle={Styles.inputContent}
+                        theme={inputTheme}
+                        mode="outlined"
+                        value={user[i.field]}
+                        onChangeText={t => {
+                            setUser({ ...user, [i.field]: t });
+                            setErr({ ...err, [i.field]: '' });
+                        }}
+                        label={i.label}
+                        outlineStyle={Styles.outlineStyle}
+                        secureTextEntry={i.secureTextEntry && !showPassword[i.field]}
+                        error={!!err[i.field]}
+                        right={<TextInput.Icon
+                            icon={i.secureTextEntry ? (showPassword[i.field] ? 'eye-off' : 'eye') : i.icon}
+                            onPress={() => i.secureTextEntry && setShowPassword({ ...showPassword, [i.field]: !showPassword[i.field] })}
+                        />}
+                    />
+                    <HelperText type="error" visible={!!err[i.field]} style={{ marginTop: -5, marginBottom: -20, paddingVertical: 0 }}>
+                        {err[i.field]}
+                    </HelperText>
+                </View>
+            ))}
 
             <Button loading={loading} disabled={loading} onPress={register}
                 style={[Styles.margin, Styles.button]} labelStyle={Styles.buttonLabel}
                 mode="contained">Đăng ký</Button>
+
+            <SocialLogin />
         </ScrollView>
     );
 }
