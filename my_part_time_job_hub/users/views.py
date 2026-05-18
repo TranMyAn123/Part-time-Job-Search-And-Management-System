@@ -18,11 +18,11 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
 
     @action(
         methods=["get", "patch"],
-        url_path="current_user",
+        url_path="me",
         detail=False,
         permission_classes=[permissions.IsAuthenticated],
     )
-    def current_user(self, request):
+    def me(self, request):
         u = request.user
         if request.method.__eq__("PATCH"):
             s = serializers.ProfileSerializer(u, data=request.data)
@@ -32,7 +32,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
 
     @action(
         methods=["patch"],
-        url_path="currnet_user/change_password",
+        url_path="me/change_password",
         detail=False,
         permission_classes=[permissions.IsAuthenticated],
     )
