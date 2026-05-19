@@ -120,6 +120,20 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView):
             ).data
         )
 
+    @action(methods=["get"], detail=False, url_path="top-followed")
+    def top_followed(self, request):
+        employers = (
+            Employer.objects.filter(is_verified=True, followers__active=True)
+            .annotate(follow_count=Count("followers"))
+            .order_by("-follow_count")[:5]
+        )
+
+        return Response(
+            serializers.EmployerSerializer(
+                employers, many=True, context={"request": request}
+            ).data
+        )
+
 
 class IndustryViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Industry.objects.filter(active=True)
