@@ -35,16 +35,26 @@ class EmployerSerializer(serializers.ModelSerializer):
     workplace_images = serializers.ListField(
         child=serializers.ImageField(), write_only=True
     )
+    full_name = serializers.SerializerMethodField(read_only=True)
+    follow_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Employer
         fields = [
+            "full_name",
             "company_name",
             "logo_company",
             "description",
             "tax_code",
             "workplace_images",
+            "follow_count",
         ]
+
+    def get_full_name(self, obj):
+        user = obj.user
+        if user.first_name or user.last_name:
+            return f"{user.first_name} {user.last_name}".strip()
+        return user.username
 
     def validate_workplace_images(self, value):
         if len(value) < 3:

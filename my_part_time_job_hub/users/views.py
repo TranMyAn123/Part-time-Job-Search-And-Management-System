@@ -26,7 +26,10 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     def me(self, request):
         u = request.user
         if request.method.__eq__("PATCH"):
-            s = serializers.ProfileSerializer(u, data=request.data, partial=True)
+            if "avatar" in request.data:
+                s = serializers.UserSerializer(u, data=request.data, partial=True)
+            else:
+                s = serializers.ProfileSerializer(u, data=request.data, partial=True)
             s.is_valid(raise_exception=True)
             u = s.save()
         return Response(serializers.UserSerializer(u).data, status=status.HTTP_200_OK)

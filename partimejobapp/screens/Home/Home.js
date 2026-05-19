@@ -4,8 +4,7 @@ import { SafeAreaView, ScrollView, View, StyleSheet } from "react-native";
 import Header from "../../components/home/Header";
 import SearchBar from "../../components/SearchBar";
 import IndustryChip from "../../components/home/IndustryChip";
-// import Banner from "./components/Banner";
-// import FeaturedJobs from "./components/FeaturedJobs";
+import FeaturedEmployer from "../../components/home/FeaturedEmployer";
 // import NearbyJobs from "./components/NearbyJobs";
 // import BottomNav from "./components/BottomNav";
 
@@ -18,14 +17,12 @@ export default function App() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <Header />
 
-        <SearchBar />
-
-        <IndustryChip active={activeChip} setActive={setActiveChip} />
 
 
-        {/* <FeaturedJobs />
 
-        <NearbyJobs /> */}
+        <FeaturedEmployer />
+
+        {/* <NearbyJobs /> */}
       </ScrollView>
 
       {/* <BottomNav active={activeNav} setActive={setActiveNav} /> */}
