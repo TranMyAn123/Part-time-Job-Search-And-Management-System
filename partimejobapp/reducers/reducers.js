@@ -5,7 +5,7 @@ export const MyUserReducer = (current, action) => {
         case "LOGOUT":
             return null;
         case "UPDATE_AVATAR":
-            return { ...current, avatar: action.payload.uri };
+            return { ...current, avatar: action.payload.avatar };
     }
 
     return current;
