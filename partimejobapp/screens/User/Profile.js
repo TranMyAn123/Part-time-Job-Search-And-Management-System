@@ -30,11 +30,11 @@ const Profile = () => {
     const [userEdit, setUserEdit] = useState({
         first_name: user?.first_name || '',
         last_name: user?.last_name || '',
-        cityzenID: user?.cityzenID || '',
+        cityzenID: user?.profile?.cityzenID || '',
         email: user?.email || '',
         phone_num: user?.phone_num || '',
-        address: user?.address || '',
-        dob: user?.dob || '',
+        address: user?.profile?.address || '',
+        dob: user?.profile?.dob || '',
     });
 
     const userInfo = [
@@ -51,11 +51,21 @@ const Profile = () => {
         try {
             setLoading(true);
             const token = await AsyncStorage.getItem('token');
-            let dataToSend = { ...userEdit };
-            if (dataToSend.dob && dataToSend.dob.includes('/')) {
-                const parts = dataToSend.dob.split('/');
-                dataToSend.dob = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            let dob = userEdit.dob;
+            if (dob && dob.includes('/')) {
+                const parts = dob.split('/');
+                dob = `${parts[2]}-${parts[1]}-${parts[0]}`;
             }
+            let dataToSend = {
+                user: {
+                    first_name: userEdit.first_name,
+                    last_name: userEdit.last_name,
+                    phone_num: userEdit.phone_num,
+                },
+                address: userEdit.address,
+                dob: dob,
+                cityzenID: userEdit.cityzenID,
+            };
             let res = await authApis(token).patch(endpoints['current-user'], dataToSend);
             dispatch({ type: "LOGIN", payload: res.data });
             setEditing(false);
@@ -134,14 +144,14 @@ const Profile = () => {
                         name: result.assets[0].fileName,
                         type: "image/jpeg"
                     });
-                    let res = await authApis(token).put(endpoints['current-user'], form, {
+                    let res = await authApis(token).patch(endpoints['current-user'], form, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }
                     });
                     dispatch({
                         type: "UPDATE_AVATAR",
-                        payload: result.assets[0]
+                        payload: res.data
                     });
                 } catch (ex) {
                     console.error(ex);
@@ -159,7 +169,7 @@ const Profile = () => {
             <TouchableOpacity onPress={picker} style={Styles.avatarPicker}>
                 {user?.avatar
                     ? <Image source={{ uri: user.avatar }} style={Styles.avatar} />
-                    : <Text style={{ fontSize: 40 }}>👤</Text>
+                    : <Image source={{ uri: 'https://res.cloudinary.com/duxz5ias9/image/upload/v1779191141/default_avatar_izym3f.png' }} style={Styles.avatar} />
                 }
             </TouchableOpacity>
 
@@ -174,7 +184,7 @@ const Profile = () => {
                             onChangeText={t => i.field !== 'dob' && setUserEdit({ ...userEdit, [i.field]: t })}
                             mode="outlined" multiline={true}
                             editable={editing && i.field !== 'dob'}
-                            style={UserStyles.input}
+                            style={[UserStyles.input, !editing && { opacity: 0.75 }]}
                             contentStyle={UserStyles.inputContent}
                             outlineStyle={UserStyles.outlineStyle}
                             theme={inputTheme}
@@ -203,12 +213,8 @@ const Profile = () => {
                                     mode="date"
                                     display={Platform.OS === 'android' ? 'default' : 'inline'}
                                     onChange={(event, date) => {
-                                        if (event.type === 'dismissed') {
-                                            setShowDatePicker(false);
-                                            return;
-                                        }
-                                        if (event.type === 'set' && date) {
-                                            setShowDatePicker(false);
+                                        setShowDatePicker(false);
+                                        if (date) {
                                             const d = date.getDate().toString().padStart(2, '0');
                                             const m = (date.getMonth() + 1).toString().padStart(2, '0');
                                             const y = date.getFullYear();
@@ -236,7 +242,7 @@ const Profile = () => {
                             {err.non_field_errors}
                         </HelperText>
                     )}
-                    
+
                     {[
                         { field: 'old_password', label: 'Mật khẩu cũ' },
                         { field: 'new_password', label: 'Mật khẩu mới' },

@@ -40,6 +40,9 @@ export default StyleSheet.create({
         height: 80,
         borderRadius: 50,
         alignSelf: "center",
+        borderWidth: 2,
+        borderColor: Colors.navy[500],
+        borderStyle: 'solid',
     },
     avatarPicker: {
         width: 80,

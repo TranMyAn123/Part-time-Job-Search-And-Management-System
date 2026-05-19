@@ -6,6 +6,7 @@ import { useState } from "react";
 import Apis, { endpoints } from "../../configs/Apis";
 import { useNavigation } from "@react-navigation/native";
 import SocialLogin from "../../components/SocialLogin";
+import { Colors } from "../../configs/Colors";
 
 const Register = () => {
     const userInfo = [{
@@ -36,7 +37,7 @@ const Register = () => {
         secureTextEntry: true
     }];
 
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState({ role: 'USER' });
     const [err, setErr] = useState({});
     const [loading, setLoading] = useState(false);
     const nav = useNavigation();
@@ -111,9 +112,9 @@ const Register = () => {
         <ScrollView contentContainerStyle={[Styles.scrollContent, Styles.gap, Styles.center]}>
             {err.api && <HelperText type="error" visible={true}>{err.api}</HelperText>}
             <TouchableOpacity onPress={picker} style={Styles.avatarPicker}>
-                {user.avatar
+                {user?.avatar
                     ? <Image source={{ uri: user.avatar.uri }} style={Styles.avatar} />
-                    : <Text style={{ fontSize: 40 }}>👤</Text>
+                    : <Image source={{ uri: 'https://res.cloudinary.com/duxz5ias9/image/upload/v1779191141/default_avatar_izym3f.png' }} style={Styles.avatar} />
                 }
             </TouchableOpacity>
 

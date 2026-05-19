@@ -6,13 +6,14 @@ export const endpoints = {
     'login': "/auth/login/",
     'logout': "/auth/logout/",
     'register': "/auth/register/",
-    'current-user': "/users/current_user/",
-    'change-password': "/users/current_user/change_password/",
+    'current-user': "/users/me/",
+    'change-password': "/users/me/change_password/",
+    'employers': "/employers/",
 };
 
 export const authApis = (token) => {
     return axios.create({
-        baseURL: "http://192.168.1.14:8000/",
+        baseURL: "http://192.168.1.2:8000/",
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -20,7 +21,7 @@ export const authApis = (token) => {
 }
 
 export default axios.create({
-    baseURL: "http://192.168.1.14:8000/",
+    baseURL: "http://192.168.1.2:8000/",
 });
 
 
