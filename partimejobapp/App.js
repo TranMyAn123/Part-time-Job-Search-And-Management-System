@@ -13,6 +13,7 @@ import Home from "./screens/Home/Home";
 import Login from "./screens/User/Login";
 import Register from "./screens/User/Register";
 import Profile from "./screens/User/Profile";
+import SearchJob from "./screens/Search_Job/SearchJob";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -31,7 +32,16 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator sceneContainerStyle={{ backgroundColor: 'transparent' }}>
       <Tab.Screen name="home" component={StackNavigator} options={{ title: 'Trang chủ', tabBarIcon: () => <Icon source="home" size={30} /> }} />
-
+      <Tab.Screen
+        name="search"
+        component={SearchJob}
+        options={{
+          title: "Tìm việc",
+          tabBarIcon: () => (
+            <Icon source="magnify" size={30} />
+          ),
+        }}
+      />
       {user === null ? <>
         <Tab.Screen name="login" component={Login} options={{ title: 'Đăng nhập', tabBarIcon: () => <Icon source="account" size={30} /> }} />
         <Tab.Screen name="register" component={Register} options={{ title: 'Đăng ký', tabBarIcon: () => <Icon source="account-plus" size={30} /> }} />

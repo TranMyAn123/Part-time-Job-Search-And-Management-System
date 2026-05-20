@@ -181,7 +181,7 @@ class JobAdmin(admin.ModelAdmin):
         (
             "Chi tiết",
             {
-                "fields": ("description", "benefic"),
+                "fields": ("description", "benefits"),
                 "classes": ("collapse",),
             },
         ),

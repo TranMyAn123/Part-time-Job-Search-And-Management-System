@@ -21,6 +21,7 @@ class JobViewSet(
 ):
     queryset = Job.objects.filter(active=True)
     permission_classes = [IsAuthenticatedOrReadOnly, IsEmployer, IsOwnerOrReadOnly]
+    pagination_class = ItemPaginator
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -29,23 +30,27 @@ class JobViewSet(
 
     def get_queryset(self):
         queryset = self.queryset
+        if not self.request.user.is_authenticated or self.request.user.role == "USER":
+            queryset = queryset.filter(status=Job.Status.OPENING)
+
         keyword = self.request.query_params.get("q")
         if keyword:
             fields = [
                 "title",
                 "employer__company_name",
                 "location",
-                "industry__name",
             ]
             q = search.create_search_query(keyword, fields)
             queryset = queryset.filter(q)
 
+        industry_name = self.request.query_params.get("industry_name")
+        if industry_name:
+            queryset = queryset.filter(industry__name__icontains=industry_name)
         min_salary = self.request.query_params.get("min_salary")
-        max_salary = self.request.query_params.get("max_salary")
-
         if min_salary:
             queryset = queryset.filter(salary_min__gte=min_salary)
 
+        max_salary = self.request.query_params.get("max_salary")
         if max_salary:
             queryset = queryset.filter(salary_max__lte=max_salary)
         return queryset
@@ -119,6 +124,13 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView):
                 self.get_object(), context={"request": request}
             ).data
         )
+
+    @action(methods=["post"], url_path="self-jobs", detail=False)
+    def self_job(self, request):
+        jobs = Job.objects.select_related("employer", "industry").filter(
+            employer__user=request.user
+        )
+        return Response(serializers.JobSerializer(jobs, many=True).data)
 
     @action(methods=["get"], detail=False, url_path="top-followed")
     def top_followed(self, request):

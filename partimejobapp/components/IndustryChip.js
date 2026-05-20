@@ -1,11 +1,11 @@
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, StyleSheet } from "react-native";
+const data = ["Tất cả", "F&B", "Gia sư", "Giao hàng", "Bán lẻ", "Văn phòng"];
 
-const data = ["Tất cả", "F&B", "Bán lẻ", "Gia sư", "Giao hàng"];
 
-export default function Chips({ active, setActive }) {
+export default function IndustryChip({ industries, active, setActive }) {
     return (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.wrap}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.wrap} >
             {data.map((item) => (
                 <TouchableOpacity
                     key={item}
@@ -25,7 +25,7 @@ export default function Chips({ active, setActive }) {
 }
 
 const styles = StyleSheet.create({
-    wrap: { paddingHorizontal: 16 },
+    wrap: { paddingHorizontal: 10, paddingVertical: 10 },
     chip: {
         paddingHorizontal: 14,
         paddingVertical: 6,
