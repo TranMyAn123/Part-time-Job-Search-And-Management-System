@@ -9,7 +9,10 @@ export const endpoints = {
     'current-user': "/users/me/",
     'change-password': "/users/me/change_password/",
 
-    'jobs': "/jobs/"
+    'jobs': "/jobs/",
+    'industries': "/industries",
+    'comments': (jobID) => `/jobs/${jobID}/comments/`,
+    'replies': (commentID) => `/comments/${commentID}/replies/`
 };
 
 export const authApis = (token) => {

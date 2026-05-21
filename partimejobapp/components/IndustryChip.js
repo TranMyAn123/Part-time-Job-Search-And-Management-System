@@ -1,22 +1,35 @@
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, StyleSheet } from "react-native";
-const data = ["Tất cả", "F&B", "Gia sư", "Giao hàng", "Bán lẻ", "Văn phòng"];
 
+export default function IndustryChip({ industries = [], active, setActive }) {
 
-export default function IndustryChip({ industries, active, setActive }) {
+    // thêm "Tất cả" vào đầu list
+    const data = [
+        { id: "all", name: "Tất cả" },
+        ...industries,
+    ];
+
     return (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.wrap} >
+        <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.wrap}
+        >
             {data.map((item) => (
                 <TouchableOpacity
-                    key={item}
+                    key={item.id}
                     onPress={() => setActive(item)}
                     style={[
                         styles.chip,
-                        active === item ? styles.active : styles.inactive,
+                        active?.id === item.id ? styles.active : styles.inactive,
                     ]}
                 >
-                    <Text style={{ color: active === item ? "#fff" : "#888" }}>
-                        {item}
+                    <Text
+                        style={{
+                            color: active?.id === item.id ? "#fff" : "#888",
+                        }}
+                    >
+                        {item.name}
                     </Text>
                 </TouchableOpacity>
             ))}
@@ -25,13 +38,22 @@ export default function IndustryChip({ industries, active, setActive }) {
 }
 
 const styles = StyleSheet.create({
-    wrap: { paddingHorizontal: 10, paddingVertical: 10 },
+    wrap: {
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+    },
     chip: {
         paddingHorizontal: 14,
         paddingVertical: 6,
         borderRadius: 20,
         marginRight: 8,
     },
-    active: { backgroundColor: "#185FA5" },
-    inactive: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#ddd" },
+    active: {
+        backgroundColor: "#185FA5",
+    },
+    inactive: {
+        backgroundColor: "#fff",
+        borderWidth: 1,
+        borderColor: "#ddd",
+    },
 });

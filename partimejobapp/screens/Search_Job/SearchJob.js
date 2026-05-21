@@ -9,123 +9,59 @@ import {
     StatusBar,
     ActivityIndicator,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { Icon } from "react-native-paper";
 import { useJobs } from "../../hooks/useJobs";
 import IndustryChip from "../../components/IndustryChip"
+import { useIndustries } from "../../hooks/useIndustries";
+import { CARD_COLORS } from "../../configs/Colors";
+import JobCard from "../../components/JobCard"
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-const CARD_COLORS = [
-    { color: "#FF6B6B", bgColor: "#FFF0F0" },
-    { color: "#4ECDC4", bgColor: "#EEFAF9" },
-    { color: "#A78BFA", bgColor: "#F5F0FF" },
-    { color: "#F97316", bgColor: "#FFF4ED" },
-    { color: "#185FA5", bgColor: "#EBF4FF" },
-];
-
-
-function mapJob(job, index) {
-    const palette = CARD_COLORS[index % CARD_COLORS.length];
-    const initials = job.title
-        .split(" ")
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase();
-
-    const salaryMin = parseInt(job.salary_min ?? 0);
-    const salaryMax = parseInt(job.salary_max ?? 0);
-    const salary =
-        salaryMin && salaryMax
-            ? `${(salaryMin / 1e6).toFixed(0)}–${(salaryMax / 1e6).toFixed(0)}tr/tháng`
-            : "Thỏa thuận";
-
-    return {
-        ...job,
-        ...palette,
-        initials,
-        salary,
-        urgent: job.status === "OPENING",
-    };
-}
-
-function JobCard({ item }) {
-    const [saved, setSaved] = useState(false);
-
-    return (
-        <Pressable
-            style={({ pressed }) => [
-                styles.jobCard,
-                pressed && { opacity: 0.93, transform: [{ scale: 0.985 }] },
-            ]}
-        >
-            <View style={[styles.colorStrip, { backgroundColor: item.color }]} />
-
-            <View style={styles.cardInner}>
-                {/* Top row */}
-                <View style={styles.jobTop}>
-                    <View style={[styles.logo, { backgroundColor: item.bgColor }]}>
-                        <Text style={[styles.logoText, { color: item.color }]}>
-                            {item.initials}
-                        </Text>
-                    </View>
-
-                    <View style={styles.topRight}>
-                        {item.urgent && (
-                            <View style={styles.urgentBadge}>
-                                <Text style={styles.urgentText}>🔥 Gấp</Text>
-                            </View>
-                        )}
-                        <Pressable
-                            onPress={() => setSaved((prev) => !prev)}
-                            style={({ pressed }) => [
-                                styles.saveBtn,
-                                saved && styles.saveBtnActive,
-                                pressed && { transform: [{ scale: 0.9 }] },
-                            ]}
-                        >
-                            <Icon
-                                source={saved ? "bookmark" : "bookmark-outline"}
-                                size={18}
-                                color={saved ? "#fff" : "#185FA5"}
-                            />
-                        </Pressable>
-                    </View>
-                </View>
-
-                <Text style={styles.jobTitle}>{item.title}</Text>
-                <Text style={styles.company}>{item.location}</Text>
-
-                <View style={styles.infoRow}>
-                    <View style={[styles.tag, { backgroundColor: item.bgColor }]}>
-                        <Icon source="map-marker-outline" size={13} color={item.color} />
-                        <Text style={[styles.tagText, { color: item.color }]}>{item.location}</Text>
-                    </View>
-                    <View style={[styles.tag, { backgroundColor: item.bgColor }]}>
-                        <Icon source="clock-outline" size={13} color={item.color} />
-                        <Text style={[styles.tagText, { color: item.color }]}>{item.status}</Text>
-                    </View>
-                </View>
-
-                <View style={styles.cardBottom}>
-                    <Text style={[styles.salary, { color: item.color }]}>{item.salary}</Text>
-                    <Pressable style={[styles.applyBtn, { backgroundColor: item.color }]}>
-                        <Text style={styles.applyText}>Ứng tuyển</Text>
-                    </Pressable>
-                </View>
-            </View>
-        </Pressable>
-    );
-}
 
 export default function SearchJob() {
-    const [selectedIndustry, setSelectedIndustry] = useState("Tất cả");
+    const [selectedIndustry, setSelectedIndustry] = useState({
+        id: "all",
+        name: "Tất cả",
+    });
+
+    const navigation = useNavigation()
     const [query, setQuery] = useState("");
 
     const { jobs, loading, refreshing, error, hasMore, loadMore, refresh } = useJobs({
-        industry: selectedIndustry,
+        industry: selectedIndustry.name,
         query,
     });
 
+    const { industries } = useIndustries()
     const mappedJobs = jobs.map(mapJob);
+
+    function mapJob(job, index) {
+        const palette = CARD_COLORS[index % CARD_COLORS.length];
+        const initials = job.title
+            .split(" ")
+            .slice(0, 2)
+            .map((w) => w[0])
+            .join("")
+            .toUpperCase();
+
+        const salaryMin = parseInt(job.salary_min ?? 0);
+        const salaryMax = parseInt(job.salary_max ?? 0);
+        const salary =
+            salaryMin && salaryMax
+                ? `${(salaryMin / 1e6).toFixed(0)}–${(salaryMax / 1e6).toFixed(0)}tr/tháng`
+                : "Thỏa thuận";
+
+        return {
+            ...job,
+            ...palette,
+            initials,
+            salary,
+            urgent: job.status === "OPENING",
+        };
+    }
+
+
+
 
     const ListHeader = ({ job_length }) => (
         <View>
@@ -185,7 +121,7 @@ export default function SearchJob() {
                 <Text style={styles.sectionTitle}>Danh mục</Text>
                 <Text style={styles.sectionCount}>{jobs.length} việc làm</Text>
             </View>
-            <IndustryChip active={selectedIndustry} setActive={setSelectedIndustry} />
+            <IndustryChip industries={industries} active={selectedIndustry} setActive={setSelectedIndustry} />
 
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Việc làm gợi ý</Text>
@@ -207,7 +143,11 @@ export default function SearchJob() {
             <FlatList
                 data={mappedJobs}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => <JobCard item={item} />}
+                renderItem={({ item }) =>
+                    <JobCard
+                        item={item}
+                        onPress={() => navigation.navigate("JobDetail", { job: item })}
+                    />}
                 ListHeaderComponent={() => (
                     <ListHeader job_length={jobs.length} />
                 )}
@@ -227,21 +167,6 @@ export default function SearchJob() {
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
-const chipStyles = StyleSheet.create({
-    row: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-    chip: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
-        backgroundColor: "#fff",
-        borderWidth: 1.5,
-        borderColor: "#E5E7EB",
-    },
-    chipActive: { backgroundColor: "#185FA5", borderColor: "#185FA5" },
-    chipText: { fontSize: 13, fontWeight: "600", color: "#6B7280" },
-    chipTextActive: { color: "#fff" },
-});
-
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#F4F6FB" },
     listContent: { paddingBottom: 100 },
@@ -301,37 +226,4 @@ const styles = StyleSheet.create({
         backgroundColor: "#FEF2F2", borderRadius: 10, padding: 12,
     },
     errorText: { color: "#EF4444", fontSize: 13, flex: 1 },
-
-    jobCard: {
-        backgroundColor: "#fff", borderRadius: 20,
-        marginHorizontal: 16, marginBottom: 14,
-        flexDirection: "row", overflow: "hidden",
-        shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 12,
-        shadowOffset: { width: 0, height: 4 }, elevation: 3,
-    },
-    colorStrip: { width: 5 },
-    cardInner: { flex: 1, padding: 16 },
-    jobTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-    logo: { width: 48, height: 48, borderRadius: 14, justifyContent: "center", alignItems: "center" },
-    logoText: { fontWeight: "800", fontSize: 18 },
-    topRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-    urgentBadge: { backgroundColor: "#FFF3E0", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-    urgentText: { fontSize: 11, fontWeight: "700", color: "#F97316" },
-    saveBtn: {
-        width: 34, height: 34, borderRadius: 10,
-        borderWidth: 1.5, borderColor: "#E0ECFB",
-        backgroundColor: "#F2F7FD", justifyContent: "center", alignItems: "center",
-    },
-    saveBtnActive: { backgroundColor: "#185FA5", borderColor: "#185FA5" },
-
-    jobTitle: { marginTop: 12, fontSize: 16, fontWeight: "800", color: "#111827", letterSpacing: -0.2 },
-    company: { marginTop: 3, color: "#6B7280", fontSize: 13, fontWeight: "500" },
-    infoRow: { flexDirection: "row", marginTop: 12, gap: 8 },
-    tag: { flexDirection: "row", alignItems: "center", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, gap: 4 },
-    tagText: { fontSize: 12, fontWeight: "600" },
-
-    cardBottom: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 14 },
-    salary: { fontSize: 18, fontWeight: "800", letterSpacing: -0.3 },
-    applyBtn: { paddingHorizontal: 18, paddingVertical: 9, borderRadius: 12 },
-    applyText: { color: "#fff", fontSize: 13, fontWeight: "700" },
 });
