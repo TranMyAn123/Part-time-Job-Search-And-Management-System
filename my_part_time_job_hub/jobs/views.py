@@ -180,4 +180,15 @@ class CommentViewSet(viewsets.ViewSet):
             .select_related("user")
             .order_by("created_at")
         )
+        p = CommentPaginator()
+
+        page = p.paginate_queryset(replies, request)
+        if page is not None:
+            serializer = serializers.CommentSerializer(page, many=True)
+            return p.get_paginated_response(serializer.data)
+
+        return Response(
+            serializers.CommentSerializer(replies, many=True).data,
+            status=status.HTTP_200_OK,
+        )
         return Response(serializers.CommentSerializer(replies, many=True).data)
