@@ -14,6 +14,7 @@ import Login from "./screens/User/Login";
 import Register from "./screens/User/Register";
 import Profile from "./screens/User/Profile";
 import SearchJob from "./screens/Search_Job/SearchJob";
+import JobDetail from "./screens/Job_Detail/JobDetail";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -23,6 +24,19 @@ const StackNavigator = () => {
     </Stack.Navigator>
   );
 }
+
+const SearchStack = createNativeStackNavigator();
+
+const SearchStackNavigator = () => {
+  return (
+    <SearchStack.Navigator
+      screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "transparent" } }}
+    >
+      <SearchStack.Screen name="SearchJob" component={SearchJob} />
+      <SearchStack.Screen name="JobDetail" component={JobDetail} />
+    </SearchStack.Navigator>
+  );
+};
 
 const Tab = createBottomTabNavigator();
 
@@ -34,7 +48,7 @@ const TabNavigator = () => {
       <Tab.Screen name="home" component={StackNavigator} options={{ title: 'Trang chủ', tabBarIcon: () => <Icon source="home" size={30} /> }} />
       <Tab.Screen
         name="search"
-        component={SearchJob}
+        component={SearchStackNavigator}
         options={{
           title: "Tìm việc",
           tabBarIcon: () => (
