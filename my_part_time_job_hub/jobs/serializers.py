@@ -4,33 +4,6 @@ from jobs.utils import validators
 from django.db import transaction
 
 
-class JobSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Job
-        fields = "__all__"
-
-
-class JobCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Job
-        fields = [
-            "title",
-            "requirement",
-            "salary_min",
-            "status",
-            "salary_max",
-            "benefits",
-            "location",
-            "available_date",
-            "industry",
-            "description",
-        ]
-
-    def create(self, validated_data):
-        user = self.context["request"].user
-        return Job.objects.create(employer=user.employer_profile, **validated_data)
-
-
 class EmployerSerializer(serializers.ModelSerializer):
     workplace_images = serializers.ListField(
         child=serializers.ImageField(), write_only=True
@@ -93,6 +66,39 @@ class EmployerSerializer(serializers.ModelSerializer):
                 {"description": "Description can not empty!"}
             )
         return attrs
+
+
+class JobSerializer(serializers.ModelSerializer):
+    employer = EmployerSerializer(read_only=True)
+    industry = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Job
+        fields = "__all__"
+
+    def get_industry(self, obj):
+        return obj.industry.name if obj.industry else None
+
+
+class JobCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        fields = [
+            "title",
+            "requirement",
+            "salary_min",
+            "status",
+            "salary_max",
+            "benefits",
+            "location",
+            "available_date",
+            "industry",
+            "description",
+        ]
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        return Job.objects.create(employer=user.employer_profile, **validated_data)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -158,31 +164,25 @@ class ApplicationReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     reply_count = serializers.IntegerField(read_only=True)
-    user = serializers.StringRelatedField()
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ["id", "user", "content", "parent", "created_at", "reply_count"]
+        fields = [
+            "id",
+            "user",
+            "content",
+            "parent",
+            "created_at",
+            "reply_count",
+        ]
 
-        extra_kwargs = {
-            "id": {"read_only": True},
-            "created_at": {"read_only": True},
-            "parent": {"required": False},
+    def get_user(self, obj):
+        return {
+            "id": obj.user.id,
+            "fullname": obj.user.get_full_name(),
+            "avatar": obj.user.avatar.url if obj.user.avatar else None,
         }
-
-    def validate_parent(self, value):
-        if value is None:
-            return None
-
-        job_id = self.context["job_id"]
-
-        if value.job_id != int(job_id):
-            raise serializers.ValidationError("Can't reply comment from another job !")
-
-        if value.parent is not None:
-            raise serializers.ValidationError("Can't reply into this reply !")
-
-        return value
 
 
 # class JobNotificationSerializer(serializers.ModelSerializer):
