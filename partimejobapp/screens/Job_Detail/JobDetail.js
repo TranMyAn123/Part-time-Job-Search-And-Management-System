@@ -11,85 +11,16 @@ import {
 } from "react-native";
 import { Icon } from "react-native-paper";
 import CommentSection from "../../components/CommentSection";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function getJobPalette(job) {
-    return {
-        color: job.color,
-        bgColor: job.bgColor
-    }
-}
-
-function getInitials(name = "") {
-    return name
-        .split(" ")
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase();
-}
-
-function formatSalary(min, max) {
-    const a = parseFloat(min ?? 0);
-    const b = parseFloat(max ?? 0);
-    if (!a && !b) return "Thỏa thuận";
-    if (a && b) return `${(a / 1e6).toFixed(0)}–${(b / 1e6).toFixed(0)} triệu/tháng`;
-    if (a) return `Từ ${(a / 1e6).toFixed(0)} triệu/tháng`;
-    return `Đến ${(b / 1e6).toFixed(0)} triệu/tháng`;
-}
-
-function formatDate(iso) {
-    if (!iso) return "—";
-    // "2026-06-30" → "30/06/2026"
-    const parts = iso.split("-");
-    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    return iso;
-}
-
-function timeAgo(isoString) {
-    const diff = Date.now() - new Date(isoString).getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return "Hôm nay";
-    if (days === 1) return "1 ngày trước";
-    if (days < 30) return `${days} ngày trước`;
-    const months = Math.floor(days / 30);
-    return `${months} tháng trước`;
-}
-
-// Parse benefits string thành mảng (split by dấu phẩy)
-function parseBenefits(str = "") {
-    return str.split(",").map((s) => s.trim()).filter(Boolean);
-}
-
-// Parse requirement string thành mảng (split by dấu phẩy hoặc xuống dòng)
-function parseRequirements(str = "") {
-    return str
-        .split(/,|\n/)
-        .map((s) => s.trim())
-        .filter(Boolean);
-}
-
-const BENEFIT_ICONS = {
-    "mentor": "account-tie",
-    "1-1": "account-tie",
-    "gửi xe": "car-outline",
-    "hybrid": "laptop",
-    "remote": "home-outline",
-    "bảo hiểm": "hospital-building",
-    "du lịch": "airplane",
-    "thưởng": "gift-outline",
-    "ăn trưa": "silverware-fork-knife",
-    "laptop": "laptop",
-    "macbook": "laptop",
-    "đào tạo": "school",
-};
-function benefitIcon(text) {
-    const lower = text.toLowerCase();
-    for (const [key, icon] of Object.entries(BENEFIT_ICONS)) {
-        if (lower.includes(key)) return icon;
-    }
-    return "check-circle-outline";
-}
+import {
+    getJobPalette,
+    getInitials,
+    formatSalary,
+    formatDate,
+    timeAgo,
+    parseBenefits,
+    parseRequirements,
+    benefitIcon
+} from "./Helpers";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function SectionTitle({ title, color }) {

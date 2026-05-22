@@ -2,6 +2,7 @@ from rest_framework import serializers
 from jobs.models import Job, Application, Employer, Comment, Industry, WorkplaceImage
 from jobs.utils import validators
 from django.db import transaction
+from users.serializers import SimpleUserSerializer
 
 
 class EmployerSerializer(serializers.ModelSerializer):
@@ -66,6 +67,26 @@ class EmployerSerializer(serializers.ModelSerializer):
                 {"description": "Description can not empty!"}
             )
         return attrs
+
+
+class SimpleJobSerializer(serializers.ModelSerializer):
+    employer = EmployerSerializer(read_only=True)
+    industry = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Job
+        fields = [
+            "employer",
+            "industry",
+            "title",
+            "location",
+            "salary_min",
+            "salary_max",
+            "available_date",
+        ]
+
+    def get_industry(self, obj):
+        return obj.industry.name if obj.industry else None
 
 
 class JobSerializer(serializers.ModelSerializer):
@@ -139,11 +160,12 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
-    job = JobSerializer(read_only=True)
+    job = SimpleJobSerializer(read_only=True)
+    candidate = SimpleUserSerializer(read_only=True)
 
     class Meta:
         model = Application
-        fields = ["id", "job", "apply_date", "status"]
+        fields = ["id", "job", "candidate", "apply_date", "status"]
         read_only_fields = fields
 
 
@@ -176,13 +198,37 @@ class CommentSerializer(serializers.ModelSerializer):
             "created_at",
             "reply_count",
         ]
+        extra_kwargs = {
+            "id": {"read_only": True},
+            "created_at": {"read_only": True},
+            "parent": {"required": False},
+        }
 
     def get_user(self, obj):
         return {
             "id": obj.user.id,
-            "fullname": obj.user.get_full_name(),
+            "fullname": obj.user.get_full_name() or obj.user.username,
             "avatar": obj.user.avatar.url if obj.user.avatar else None,
         }
+
+    def validate_parent(self, value):
+        if value is None:
+            return None
+
+        job_id = self.context["job_id"]
+
+        if value.job_id != int(job_id):
+            raise serializers.ValidationError("Can't reply comment from another job !")
+
+        if value.parent is not None:
+            raise serializers.ValidationError("Can't reply into this reply !")
+
+        return value
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        job_id = self.context["job_id"]
+        return Comment.objects.create(job_id=job_id, user=user, **validated_data)
 
 
 # class JobNotificationSerializer(serializers.ModelSerializer):

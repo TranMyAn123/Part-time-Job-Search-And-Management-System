@@ -17,9 +17,18 @@ class AvatarSerializer(serializers.ModelSerializer):
 
 
 class SimpleUserSerializer(AvatarSerializer):
+    fullname = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "avatar", "phone_num"]
+        fields = ["fullname", "first_name", "last_name", "avatar", "email", "phone_num"]
+        extra_kwargs = {
+            "first_name": {"write_only": True},
+            "last_name": {"write_only": True},
+        }
+
+    def get_fullname(self, obj):
+        return obj.get_full_name() or obj.username
 
 
 class ProfileSerializer(serializers.ModelSerializer):

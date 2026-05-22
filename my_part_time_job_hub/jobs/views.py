@@ -20,8 +20,12 @@ class JobViewSet(
     generics.UpdateAPIView,
 ):
     queryset = Job.objects.filter(active=True)
-    permission_classes = [IsAuthenticatedOrReadOnly, IsEmployer, IsOwnerOrReadOnly]
     pagination_class = ItemPaginator
+
+    def get_permissions(self):
+        if self.action == "comments":
+            return [IsAuthenticatedOrReadOnly()]
+        return [IsAuthenticatedOrReadOnly(), IsEmployer(), IsOwnerOrReadOnly()]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -191,4 +195,3 @@ class CommentViewSet(viewsets.ViewSet):
             serializers.CommentSerializer(replies, many=True).data,
             status=status.HTTP_200_OK,
         )
-        return Response(serializers.CommentSerializer(replies, many=True).data)

@@ -3,6 +3,7 @@ import axios from "axios";
 export const endpoints = {
     'loginFb': "/auth/facebook/login/",
     'loginGg': "/auth/google/login/",
+    'refresh': "/auth/refresh/",
     'login': "/auth/login/",
     'logout': "/auth/logout/",
     'register': "/auth/register/",
@@ -12,12 +13,14 @@ export const endpoints = {
     'jobs': "/jobs/",
     'industries': "/industries",
     'comments': (jobID) => `/jobs/${jobID}/comments/`,
-    'replies': (commentID) => `/comments/${commentID}/replies/`
+    'replies': (commentID) => `/comments/${commentID}/replies/`,
+    'applications': '/users/me/applications/'
 };
 
 export const authApis = (token) => {
     return axios.create({
-        baseURL: "http://192.168.1.111:8000/",
+        // baseURL: "http://192.168.1.111:8000/",
+        baseURL: "http://172.24.248.51:8000",
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -25,7 +28,8 @@ export const authApis = (token) => {
 }
 
 export default axios.create({
-    baseURL: "http://192.168.1.111:8000/",
+    // baseURL: "http://192.168.1.111:8000/",
+    baseURL: "http://172.24.248.51:8000"
 });
 
 
