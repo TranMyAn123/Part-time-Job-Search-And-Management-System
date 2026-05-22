@@ -13,6 +13,7 @@ import Home from "./screens/Home/Home";
 import Login from "./screens/User/Login";
 import Register from "./screens/User/Register";
 import Profile from "./screens/User/Profile";
+import EmRegister from "./screens/Employer/EmRegister";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -20,6 +21,16 @@ const StackNavigator = () => {
     <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
       <Stack.Screen name="index" component={Home} />
     </Stack.Navigator>
+  );
+}
+
+const ProfileStack = createNativeStackNavigator();
+const ProfileStackNavigator = () => {
+  return (
+    <ProfileStack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+      <ProfileStack.Screen name="profile" component={Profile} />
+      <ProfileStack.Screen name="emregister" component={EmRegister} />
+    </ProfileStack.Navigator>
   );
 }
 
@@ -36,7 +47,7 @@ const TabNavigator = () => {
         <Tab.Screen name="login" component={Login} options={{ title: 'Đăng nhập', tabBarIcon: () => <Icon source="account" size={30} /> }} />
         <Tab.Screen name="register" component={Register} options={{ title: 'Đăng ký', tabBarIcon: () => <Icon source="account-plus" size={30} /> }} />
       </> : <>
-        <Tab.Screen name="profile" component={Profile} options={{ title: 'Thông tin cá nhân', tabBarIcon: () => <Icon source="account" size={30} /> }} />
+        <Tab.Screen name="profiles" component={ProfileStackNavigator} options={{ title: 'Thông tin cá nhân', tabBarIcon: () => <Icon source="account" size={30} /> }} />
       </>}
     </Tab.Navigator>
   );

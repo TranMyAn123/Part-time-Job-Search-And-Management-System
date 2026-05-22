@@ -1,4 +1,4 @@
-import { ScrollView, Image, View } from "react-native";
+import { ScrollView, Image, View, Modal, Text, TouchableOpacity } from "react-native";
 import Styles, { inputTheme } from "../../styles/Styles";
 import { Button, HelperText, TextInput } from "react-native-paper";
 import { useContext, useState } from "react";
@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MyUserContext } from "../../configs/Contexts";
 import SocialLogin from "../../components/SocialLogin";
 import logo from "../../assets/logo.png";
+import UserStyles from "./Styles";
 
 const Login = () => {
     const userInfo = [{
@@ -27,6 +28,8 @@ const Login = () => {
     const nav = useNavigation();
     const [, dispatch] = useContext(MyUserContext);
     const [showPassword, setShowPassword] = useState({});
+    const [showRole, setShowRole] = useState(false);
+    const [pendingUser, setPendingUser] = useState(null);
 
     const validate = () => {
         let newErr = {};
@@ -47,22 +50,39 @@ const Login = () => {
                     ...user,
                     'grant_type': 'password'
                 });
-                console.info(res.data);
                 await AsyncStorage.setItem('token', res.data.access_token);
 
                 let u = await authApis(res.data.access_token).get(endpoints['current-user']);
-                console.info(u.data);
-                dispatch({
-                    "type": "LOGIN",
-                    "payload": u.data
-                });
+
+                const userData = u.data;
+                if (userData.last_login === null) {
+                    setPendingUser(userData);
+                    setShowRole(true);
+                } else {
+                    dispatch({
+                        "type": "LOGIN",
+                        "payload": userData
+                    });
+                }
             } catch (ex) {
-                setErr({ api: ex.response?.data?.error_description || ex.message || "Đăng nhập thất bại!" });
+                setErr({ api: "Đăng nhập thất bại!" });
             } finally {
                 setLoading(false);
             }
         }
     }
+
+    const handleSelectRole = (role) => {
+        setShowRole(false);
+        if (role === 'EMPLOYER') {
+            nav.navigate('emregister', { user: pendingUser })
+        } else {
+            dispatch({
+                "type": "LOGIN",
+                "payload": pendingUser
+            });
+        }
+    };
 
     return (
         <ScrollView contentContainerStyle={[Styles.padding, Styles.gap, Styles.center]}>
@@ -100,6 +120,30 @@ const Login = () => {
                 mode="contained">Đăng nhập</Button>
 
             <SocialLogin />
+
+            <Modal
+                visible={showRole}
+                transparent
+                animationType="fade"
+                onRequestClose={() => { }}
+            >
+                <View style={UserStyles.modalOverlay}>
+                    <View style={UserStyles.modalContainer}>
+                        <Text style={UserStyles.modalSubtitle}>Chào mừng {pendingUser?.first_name}!</Text>
+                        <Text style={UserStyles.modalTitle}>
+                            Bạn muốn sử dụng ứng dụng với tư cách gì?
+                        </Text>
+                        <TouchableOpacity style={UserStyles.modalOption} onPress={() => handleSelectRole('EMPLOYER')}>
+                            <Text style={UserStyles.modalOptionTitle}>Nhà tuyển dụng</Text>
+                            <Text style={UserStyles.modalOptionDesc}>Đăng tin và tìm kiếm ứng viên</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={UserStyles.modalOption} onPress={() => handleSelectRole('USER')}>
+                            <Text style={UserStyles.modalOptionTitle}>Người tìm việc</Text>
+                            <Text style={UserStyles.modalOptionDesc}>Khám phá cơ hội việc làm</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 }

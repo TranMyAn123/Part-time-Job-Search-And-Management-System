@@ -33,7 +33,7 @@ class JobCreateSerializer(serializers.ModelSerializer):
 
 class EmployerSerializer(serializers.ModelSerializer):
     workplace_images = serializers.ListField(
-        child=serializers.ImageField(), write_only=True
+        child=serializers.FileField(), write_only=True
     )
 
     class Meta:
@@ -48,19 +48,19 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     def validate_workplace_images(self, value):
         if len(value) < 3:
-            raise serializers.ValidationError("Need at least 3 workplace images!")
+            raise serializers.ValidationError("Cần ít nhất 3 ảnh mô tả môi trường làm việc!")
         return value
 
     def validate_logo_company(self, value):
-        size = 1 * pow(1024, 2)
+        size = 5 * pow(1024, 2)
 
         if value.size > size:
-            raise serializers.ValidationError("Can't upload image higher than 1MB !")
+            raise serializers.ValidationError("Ảnh logo không được vượt quá 5MB !")
         return value
 
     def validate_tax_code(self, value):
         if Employer.objects.filter(tax_code=value).exists():
-            raise serializers.ValidationError("This tax code is already registered !")
+            raise serializers.ValidationError("Mã số thuế này đã được đăng ký rồi!")
         return value
 
     def validate(self, attrs):
@@ -70,17 +70,17 @@ class EmployerSerializer(serializers.ModelSerializer):
 
         if not validators.check_strip(company_name):
             raise serializers.ValidationError(
-                {"company_name": "Company name can not empty!"}
+                {"company_name": "Tên công ty không được để trống!"}
             )
 
         if not logo_company:
             raise serializers.ValidationError(
-                {"logo_company": "Logo company can not empty!"}
+                {"logo_company": "Vui lòng chọn logo cho công ty!!"}
             )
 
         if not validators.check_strip(description):
             raise serializers.ValidationError(
-                {"description": "Description can not empty!"}
+                {"description": "Vui lòng mô tả về công ty!"}
             )
         return attrs
 
@@ -95,13 +95,19 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images = validated_data.pop("workplace_images")
+        user = self.context['request'].user
 
+        if Employer.objects.filter(user=user).exists():
+            raise serializers.ValidationError({"Lỗi": "Bạn đã đăng ký trở thành nhà tuyển dụng rồi!"})
         with transaction.atomic():
-            employer = super().create(validated_data)
-            arrImg = []
-            for img in images:
-                arrImg.append(img)
-            WorkplaceImage.objects.bulk_create(arrImg)
+            employer = Employer.objects.create(
+                user=self.context['request'].user,
+                **validated_data
+            )
+            WorkplaceImage.objects.bulk_create([
+                WorkplaceImage(employer=employer, image=img)
+                for img in images
+            ])
 
         return employer
 
