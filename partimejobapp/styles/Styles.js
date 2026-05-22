@@ -76,4 +76,11 @@ export default StyleSheet.create({
         borderRadius: 20,
         borderColor: Colors.navy[700],
     },
+    snackbarSuccess: {
+        backgroundColor: '#4CAF50',
+    },
+    snackbarTop: {
+        top: 0,
+        bottom: undefined,
+    },
 });

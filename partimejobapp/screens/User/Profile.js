@@ -22,6 +22,7 @@ const Profile = () => {
     const [editing, setEditing] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [changingPassword, setChangingPassword] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
     const [passwords, setPasswords] = useState({
         old_password: '',
         new_password: '',
@@ -75,6 +76,20 @@ const Profile = () => {
                 ? JSON.stringify(ex.response.data)
                 : ex.message;
             alert("Lỗi: " + msg);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const cancelEmployerRequest = async () => {
+        try {
+            setLoading(true);
+            const token = await AsyncStorage.getItem('token');
+            await authApis(token).delete(endpoints['employers']);
+            dispatch({ type: "LOGIN", payload: { ...user, is_employer: false } });
+            setShowCancelModal(false);
+        } catch (ex) {
+            alert("Hủy yêu cầu thất bại!");
         } finally {
             setLoading(false);
         }
@@ -168,7 +183,7 @@ const Profile = () => {
             <View style={Styles.profileHeader} />
             <TouchableOpacity onPress={picker} style={Styles.avatarPicker}>
                 {user?.avatar
-                    ? <Image source={{ uri: user.avatar }} style={Styles.avatar} />
+                    ? <Image source={{ uri: user?.avatar }} style={Styles.avatar} />
                     : <Image source={{ uri: 'https://res.cloudinary.com/duxz5ias9/image/upload/v1779191141/default_avatar_izym3f.png' }} style={Styles.avatar} />
                 }
             </TouchableOpacity>
@@ -278,8 +293,6 @@ const Profile = () => {
             <View style={{ flexDirection: 'row', marginHorizontal: 16, gap: 10, marginBottom: 12 }}>
                 <Button
                     compact
-                    loading={loading}
-                    disabled={loading}
                     onPress={changingPassword ? () => setChangingPassword(false) : editing ? save : () => setEditing(true)}
                     style={[Styles.button, { flex: 1, backgroundColor: changingPassword ? '#6b7280' : Colors.navy[700] }]}
                     labelStyle={Styles.buttonLabel}
@@ -289,7 +302,6 @@ const Profile = () => {
 
                 <Button
                     compact
-                    loading={loading}
                     disabled={loading}
                     onPress={editing ? () => setEditing(false) : () => {
                         if (changingPassword) {
@@ -305,7 +317,16 @@ const Profile = () => {
                 </Button>
             </View>
 
-            <Button loading={loading} disabled={loading}
+            <Button
+                onPress={() => !user?.is_employer && nav.navigate('emregister', { user: user })}
+                disabled={!!user?.employer}
+                style={[Styles.margin, Styles.button, { backgroundColor: user?.employer ? '#6b7280' : Colors.navy[500] }]}
+                labelStyle={Styles.buttonLabel}
+                mode="contained">
+                {user?.employer ? 'Chờ xét duyệt thành nhà tuyển dụng!' : 'Trở thành nhà tuyển dụng'}
+            </Button>
+
+            <Button
                 onPress={() => dispatch({ type: "LOGOUT" })}
                 style={[Styles.margin, Styles.button, { backgroundColor: '#e53935' }]}
                 labelStyle={Styles.buttonLabel}
