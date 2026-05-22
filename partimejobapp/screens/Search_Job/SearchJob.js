@@ -60,9 +60,6 @@ export default function SearchJob() {
         };
     }
 
-
-
-
     const ListHeader = ({ job_length }) => (
         <View>
             {/* Header */}
@@ -168,7 +165,7 @@ export default function SearchJob() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#F4F6FB" },
+    container: { flex: 1 },
     listContent: { paddingBottom: 100 },
 
     header: {

@@ -130,7 +130,7 @@ class Application(TimeStampedModel):
         max_length=20, choices=Status.choices, default=Status.REVIEWING
     )
     evaluation = models.CharField(max_length=25, null=True, blank=True)
-    cv_file = CloudinaryField("cv_file", null=False)
+    cv_file = CloudinaryField(resource_type="auto", blank=True, null=True)
     note = models.TextField(null=True, blank=True)
 
     def get_status_display(self):

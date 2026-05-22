@@ -48,15 +48,19 @@ const Login = () => {
                     'grant_type': 'password'
                 });
                 console.info(res.data);
-                await AsyncStorage.setItem('token', res.data.access_token);
 
                 let u = await authApis(res.data.access_token).get(endpoints['current-user']);
                 console.info(u.data);
                 dispatch({
                     "type": "LOGIN",
-                    "payload": u.data
+                    payload: {
+                        ...u.data,
+                        access_token: res.data.access_token,
+                        refresh_token: res.data.refresh_token,
+                    },
                 });
             } catch (ex) {
+                console.log({ api: ex.response?.data?.error_description || ex.message || "Đăng nhập thất bại!" })
                 setErr({ api: ex.response?.data?.error_description || ex.message || "Đăng nhập thất bại!" });
             } finally {
                 setLoading(false);

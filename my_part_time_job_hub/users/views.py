@@ -8,6 +8,8 @@ from users.services import auth_services
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
 from django.conf import settings
 from oauth2_provider.models import AccessToken, Application
+from jobs.serializers import ApplicationSerializer
+from jobs.models import Application as JobApplication
 
 # from google.auth.transport import requests
 
@@ -51,6 +53,22 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
             {"message": "Đổi mật khẩu thành công!"}, status=status.HTTP_202_ACCEPTED
         )
 
+    @action(
+        methods=["get"],
+        url_path="me/applications",
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def applications(self, request):
+        u = request.user
+        applications = JobApplication.objects.filter(candidate=u).order_by(
+            "-apply_date"
+        )
+        return Response(
+            ApplicationSerializer(applications, many=True).data,
+            status=status.HTTP_200_OK,
+        )
+
 
 class AuthViewSet(viewsets.ViewSet):
     @action(
@@ -72,6 +90,10 @@ class AuthViewSet(viewsets.ViewSet):
     @action(methods=["post"], url_path="login", detail=False)
     def login_user(self, request):
         data = request.data
+        print("BODY:", request.body)
+        print("CONTENT TYPE:", request.content_type)
+        print("POST:", request.POST)
+
         if not data:
             return Response(
                 {"message": "Request is required !"}, status=status.HTTP_400_BAD_REQUEST
@@ -81,7 +103,7 @@ class AuthViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             validated_data = serializer.validated_data
 
-            token_url = "http://127.0.0.1:8000/o/token/"
+            token_url = request.build_absolute_uri("/o/token/")
 
             data_send_oauth = {
                 "grant_type": "password",
@@ -90,8 +112,8 @@ class AuthViewSet(viewsets.ViewSet):
                 "client_id": settings.CLIENT_KEY,
                 "client_secret": settings.CLIENT_SECRET,
             }
-
-            response = requests.post(token_url, data=data_send_oauth)
+            response = requests.post(token_url, json=data_send_oauth)
+            print("RESPONSE:", response.json())
             return Response(response.json(), status=status.HTTP_200_OK)
         except AuthenticationFailed as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

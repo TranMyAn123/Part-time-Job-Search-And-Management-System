@@ -22,6 +22,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from onlinejobapp.admin import admin_site
+from onlinejobapp.views import CustomTokenView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -38,6 +39,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("", include("onlinejobapp.urls")),
+    path("auth/refresh/", CustomTokenView.as_view()),
     path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
     path("admin/", admin_site.urls),
     re_path(

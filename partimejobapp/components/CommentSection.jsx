@@ -69,7 +69,7 @@ function ReplyItem({ reply }) {
 // ─── Comment item ─────────────────────────────────────────────────────────────
 function CommentItem({ comment, onReply, replies, onLoadReplies }) {
     const replyState = replies[comment.id];
-    const repliesLoaded = !!replyState?.data;
+    const repliesLoaded = Array.isArray(replyState?.data);
     const replyList = replyState?.data ?? [];
     const replyLoading = replyState?.loading ?? false;
     const hasMoreReplies = replyState?.hasMore ?? false;
@@ -164,6 +164,7 @@ export default function CommentSection({ jobID, labelColor = "#185FA5" }) {
     const [replyingTo, setReplyingTo] = useState(null);
     const inputRef = useRef(null);
 
+
     useEffect(() => {
         fetchComments();
     }, []);
@@ -254,7 +255,7 @@ export default function CommentSection({ jobID, labelColor = "#185FA5" }) {
                         style={styles.input}
                         placeholder={
                             replyingTo
-                                ? `Trả lời ${replyingTo.user}...`
+                                ? `Trả lời ${replyingTo.user.fullname}...`
                                 : "Viết bình luận..."
                         }
                         placeholderTextColor="#9CA3AF"

@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
-import Apis, { endpoints } from "../configs/Apis"
-
+import { useState, useCallback, useContext } from "react";
+import Apis, { authApis, endpoints } from "../configs/Apis"
+import { MyUserContext } from "../configs/Contexts";
 export function useComments(jobID) {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -8,7 +8,7 @@ export function useComments(jobID) {
     const [nextUrl, setNextUrl] = useState(null);
     const [hasMore, setHasMore] = useState(false);
     const [error, setError] = useState(null);
-
+    const [user] = useContext(MyUserContext);
     const [replies, setReplies] = useState({});
 
     const fetchComments = useCallback(async (url = null) => {
@@ -65,23 +65,22 @@ export function useComments(jobID) {
     // ── Post comment hoặc reply ───────────────────────────────────────────────
     const postComment = useCallback(async (content, parentID = null) => {
         if (!content.trim()) return;
-
+        if (!user) alert("Bạn phải đăng nhập để thực hiện bình luận")
 
         try {
             setPosting(true);
-            const res = await Apis.post(
-                `/jobs/${jobID}/comments/`,
+            // Dùng authApis để gửi token (ở đây đang dùng token từ database
+            const res = await authApis(user.access_token).post(
+                endpoints['comments'](jobID),
                 {
                     content,
-                    parent: parentID,
+                    parent: parentID
                 }
             );
-
-            const newComment = res.data;
-
+            const newComment = res.data
             if (!parentID) {
                 // Comment cha
-                setComments((prev) => [newComment, ...prev]);
+                setComments((prev) => [...prev, newComment]);
             } else {
                 // Reply
                 setReplies((prev) => ({
@@ -113,7 +112,7 @@ export function useComments(jobID) {
                 e?.response?.data?.message ??
                 "Không thể đăng bình luận";
 
-            setError(msg);
+            console.log(msg);
         } finally {
             setPosting(false);
         }
