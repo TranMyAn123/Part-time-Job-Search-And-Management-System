@@ -1,8 +1,9 @@
 import requests
+from django.utils import timezone
 from rest_framework import viewsets, generics, status, parsers, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from users.models import User
+from users.models import User, Profile
 from users import serializers
 from users.services import auth_services
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
@@ -28,12 +29,16 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     def me(self, request):
         u = request.user
         if request.method.__eq__("PATCH"):
+
             if "avatar" in request.data:
                 s = serializers.UserSerializer(u, data=request.data, partial=True)
             else:
-                s = serializers.ProfileSerializer(u, data=request.data, partial=True)
+                profile, _ = Profile.objects.get_or_create(user=u)
+                s = serializers.ProfileSerializer(
+                    profile, data=request.data, partial=True
+                )
             s.is_valid(raise_exception=True)
-            u = s.save()
+            s.save()
         return Response(serializers.UserSerializer(u).data, status=status.HTTP_200_OK)
 
     @action(
@@ -90,7 +95,7 @@ class AuthViewSet(viewsets.ViewSet):
     @action(methods=["post"], url_path="login", detail=False)
     def login_user(self, request):
         data = request.data
-        print("BODY:", request.body)
+        print("BODY:", data)
         print("CONTENT TYPE:", request.content_type)
         print("POST:", request.POST)
 
@@ -112,8 +117,15 @@ class AuthViewSet(viewsets.ViewSet):
                 "client_id": settings.CLIENT_KEY,
                 "client_secret": settings.CLIENT_SECRET,
             }
+
             response = requests.post(token_url, json=data_send_oauth)
-            print("RESPONSE:", response.json())
+
+            if response.status_code == 200:
+                user = validated_data.get("user")
+                if user:
+                    user.last_login = timezone.now()
+                    user.save(update_fields=["last_login"])
+
             return Response(response.json(), status=status.HTTP_200_OK)
         except AuthenticationFailed as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -40,6 +40,9 @@ export default StyleSheet.create({
         height: 80,
         borderRadius: 50,
         alignSelf: "center",
+        borderWidth: 2,
+        borderColor: Colors.navy[500],
+        borderStyle: 'solid',
     },
     avatarPicker: {
         width: 80,
@@ -72,5 +75,12 @@ export default StyleSheet.create({
     outlineStyle: {
         borderRadius: 20,
         borderColor: Colors.navy[700],
+    },
+    snackbarSuccess: {
+        backgroundColor: '#4CAF50',
+    },
+    snackbarTop: {
+        top: 0,
+        bottom: undefined,
     },
 });

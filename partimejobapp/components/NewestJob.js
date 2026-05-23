@@ -5,18 +5,8 @@ import {
 import { Icon } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { CARD_COLORS } from "../configs/Colors";
+import { getInitials, formatSalary } from "../helpers";
 
-function getInitials(name = "") {
-    return name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-}
-
-function formatSalary(min, max) {
-    const a = parseFloat(min ?? 0);
-    const b = parseFloat(max ?? 0);
-    if (!a && !b) return "Thỏa thuận";
-    if (a && b) return `${(a / 1e6).toFixed(0)}–${(b / 1e6).toFixed(0)}tr`;
-    return "Thỏa thuận";
-}
 
 // ─── Job Card (ngang, nhỏ gọn) ───────────────────────────────────────────────
 function JobCard({ item, index }) {

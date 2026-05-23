@@ -12,7 +12,6 @@ import { useNavigation } from "@react-navigation/native";
 import { INDUSTRY_ICONS } from "../configs/Icons";
 import { INDUSTRY_COLORS } from "../configs/Colors";
 export default function ListIndustries({ industries, loading }) {
-    const navigation = useNavigation();
 
     function SectionHeader({ title }) {
         return (

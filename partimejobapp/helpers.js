@@ -1,12 +1,3 @@
-import { BENEFIT_ICONS } from "../../configs/Icons";
-
-export function getJobPalette(job) {
-    return {
-        color: job.color || "#2563EB",
-        bgColor: job.bgColor || "#DBEAFE"
-    };
-}
-
 export function getInitials(name = "") {
     const words = name.trim().split(/\s+/);
     if (words.length === 1) {
@@ -36,7 +27,13 @@ export function formatDate(iso) {
     return iso;
 }
 
-export function timeAgo(isoString) {
+export function formatDateTime(iso) {
+    if (!iso) return "—";
+    const parts = iso.split("T")[0].split("-");
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+export function timeAgoByDate(isoString) {
     const diff = Date.now() - new Date(isoString).getTime();
     const days = Math.floor(diff / 86400000);
     if (days === 0) return "Hôm nay";
@@ -46,23 +43,14 @@ export function timeAgo(isoString) {
     return `${months} tháng trước`;
 }
 
-// Parse benefits string thành mảng (split by dấu phẩy)
-export function parseBenefits(str = "") {
-    return str.split(",").map((s) => s.trim()).filter(Boolean);
-}
-
-// Parse requirement string thành mảng (split by dấu phẩy hoặc xuống dòng)
-export function parseRequirements(str = "") {
-    return str
-        .split(/,|\n/)
-        .map((s) => s.trim())
-        .filter(Boolean);
-}
-
-export function benefitIcon(text) {
-    const lower = text.toLowerCase();
-    for (const [key, icon] of Object.entries(BENEFIT_ICONS)) {
-        if (lower.includes(key)) return icon;
-    }
-    return "check-circle-outline";
+export function timeAgoByTime(isoString) {
+    const diff = Date.now() - new Date(isoString).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Vừa xong";
+    if (mins < 60) return `${mins} phút trước`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours} giờ trước`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days} ngày trước`;
+    return `${Math.floor(days / 30)} tháng trước`;
 }

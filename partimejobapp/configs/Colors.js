@@ -55,3 +55,5 @@ export const INDUSTRY_COLORS = [
     { color: "#8B5CF6", bgColor: "#F3E8FF" },
     { color: "#F43F5E", bgColor: "#FFF1F2" },
 ];
+
+

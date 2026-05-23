@@ -22,6 +22,7 @@ const Profile = () => {
     const [editing, setEditing] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [changingPassword, setChangingPassword] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
     const [passwords, setPasswords] = useState({
         old_password: '',
         new_password: '',
@@ -30,11 +31,11 @@ const Profile = () => {
     const [userEdit, setUserEdit] = useState({
         first_name: user?.first_name || '',
         last_name: user?.last_name || '',
-        cityzenID: user?.cityzenID || '',
+        cityzenID: user?.profile?.cityzenID || '',
         email: user?.email || '',
         phone_num: user?.phone_num || '',
-        address: user?.address || '',
-        dob: user?.dob || '',
+        address: user?.profile?.address || '',
+        dob: user?.profile?.dob || '',
     });
 
     const userInfo = [
@@ -51,11 +52,21 @@ const Profile = () => {
         try {
             setLoading(true);
             const token = await AsyncStorage.getItem('token');
-            let dataToSend = { ...userEdit };
-            if (dataToSend.dob && dataToSend.dob.includes('/')) {
-                const parts = dataToSend.dob.split('/');
-                dataToSend.dob = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            let dob = userEdit.dob;
+            if (dob && dob.includes('/')) {
+                const parts = dob.split('/');
+                dob = `${parts[2]}-${parts[1]}-${parts[0]}`;
             }
+            let dataToSend = {
+                user: {
+                    first_name: userEdit.first_name,
+                    last_name: userEdit.last_name,
+                    phone_num: userEdit.phone_num,
+                },
+                address: userEdit.address,
+                dob: dob,
+                cityzenID: userEdit.cityzenID,
+            };
             let res = await authApis(token).patch(endpoints['current-user'], dataToSend);
             dispatch({ type: "LOGIN", payload: res.data });
             setEditing(false);
@@ -65,6 +76,20 @@ const Profile = () => {
                 ? JSON.stringify(ex.response.data)
                 : ex.message;
             alert("Lỗi: " + msg);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const cancelEmployerRequest = async () => {
+        try {
+            setLoading(true);
+            const token = await AsyncStorage.getItem('token');
+            await authApis(token).delete(endpoints['employers']);
+            dispatch({ type: "LOGIN", payload: { ...user, is_employer: false } });
+            setShowCancelModal(false);
+        } catch (ex) {
+            alert("Hủy yêu cầu thất bại!");
         } finally {
             setLoading(false);
         }
@@ -134,14 +159,14 @@ const Profile = () => {
                         name: result.assets[0].fileName,
                         type: "image/jpeg"
                     });
-                    let res = await authApis(token).put(endpoints['current-user'], form, {
+                    let res = await authApis(token).patch(endpoints['current-user'], form, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }
                     });
                     dispatch({
                         type: "UPDATE_AVATAR",
-                        payload: result.assets[0]
+                        payload: res.data
                     });
                 } catch (ex) {
                     console.error(ex);
@@ -158,8 +183,8 @@ const Profile = () => {
             <View style={Styles.profileHeader} />
             <TouchableOpacity onPress={picker} style={Styles.avatarPicker}>
                 {user?.avatar
-                    ? <Image source={{ uri: user.avatar }} style={Styles.avatar} />
-                    : <Text style={{ fontSize: 40 }}>👤</Text>
+                    ? <Image source={{ uri: user?.avatar }} style={Styles.avatar} />
+                    : <Image source={{ uri: 'https://res.cloudinary.com/duxz5ias9/image/upload/v1779191141/default_avatar_izym3f.png' }} style={Styles.avatar} />
                 }
             </TouchableOpacity>
 
@@ -174,7 +199,7 @@ const Profile = () => {
                             onChangeText={t => i.field !== 'dob' && setUserEdit({ ...userEdit, [i.field]: t })}
                             mode="outlined" multiline={true}
                             editable={editing && i.field !== 'dob'}
-                            style={UserStyles.input}
+                            style={[UserStyles.input, !editing && { opacity: 0.75 }]}
                             contentStyle={UserStyles.inputContent}
                             outlineStyle={UserStyles.outlineStyle}
                             theme={inputTheme}
@@ -203,12 +228,8 @@ const Profile = () => {
                                     mode="date"
                                     display={Platform.OS === 'android' ? 'default' : 'inline'}
                                     onChange={(event, date) => {
-                                        if (event.type === 'dismissed') {
-                                            setShowDatePicker(false);
-                                            return;
-                                        }
-                                        if (event.type === 'set' && date) {
-                                            setShowDatePicker(false);
+                                        setShowDatePicker(false);
+                                        if (date) {
                                             const d = date.getDate().toString().padStart(2, '0');
                                             const m = (date.getMonth() + 1).toString().padStart(2, '0');
                                             const y = date.getFullYear();
@@ -236,7 +257,7 @@ const Profile = () => {
                             {err.non_field_errors}
                         </HelperText>
                     )}
-                    
+
                     {[
                         { field: 'old_password', label: 'Mật khẩu cũ' },
                         { field: 'new_password', label: 'Mật khẩu mới' },
@@ -272,8 +293,6 @@ const Profile = () => {
             <View style={{ flexDirection: 'row', marginHorizontal: 16, gap: 10, marginBottom: 12 }}>
                 <Button
                     compact
-                    loading={loading}
-                    disabled={loading}
                     onPress={changingPassword ? () => setChangingPassword(false) : editing ? save : () => setEditing(true)}
                     style={[Styles.button, { flex: 1, backgroundColor: changingPassword ? '#6b7280' : Colors.navy[700] }]}
                     labelStyle={Styles.buttonLabel}
@@ -283,7 +302,6 @@ const Profile = () => {
 
                 <Button
                     compact
-                    loading={loading}
                     disabled={loading}
                     onPress={editing ? () => setEditing(false) : () => {
                         if (changingPassword) {
@@ -299,7 +317,16 @@ const Profile = () => {
                 </Button>
             </View>
 
-            <Button loading={loading} disabled={loading}
+            <Button
+                onPress={() => !user?.is_employer && nav.navigate('emregister', { user: user })}
+                disabled={!!user?.employer}
+                style={[Styles.margin, Styles.button, { backgroundColor: user?.employer ? '#6b7280' : Colors.navy[500] }]}
+                labelStyle={Styles.buttonLabel}
+                mode="contained">
+                {user?.employer ? 'Chờ xét duyệt thành nhà tuyển dụng!' : 'Trở thành nhà tuyển dụng'}
+            </Button>
+
+            <Button
                 onPress={() => dispatch({ type: "LOGOUT" })}
                 style={[Styles.margin, Styles.button, { backgroundColor: '#e53935' }]}
                 labelStyle={Styles.buttonLabel}

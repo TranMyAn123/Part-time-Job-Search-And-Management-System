@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaView, ScrollView, View, StyleSheet, StatusBar, Text } from "react-native";
-import Apis, { endpoints } from "../../configs/Apis";
+import Apis, { authApis, endpoints } from "../../configs/Apis";
 import Header from "../../components/Header";
 import FeaturedEmployer from "../../components/FeaturedEmployer";
 import NewestJob from "../../components/NewestJob";
@@ -14,21 +14,39 @@ import { MyUserContext } from "../../configs/Contexts";
 export default function App() {
   const [activeChip, setActiveChip] = useState("Tất cả");
   const [activeNav, setActiveNav] = useState("home");
-  const [jobs, setJobs] = useState([]);
-  const [loadingJobs, setLoadingJobs] = useState(false);
+
   const [user] = useContext(MyUserContext);
   useEffect(() => {
+    fetchEmployers()
     fetchJobs();
     fetchIndustries();
   }, []);
 
-  const fetchJobs = async () => {
-    setLoadingJobs(true);
+  const [employers, setEmployers] = useState([])
+  const [loadingEmployers, setLoadingEmployers] = useState(false)
+  const fetchEmployers = async () => {
     try {
+      setLoadingEmployers(true);
+      const res = await authApis(user.access_token).get(endpoints["employers"]);
+      setEmployers(res.data.results?.slice(0, 5) ?? []);
+    } catch (e) {
+      console.error(e?.response?.data?.detail ??
+        e?.response?.data?.message);
+    } finally {
+      setLoadingEmployers(false)
+    }
+  }
+
+  const [jobs, setJobs] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const fetchJobs = async () => {
+    try {
+      setLoadingJobs(true);
       const res = await Apis.get(endpoints["jobs"]);
       setJobs(res.data.results?.slice(0, 8) ?? []);
     } catch (e) {
-      console.error(e);
+      console.error(e?.response?.data?.detail ??
+        e?.response?.data?.message);
     } finally {
       setLoadingJobs(false);
     }
@@ -44,7 +62,8 @@ export default function App() {
       const res = await Apis.get(endpoints["industries"]);
       setIndustries(res.data ?? []);
     } catch (e) {
-      console.error(e);
+      console.error(e?.response?.data?.detail ??
+        e?.response?.data?.message);
     } finally {
       setLoadingIndustries(false);
     }
@@ -74,7 +93,7 @@ export default function App() {
             </React.Fragment>
           ))}
         </View>
-        <FeaturedEmployer />
+        <FeaturedEmployer employers={employers} />
 
 
         <NewestJob jobs={jobs} loading={loadingJobs} />

@@ -1,11 +1,12 @@
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Styles, { inputTheme } from "../../styles/Styles";
-import { Button, HelperText, TextInput } from "react-native-paper";
+import { Button, HelperText, TextInput, Snackbar } from "react-native-paper";
 import * as ImgPicker from 'expo-image-picker';
 import { useState } from "react";
 import Apis, { endpoints } from "../../configs/Apis";
 import { useNavigation } from "@react-navigation/native";
 import SocialLogin from "../../components/SocialLogin";
+import { Colors } from "../../configs/Colors";
 
 const Register = () => {
     const userInfo = [{
@@ -36,11 +37,12 @@ const Register = () => {
         secureTextEntry: true
     }];
 
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState({ role: 'USER' });
     const [err, setErr] = useState({});
     const [loading, setLoading] = useState(false);
     const nav = useNavigation();
     const [showPassword, setShowPassword] = useState({});
+    const [visible, setVisible] = useState(false);
 
     const picker = async () => {
         let { status } = await ImgPicker.requestMediaLibraryPermissionsAsync();
@@ -94,13 +96,17 @@ const Register = () => {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
-                if (res.status === 201)
-                    nav.navigate('login');
+                if (res.status === 201) {
+                    console.log("Đăng ký thành công!");
+                    setVisible(true);
+                    setTimeout(() => nav.navigate('login'), 2000);
+                }
                 else
-                    alert("Hệ thống có lỗi!");
+                    alert("Đăng ký không thành công!");
             } catch (ex) {
-                console.error(JSON.stringify(ex.response?.data));
-                setErr({ api: "Hệ thống có lỗi!" });
+                const data = ex.response?.data;
+                const msg = data?.message || data?.username?.[0] || "Đăng ký không thành công!";
+                setErr({ api: msg });
             } finally {
                 setLoading(false);
             }
@@ -110,10 +116,11 @@ const Register = () => {
     return (
         <ScrollView contentContainerStyle={[Styles.scrollContent, Styles.gap, Styles.center]}>
             {err.api && <HelperText type="error" visible={true}>{err.api}</HelperText>}
+
             <TouchableOpacity onPress={picker} style={Styles.avatarPicker}>
-                {user.avatar
+                {user?.avatar
                     ? <Image source={{ uri: user.avatar.uri }} style={Styles.avatar} />
-                    : <Text style={{ fontSize: 40 }}>👤</Text>
+                    : <Image source={{ uri: 'https://res.cloudinary.com/duxz5ias9/image/upload/v1779191141/default_avatar_izym3f.png' }} style={Styles.avatar} />
                 }
             </TouchableOpacity>
 
@@ -149,6 +156,14 @@ const Register = () => {
                 mode="contained">Đăng ký</Button>
 
             <SocialLogin />
+
+            <Snackbar visible={visible} 
+            onDismiss={() => setVisible(false)}
+            style={Styles.snackbarSuccess}
+            wrapperStyle={Styles.snackbarTop}>
+                Đăng ký thành công!
+            </Snackbar>
+
         </ScrollView>
     );
 }
