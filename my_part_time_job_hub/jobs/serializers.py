@@ -47,7 +47,7 @@ class EmployerSerializer(serializers.ModelSerializer):
         ]
 
     def validate_workplace_images(self, value):
-        if len(value) < 3:
+        if not self.instance and len(value) < 3:
             raise serializers.ValidationError("Cần ít nhất 3 ảnh mô tả môi trường làm việc!")
         return value
 
@@ -59,7 +59,10 @@ class EmployerSerializer(serializers.ModelSerializer):
         return value
 
     def validate_tax_code(self, value):
-        if Employer.objects.filter(tax_code=value).exists():
+        qs = Employer.objects.filter(tax_code=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
             raise serializers.ValidationError("Mã số thuế này đã được đăng ký rồi!")
         return value
 
@@ -73,7 +76,7 @@ class EmployerSerializer(serializers.ModelSerializer):
                 {"company_name": "Tên công ty không được để trống!"}
             )
 
-        if not logo_company:
+        if not logo_company and not self.instance:
             raise serializers.ValidationError(
                 {"logo_company": "Vui lòng chọn logo cho công ty!!"}
             )
@@ -91,6 +94,9 @@ class EmployerSerializer(serializers.ModelSerializer):
             data["is_followed"] = instance.followers.filter(
                 candidate=request.user, active=True
             ).exists()
+        if instance.logo_company:
+            data["logo_company"] = instance.logo_company.url
+        data["workplace_images"] = [img.image.url for img in instance.workplace_images.all()]
         return data
 
     def create(self, validated_data):
@@ -111,6 +117,18 @@ class EmployerSerializer(serializers.ModelSerializer):
 
         return employer
 
+    def update(self, instance, validated_data):
+        images = validated_data.pop("workplace_images", None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if images:
+            instance.workplace_images.all().delete()
+            WorkplaceImage.objects.bulk_create([
+                WorkplaceImage(employer=instance, image=img)
+                for img in images
+            ])
+        return instance
 
 class IndustrSerializer(serializers.ModelSerializer):
     class Meta:
