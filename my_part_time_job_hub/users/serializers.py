@@ -1,4 +1,5 @@
 from users.models import *
+from jobs.models import Employer
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth import authenticate
@@ -17,24 +18,21 @@ class AvatarSerializer(serializers.ModelSerializer):
 
 
 class SimpleUserSerializer(AvatarSerializer):
-    fullname = serializers.SerializerMethodField(read_only=True)
-
     class Meta:
         model = User
-        fields = ["fullname", "first_name", "last_name", "avatar", "email", "phone_num"]
-        extra_kwargs = {
-            "first_name": {"write_only": True},
-            "last_name": {"write_only": True},
-        }
+        fields = ["first_name", "last_name", "avatar", "phone_num"]
+        extra_kwargs = {"phone_num": {"validators": []}}
 
-    def get_fullname(self, obj):
-        return obj.get_full_name() or obj.username
+    def validate_phone_num(self, value):
+        user = self.instance
+
+        if user and User.objects.filter(phone_num=value).exclude(pk=user.pk).exists():
+            raise serializers.ValidationError("Số điện thoại đã được sử dụng!")
+        return value
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = SimpleUserSerializer(required=False, write_only=True)
-    dob = serializers.DateField(required=False, allow_null=True)
-    cityzenID = serializers.CharField(required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         model = Profile
@@ -59,6 +57,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(SimpleUserSerializer):
     profile = ProfileSerializer(read_only=True)
+    employer = serializers.SerializerMethodField()
 
     class Meta:
         model = SimpleUserSerializer.Meta.model
@@ -68,6 +67,8 @@ class UserSerializer(SimpleUserSerializer):
             "password",
             "email",
             "profile",
+            "last_login",
+            "employer",
         ]
         extra_kwargs = {"password": {"write_only": True}}
 
@@ -77,6 +78,9 @@ class UserSerializer(SimpleUserSerializer):
             instance.avatar = avatar
         instance.save()
         return instance
+
+    def get_employer(self, obj):
+        return Employer.objects.filter(user=obj).exists()
 
 
 class LoginSerializer(serializers.ModelSerializer):

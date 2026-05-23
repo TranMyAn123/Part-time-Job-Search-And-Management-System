@@ -11,16 +11,18 @@ export const endpoints = {
     'change-password': "/users/me/change_password/",
 
     'jobs': "/jobs/",
+    'job': (jobID) => `/jobs/${jobID}/`,
     'industries': "/industries",
     'comments': (jobID) => `/jobs/${jobID}/comments/`,
     'replies': (commentID) => `/comments/${commentID}/replies/`,
-    'applications': '/users/me/applications/'
+    'applications': '/users/me/applications',
+    'employers': "/employers/",
+    'follow': (employerID) => `/employers/${employerID}/follow/`
 };
 
 export const authApis = (token) => {
     return axios.create({
-        // baseURL: "http://192.168.1.111:8000/",
-        baseURL: "http://172.24.248.51:8000",
+        baseURL: "http://192.168.1.111:8000/",
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -28,8 +30,7 @@ export const authApis = (token) => {
 }
 
 export default axios.create({
-    // baseURL: "http://192.168.1.111:8000/",
-    baseURL: "http://172.24.248.51:8000"
+    baseURL: "http://192.168.1.111:8000/",
 });
 
 

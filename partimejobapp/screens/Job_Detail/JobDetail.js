@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -8,6 +8,7 @@ import {
     StatusBar,
     Share,
     Image,
+    ActivityIndicator,
 } from "react-native";
 import { Icon } from "react-native-paper";
 import CommentSection from "../../components/CommentSection";
@@ -21,6 +22,7 @@ import {
     parseRequirements,
     benefitIcon
 } from "./Helpers";
+import Apis, { endpoints } from "../../configs/Apis";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function SectionTitle({ title, color }) {
@@ -77,7 +79,38 @@ function InfoRow({ icon, label, value, color }) {
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function JobDetail({ navigation, route }) {
-    const job = route?.params?.job
+    const passedJob = route?.params?.job
+    const jobID = route?.params?.jobID
+    const [job, setJob] = useState(passedJob)
+    const [saved, setSaved] = useState(false);
+    const [applied, setApplied] = useState(false);
+    const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if (passedJob) return;
+
+        const fetchJob = async () => {
+            try {
+                const res = await Apis.get(endpoints['job'](jobID))
+                setJob(res.data);
+            } catch (e) {
+                const msg = e?.response?.data?.detail ?? e?.response?.data?.message ??
+                    console.log(msg);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchJob();
+    }, [passedJob, jobID]);
+
+    if (loading || !job) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={color || "#2563EB"} />
+            </View>
+        );
+    }
 
     const { color, bgColor } = getJobPalette(job);
     const initials = getInitials(job.employer?.company_name || job.employer?.full_name);
@@ -88,20 +121,15 @@ export default function JobDetail({ navigation, route }) {
     const requirements = parseRequirements(job.requirement);
     const isOpening = job.status === "OPENING";
 
-    const [saved, setSaved] = useState(false);
-    const [applied, setApplied] = useState(false);
-
     const handleShare = async () => {
         await Share.share({
             message: `${job.title} tại ${job.employer?.company_name} – ${salary}`,
         });
     };
-
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor={color} />
 
-            {/* ── HERO ─────────────────────────────────────────────────── */}
             <View style={[styles.hero, { backgroundColor: color }]}>
                 {/* Decorative bubbles */}
                 <View style={styles.bubble1} />
@@ -228,7 +256,6 @@ export default function JobDetail({ navigation, route }) {
                     />
                 </View>
 
-                {/* Status badge */}
                 <View style={[styles.statusBadge, { backgroundColor: isOpening ? "#DCFCE7" : "#F3F4F6" }]}>
                     <View style={[styles.statusDot, { backgroundColor: isOpening ? "#16A34A" : "#9CA3AF" }]} />
                     <Text style={[styles.statusText, { color: isOpening ? "#16A34A" : "#6B7280" }]}>
@@ -236,7 +263,6 @@ export default function JobDetail({ navigation, route }) {
                     </Text>
                 </View>
 
-                {/* Description */}
                 {job.description && (
                     <>
                         <SectionTitle title="Mô tả công việc" color={color} />
@@ -332,6 +358,13 @@ export default function JobDetail({ navigation, route }) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
+
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
     container: { flex: 1, backgroundColor: "#F4F6FB" },
 
     // Hero

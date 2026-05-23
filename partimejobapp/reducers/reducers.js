@@ -21,7 +21,7 @@ export const MyUserReducer = (current, action) => {
             return { ...current, ...action.payload };
 
         case "UPDATE_AVATAR":
-            return { ...current, avatar: action.payload.uri };
+            return { ...current, avatar: action.payload.avatar };
     }
     return current;
 };

@@ -7,75 +7,52 @@ import {
     TouchableOpacity,
     Pressable,
 } from "react-native";
+import { CARD_COLORS } from "../configs/Colors";
+import { getInitials } from "../helpers";
+import { useNavigation } from "@react-navigation/native";
 
-const employers = [
-    {
-        full_name: "Nguyễn Văn An",
-        company_name: "GoGi House",
-        logo_company: "",
-        description: "Chuỗi nhà hàng nướng Hàn Quốc tại TP.HCM",
-        tax_code: "0123456789",
-        jobs: 12,
-        color: "#FF6B6B",
-        initials: "GG",
-    },
-    {
-        full_name: "Trần Thị Bích",
-        company_name: "The Shift Coffee",
-        logo_company: "",
-        description: "Chuỗi cà phê phong cách specialty",
-        tax_code: "0987654321",
-        jobs: 5,
-        color: "#4ECDC4",
-        initials: "SC",
-    },
-    {
-        full_name: "Lê Minh Khoa",
-        company_name: "Shopee Express",
-        logo_company: "",
-        description: "Dịch vụ giao hàng nhanh toàn quốc",
-        tax_code: "1122334455",
-        jobs: 28,
-        color: "#F97316",
-        initials: "SE",
-    },
-    {
-        full_name: "Phạm Thị Lan",
-        company_name: "CircleK Vietnam",
-        logo_company: "",
-        description: "Chuỗi cửa hàng tiện lợi 24/7",
-        tax_code: "5566778899",
-        jobs: 9,
-        color: "#6366F1",
-        initials: "CK",
-    },
-];
-
-function EmployerCard({ employer }) {
+function EmployerCard({ item, index }) {
     const [followed, setFollowed] = useState(false);
-
+    const { color, bgColor } = CARD_COLORS[index % CARD_COLORS.length];
+    const initials = getInitials(item?.fullname || item?.company_name);
+    const isFollowed = item.is_followed
     return (
         <View style={styles.card}>
-            <View style={[styles.accentBar, { backgroundColor: employer.color }]} />
+            <View style={[styles.accentBar, { backgroundColor: color }]} />
 
-            <View style={[styles.logoWrapper, { backgroundColor: employer.color + "20" }]}>
-                <Text style={[styles.logoText, { color: employer.color }]}>
-                    {employer.initials}
-                </Text>
-            </View>
+            {
+                item.logo_company ? (
+                    <Image
+                        source={{ uri: item.logo_company }}
+                        style={styles.logoImage}
+                        resizeMode="cover"
+                    />
+                ) : (
+                    <View
+                        style={[
+                            styles.logoWrapper,
+                            { backgroundColor: color + "20" }
+                        ]}
+                    >
+                        <Text style={[styles.logoText, { color }]}>
+                            {initials}
+                        </Text>
+                    </View>
+                )
+            }
 
             <Text style={styles.companyName} numberOfLines={1}>
-                {employer.company_name}
+                {item.company_name}
             </Text>
             <Text style={styles.ownerName} numberOfLines={1}>
-                {employer.full_name}
+                {item.full_name}
             </Text>
             <Text style={styles.desc} numberOfLines={2}>a
-                {employer.description}
+                {item.description}
             </Text>
 
             <View style={styles.jobsBadge}>
-                <Text style={styles.jobsText}>🧳 {employer.jobs} việc làm</Text>
+                <Text style={styles.jobsText}>🧳 {item.job_count} việc làm</Text>
             </View>
 
             <Pressable
@@ -87,19 +64,20 @@ function EmployerCard({ employer }) {
                 ]}
             >
                 <Text style={[styles.followBtnText, followed && styles.followBtnTextActive]}>
-                    {followed ? "✓ Đang theo dõi" : "+ Theo dõi"}
+                    {isFollowed ? "✓ Đang theo dõi" : "+ Theo dõi"}
                 </Text>
             </Pressable>
         </View>
     );
 }
 
-export default function FeaturedEmployer() {
+export default function FeaturedEmployer({ employers }) {
+    const navigation = useNavigation()
     return (
         <View style={styles.section}>
             <View style={styles.headerRow}>
                 <Text style={styles.header}>🔥 Nhà tuyển dụng nổi bật</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate("EmployerList")}>
                     <Text style={styles.seeAll}>Xem tất cả →</Text>
                 </TouchableOpacity>
             </View>
@@ -109,8 +87,8 @@ export default function FeaturedEmployer() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {employers.map((employer, i) => (
-                    <EmployerCard key={i} employer={employer} />
+                {employers.map((employer, index) => (
+                    <EmployerCard key={index} item={employer} index={index} />
                 ))}
             </ScrollView>
         </View>

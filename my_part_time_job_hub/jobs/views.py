@@ -109,9 +109,30 @@ class JobViewSet(
         )
 
 
-class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView):
+class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
     queryset = Employer.objects.filter(is_verified=True)
     serializer_class = serializers.EmployerSerializer
+    pagination_class = ItemPaginator
+
+    def get_queryset(self):
+
+        qs = Employer.objects.filter(is_verified=True).annotate(
+            follow_count=Count("followers", distinct=True),
+            job_count=Count("jobs", distinct=True),
+        )
+
+        # user = self.request.user
+        # if user.is_authenticated:
+        #     qs = qs.annotate(
+        #         is_followed=Exists(
+        #             CompanyFollow.objects.filter(
+        #                 employer=OuterRef("pk"),
+        #                 candidate=user,
+        #                 active=True,
+        #             )
+        #         )
+        #     )
+        return qs.order_by("-follow_count")
 
     @action(methods=["post"], url_path="follow", detail=True)
     def follow(self, request, pk):
@@ -171,6 +192,9 @@ class ApplicationViewSet(
         return serializers.ApplicationSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Application.objects.none()
+
         user = self.request.user
         return Application.objects.filter(candidate=user)
 

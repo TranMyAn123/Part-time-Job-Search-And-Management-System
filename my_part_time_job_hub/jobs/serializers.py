@@ -10,11 +10,13 @@ class EmployerSerializer(serializers.ModelSerializer):
         child=serializers.ImageField(), write_only=True
     )
     full_name = serializers.SerializerMethodField(read_only=True)
-    follow_count = serializers.IntegerField(read_only=True)
+    follow_count = serializers.IntegerField(read_only=True)  # thêm
+    job_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Employer
         fields = [
+            "user_id",
             "full_name",
             "company_name",
             "logo_company",
@@ -22,6 +24,7 @@ class EmployerSerializer(serializers.ModelSerializer):
             "tax_code",
             "workplace_images",
             "follow_count",
+            "job_count",
         ]
 
     def get_full_name(self, obj):
@@ -68,6 +71,19 @@ class EmployerSerializer(serializers.ModelSerializer):
             )
         return attrs
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context["request"]
+        if request and request.user and request.user.is_authenticated:
+            data["is_followed"] = instance.followers.filter(
+                candidate=request.user, active=True
+            ).exists()
+        # from django.db import connection, reset_queries
+        # print("TOTAL QUERIES:", len(connection.queries))
+        # for q in connection.queries:
+        #     print(q["sql"])
+        return data
+
 
 class SimpleJobSerializer(serializers.ModelSerializer):
     employer = EmployerSerializer(read_only=True)
@@ -76,6 +92,7 @@ class SimpleJobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = [
+            "id",
             "employer",
             "industry",
             "title",
@@ -121,15 +138,6 @@ class JobCreateSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         return Job.objects.create(employer=user.employer_profile, **validated_data)
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        request = self.context["request"]
-        if request and request.user and request.user.is_authenticated:
-            data["is_followed"] = instance.followers.filter(
-                candidate=request.user, active=True
-            ).exists()
-        return data
-
     def create(self, validated_data):
         images = validated_data.pop("workplace_images")
 
@@ -152,7 +160,7 @@ class IndustrSerializer(serializers.ModelSerializer):
 class ApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
-        fields = ["job"]
+        fields = ["job", "cv_file"]
 
     def create(self, validated_data):
         validated_data["candidate"] = self.context["request"].user
@@ -165,8 +173,16 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = ["id", "job", "candidate", "apply_date", "status"]
+        fields = ["id", "job", "candidate", "apply_date", "cv_file", "status"]
         read_only_fields = fields
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        if instance.cv_file:
+            data["cv_file"] = instance.cv_file.url
+
+        return data
 
 
 class ApplicationReviewSerializer(serializers.ModelSerializer):

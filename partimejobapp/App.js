@@ -19,6 +19,9 @@ import Apis, { endpoints } from "./configs/Apis";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import IndustryDetail from "./components/IndustryDetail";
 import MyApplication from "./screens/MyApplication/MyApplication";
+import EmRegister from "./screens/Employer/EmRegister";
+import ApplicationDetail from "./screens/MyApplication/ApplicationDetail";
+import EmployerList from "./screens/Home/EmployerList";
 
 const Stack = createNativeStackNavigator();
 const SearchStack = createNativeStackNavigator();
@@ -28,6 +31,7 @@ const StackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
       <Stack.Screen name="index" component={Home} />
+      <Stack.Screen name="EmployerList" component={EmployerList} />
       <Stack.Screen name="IndustryDetail" component={IndustryDetail} />
     </Stack.Navigator>
   );
@@ -49,8 +53,19 @@ const ApplicationStackNavigator = () => {
   return (
     <ApplicationStack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "transparent" } }}>
       <ApplicationStack.Screen name="MyApplications" component={MyApplication} />
+      <ApplicationStack.Screen name="ApplicationDetail" component={ApplicationDetail} />
+
     </ApplicationStack.Navigator>
   )
+}
+const ProfileStack = createNativeStackNavigator();
+const ProfileStackNavigator = () => {
+  return (
+    <ProfileStack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+      <ProfileStack.Screen name="profile" component={Profile} />
+      <ProfileStack.Screen name="emregister" component={EmRegister} />
+    </ProfileStack.Navigator>
+  );
 }
 
 const Tab = createBottomTabNavigator();
@@ -87,7 +102,7 @@ const TabNavigator = () => {
         <Tab.Screen name="login" component={Login} options={{ title: 'Đăng nhập', tabBarIcon: () => <Icon source="account" size={30} /> }} />
         <Tab.Screen name="register" component={Register} options={{ title: 'Đăng ký', tabBarIcon: () => <Icon source="account-plus" size={30} /> }} />
       </> : <>
-        <Tab.Screen name="profile" component={Profile} options={{ title: 'Thông tin cá nhân', tabBarIcon: () => <Icon source="account" size={30} /> }} />
+        <Tab.Screen name="profiles" component={ProfileStackNavigator} options={{ title: 'Thông tin cá nhân', tabBarIcon: () => <Icon source="account" size={30} /> }} />
       </>}
     </Tab.Navigator>
   );
@@ -103,7 +118,6 @@ const App = () => {
         if (!stored) return;
 
         const { access_token, refresh_token } = JSON.parse(stored);
-
         try {
           const { data } = await Apis.get(endpoints['current-user'],
             { headers: { Authorization: `Bearer ${access_token}` } }
