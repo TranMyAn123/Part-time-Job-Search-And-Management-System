@@ -71,7 +71,8 @@ class UserSerializer(SimpleUserSerializer):
             "email",
             "profile",
             "last_login",
-            "employer"
+            "employer",
+            "role"
         ]
         extra_kwargs = {"password": {"write_only": True}}
 
