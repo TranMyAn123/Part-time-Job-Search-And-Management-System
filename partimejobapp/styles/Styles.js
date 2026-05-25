@@ -83,4 +83,18 @@ export default StyleSheet.create({
         top: 0,
         bottom: undefined,
     },
+    sectionCard: {
+        backgroundColor: Colors.bg.card,
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: Colors.border,
+    },
+    sectionCardTitle: {
+        fontWeight: '700',
+        fontSize: 15,
+        color: Colors.navy[700],
+        marginBottom: 12,
+    },
 });
