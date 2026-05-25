@@ -16,13 +16,12 @@ class AvatarSerializer(serializers.ModelSerializer):
 
         return data
 
+
 class SimpleUserSerializer(AvatarSerializer):
     class Meta:
         model = User
         fields = ["first_name", "last_name", "avatar", "phone_num"]
-        extra_kwargs = {
-            'phone_num': {'validators': []}
-        }
+        extra_kwargs = {"phone_num": {"validators": []}}
 
     def validate_phone_num(self, value):
         user = self.instance
@@ -30,6 +29,7 @@ class SimpleUserSerializer(AvatarSerializer):
         if user and User.objects.filter(phone_num=value).exclude(pk=user.pk).exists():
             raise serializers.ValidationError("Số điện thoại đã được sử dụng!")
         return value
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = SimpleUserSerializer(required=False, write_only=True)
@@ -43,10 +43,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         if user:
             user_serializer = SimpleUserSerializer(
-                instance=instance.user,
-                data=user,
-                partial=True,
-                context=self.context
+                instance=instance.user, data=user, partial=True, context=self.context
             )
             user_serializer.is_valid(raise_exception=True)
             user_serializer.save()
@@ -77,7 +74,7 @@ class UserSerializer(SimpleUserSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def update(self, instance, validated_data):
-        avatar = validated_data.pop('avatar', None)
+        avatar = validated_data.pop("avatar", None)
         if avatar is not None:
             instance.avatar = avatar
         instance.save()
@@ -85,6 +82,7 @@ class UserSerializer(SimpleUserSerializer):
 
     def get_employer(self, obj):
         return Employer.objects.filter(user=obj).exists()
+
 
 class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField()

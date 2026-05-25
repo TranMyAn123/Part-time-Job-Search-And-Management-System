@@ -50,22 +50,19 @@ const Login = () => {
                     ...user,
                     'grant_type': 'password'
                 });
-                await AsyncStorage.setItem('token', res.data.access_token);
-
+                console.info(res.data);
                 let u = await authApis(res.data.access_token).get(endpoints['current-user']);
-
-                const userData = u.data;
-                if (userData.last_login === null) {
-                    setPendingUser(userData);
-                    setShowRole(true);
-                } else {
-                    dispatch({
-                        "type": "LOGIN",
-                        "payload": userData
-                    });
-                }
+                console.info(u.data);
+                dispatch({
+                    "type": "LOGIN",
+                    payload: {
+                        ...u.data,
+                        access_token: res.data.access_token,
+                        refresh_token: res.data.refresh_token,
+                    },
+                });
             } catch (ex) {
-                setErr({ api: "Đăng nhập thất bại!" });
+                setErr({ api: ex.response?.data?.error_description || ex.message || "Đăng nhập thất bại!" });
             } finally {
                 setLoading(false);
             }

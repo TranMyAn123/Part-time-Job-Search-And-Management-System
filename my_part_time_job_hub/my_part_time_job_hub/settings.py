@@ -29,10 +29,14 @@ SECRET_KEY = "django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.14',
-                 'localhost',
-                 '127.0.0.1',
-                 '0.0.0.0']
+ALLOWED_HOSTS = [
+    "192.168.1.14",
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    "192.168.1.111",
+    "172.24.248.51",
+]
 
 AUTH_USER_MODEL = "users.User"
 
@@ -67,10 +71,10 @@ REST_FRAMEWORK = {
 }
 
 OAUTH2_PROVIDER = {
-    "ACCESS_TOKEN_EXPIRE_SECONDS": 7200,
-    "REFRESH_TOKEN_EXPIRE_SECONDS": 72000,
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 2592000,
     "ROTATE_REFRESH_TOKEN": False,
-    # "OAUTH2_BACKEND_CLASS": "oauth2_provider.oauth2_backends.JSONOAuthLibCore",
+    "OAUTH2_BACKEND_CLASS": "oauth2_provider.oauth2_backends.JSONOAuthLibCore",
 }
 
 # OAUTH2_PROVIDER = {"ROTATE_REFRESH_TOKEN": True, "BLACKLIST_AFTER_ROTATION": True}
@@ -127,7 +131,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "job_db",
         "USER": "root",
-        "PASSWORD": "root",
+        "PASSWORD": "35715982",
         "HOST": "",
     }
 }
@@ -216,3 +220,6 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 # Dev: in mail ra console thay vì gửi thật
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+
+TIME_ZONE = "Asia/Ho_Chi_Minh"

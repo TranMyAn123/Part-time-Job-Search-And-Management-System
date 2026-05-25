@@ -2,12 +2,126 @@ from rest_framework import serializers
 from jobs.models import Job, Application, Employer, Comment, Industry, WorkplaceImage
 from jobs.utils import validators
 from django.db import transaction
+from users.serializers import SimpleUserSerializer
+
+
+class EmployerSerializer(serializers.ModelSerializer):
+    workplace_images = serializers.ListField(
+        child=serializers.ImageField(), write_only=True
+    )
+    full_name = serializers.SerializerMethodField(read_only=True)
+    follow_count = serializers.IntegerField(read_only=True)  # thêm
+    job_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Employer
+        fields = [
+            "user_id",
+            "full_name",
+            "company_name",
+            "logo_company",
+            "description",
+            "tax_code",
+            "workplace_images",
+            "follow_count",
+            "job_count",
+        ]
+
+    def get_full_name(self, obj):
+        user = obj.user
+        if user.first_name or user.last_name:
+            return f"{user.first_name} {user.last_name}".strip()
+        return user.username
+
+    def validate_workplace_images(self, value):
+        if not self.instance and len(value) < 3:
+            raise serializers.ValidationError("Cần ít nhất 3 ảnh mô tả môi trường làm việc!")
+        return value
+
+    def validate_logo_company(self, value):
+        size = 1 * pow(1024, 2)
+
+        if value.size > size:
+            raise serializers.ValidationError("Can't upload image higher than 1MB !")
+        return value
+
+    def validate_tax_code(self, value):
+        qs = Employer.objects.filter(tax_code=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("Mã số thuế này đã được đăng ký rồi!")
+        return value
+
+    def validate(self, attrs):
+        company_name = attrs.get("company_name")
+        logo_company = attrs.get("logo_company")
+        description = attrs.get("description")
+
+        if not validators.check_strip(company_name):
+            raise serializers.ValidationError(
+                {"company_name": "Company name can not empty!"}
+            )
+
+        if not logo_company and not self.instance:
+            raise serializers.ValidationError(
+                {"logo_company": "Logo company can not empty!"}
+            )
+
+        if not validators.check_strip(description):
+            raise serializers.ValidationError(
+                {"description": "Description can not empty!"}
+            )
+        return attrs
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context["request"]
+        if request and request.user and request.user.is_authenticated:
+            data["is_followed"] = instance.followers.filter(
+                candidate=request.user, active=True
+            ).exists()
+        # from django.db import connection, reset_queries
+        # print("TOTAL QUERIES:", len(connection.queries))
+        # for q in connection.queries:
+        #     print(q["sql"])
+        if instance.logo_company:
+            data["logo_company"] = instance.logo_company.url
+        data["workplace_images"] = [img.image.url for img in instance.workplace_images.all()]
+        return data
+
+
+class SimpleJobSerializer(serializers.ModelSerializer):
+    employer = EmployerSerializer(read_only=True)
+    industry = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Job
+        fields = [
+            "id",
+            "employer",
+            "industry",
+            "title",
+            "location",
+            "salary_min",
+            "salary_max",
+            "available_date",
+        ]
+
+    def get_industry(self, obj):
+        return obj.industry.name if obj.industry else None
 
 
 class JobSerializer(serializers.ModelSerializer):
+    employer = EmployerSerializer(read_only=True)
+    industry = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Job
         fields = "__all__"
+
+    def get_industry(self, obj):
+        return obj.industry.name if obj.industry else None
 
 
 class JobCreateSerializer(serializers.ModelSerializer):
@@ -30,90 +144,15 @@ class JobCreateSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         return Job.objects.create(employer=user.employer_profile, **validated_data)
 
-
-class EmployerSerializer(serializers.ModelSerializer):
-    workplace_images = serializers.ListField(
-        child=serializers.FileField(), write_only=True
-    )
-
-    class Meta:
-        model = Employer
-        fields = [
-            "company_name",
-            "logo_company",
-            "description",
-            "tax_code",
-            "workplace_images",
-        ]
-
-    def validate_workplace_images(self, value):
-        if not self.instance and len(value) < 3:
-            raise serializers.ValidationError("Cần ít nhất 3 ảnh mô tả môi trường làm việc!")
-        return value
-
-    def validate_logo_company(self, value):
-        size = 5 * pow(1024, 2)
-
-        if value.size > size:
-            raise serializers.ValidationError("Ảnh logo không được vượt quá 5MB !")
-        return value
-
-    def validate_tax_code(self, value):
-        qs = Employer.objects.filter(tax_code=value)
-        if self.instance:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise serializers.ValidationError("Mã số thuế này đã được đăng ký rồi!")
-        return value
-
-    def validate(self, attrs):
-        company_name = attrs.get("company_name")
-        logo_company = attrs.get("logo_company")
-        description = attrs.get("description")
-
-        if not validators.check_strip(company_name):
-            raise serializers.ValidationError(
-                {"company_name": "Tên công ty không được để trống!"}
-            )
-
-        if not logo_company and not self.instance:
-            raise serializers.ValidationError(
-                {"logo_company": "Vui lòng chọn logo cho công ty!!"}
-            )
-
-        if not validators.check_strip(description):
-            raise serializers.ValidationError(
-                {"description": "Vui lòng mô tả về công ty!"}
-            )
-        return attrs
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        request = self.context["request"]
-        if request and request.user and request.user.is_authenticated:
-            data["is_followed"] = instance.followers.filter(
-                candidate=request.user, active=True
-            ).exists()
-        if instance.logo_company:
-            data["logo_company"] = instance.logo_company.url
-        data["workplace_images"] = [img.image.url for img in instance.workplace_images.all()]
-        return data
-
     def create(self, validated_data):
         images = validated_data.pop("workplace_images")
-        user = self.context['request'].user
 
-        if Employer.objects.filter(user=user).exists():
-            raise serializers.ValidationError({"Lỗi": "Bạn đã đăng ký trở thành nhà tuyển dụng rồi!"})
         with transaction.atomic():
-            employer = Employer.objects.create(
-                user=self.context['request'].user,
-                **validated_data
-            )
-            WorkplaceImage.objects.bulk_create([
-                WorkplaceImage(employer=employer, image=img)
-                for img in images
-            ])
+            employer = super().create(validated_data)
+            arrImg = []
+            for img in images:
+                arrImg.append(img)
+            WorkplaceImage.objects.bulk_create(arrImg)
 
         return employer
 
@@ -139,7 +178,7 @@ class IndustrSerializer(serializers.ModelSerializer):
 class ApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
-        fields = ["job"]
+        fields = ["job", "cv_file"]
 
     def create(self, validated_data):
         validated_data["candidate"] = self.context["request"].user
@@ -147,12 +186,21 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
-    job = JobSerializer(read_only=True)
+    job = SimpleJobSerializer(read_only=True)
+    candidate = SimpleUserSerializer(read_only=True)
 
     class Meta:
         model = Application
-        fields = ["id", "job", "apply_date", "status"]
+        fields = ["id", "job", "candidate", "apply_date", "cv_file", "status"]
         read_only_fields = fields
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        if instance.cv_file:
+            data["cv_file"] = instance.cv_file.url
+
+        return data
 
 
 class ApplicationReviewSerializer(serializers.ModelSerializer):
@@ -172,16 +220,29 @@ class ApplicationReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     reply_count = serializers.IntegerField(read_only=True)
-    user = serializers.StringRelatedField()
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ["id", "user", "content", "parent", "created_at", "reply_count"]
-
+        fields = [
+            "id",
+            "user",
+            "content",
+            "parent",
+            "created_at",
+            "reply_count",
+        ]
         extra_kwargs = {
             "id": {"read_only": True},
             "created_at": {"read_only": True},
             "parent": {"required": False},
+        }
+
+    def get_user(self, obj):
+        return {
+            "id": obj.user.id,
+            "fullname": obj.user.get_full_name() or obj.user.username,
+            "avatar": obj.user.avatar.url if obj.user.avatar else None,
         }
 
     def validate_parent(self, value):
@@ -197,6 +258,11 @@ class CommentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Can't reply into this reply !")
 
         return value
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        job_id = self.context["job_id"]
+        return Comment.objects.create(job_id=job_id, user=user, **validated_data)
 
 
 # class JobNotificationSerializer(serializers.ModelSerializer):

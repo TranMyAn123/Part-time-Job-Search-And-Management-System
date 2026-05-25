@@ -20,7 +20,12 @@ class JobViewSet(
     generics.UpdateAPIView,
 ):
     queryset = Job.objects.filter(active=True)
-    permission_classes = [IsAuthenticatedOrReadOnly, IsEmployer, IsOwnerOrReadOnly]
+    pagination_class = ItemPaginator
+
+    def get_permissions(self):
+        if self.action == "comments":
+            return [IsAuthenticatedOrReadOnly()]
+        return [IsAuthenticatedOrReadOnly(), IsEmployer(), IsOwnerOrReadOnly()]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -29,23 +34,27 @@ class JobViewSet(
 
     def get_queryset(self):
         queryset = self.queryset
+        if not self.request.user.is_authenticated or self.request.user.role == "USER":
+            queryset = queryset.filter(status=Job.Status.OPENING)
+
         keyword = self.request.query_params.get("q")
         if keyword:
             fields = [
                 "title",
                 "employer__company_name",
                 "location",
-                "industry__name",
             ]
             q = search.create_search_query(keyword, fields)
             queryset = queryset.filter(q)
 
+        industry_name = self.request.query_params.get("industry_name")
+        if industry_name:
+            queryset = queryset.filter(industry__name__icontains=industry_name)
         min_salary = self.request.query_params.get("min_salary")
-        max_salary = self.request.query_params.get("max_salary")
-
         if min_salary:
             queryset = queryset.filter(salary_min__gte=min_salary)
 
+        max_salary = self.request.query_params.get("max_salary")
         if max_salary:
             queryset = queryset.filter(salary_max__lte=max_salary)
         return queryset
@@ -100,9 +109,30 @@ class JobViewSet(
         )
 
 
-class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView):
+class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView):
     queryset = Employer.objects.filter(is_verified=True)
     serializer_class = serializers.EmployerSerializer
+    pagination_class = ItemPaginator
+
+    def get_queryset(self):
+
+        qs = Employer.objects.filter(is_verified=True).annotate(
+            follow_count=Count("followers", distinct=True),
+            job_count=Count("jobs", distinct=True),
+        )
+
+        # user = self.request.user
+        # if user.is_authenticated:
+        #     qs = qs.annotate(
+        #         is_followed=Exists(
+        #             CompanyFollow.objects.filter(
+        #                 employer=OuterRef("pk"),
+        #                 candidate=user,
+        #                 active=True,
+        #             )
+        #         )
+        #     )
+        return qs.order_by("-follow_count")
 
     @action(methods=["post"], url_path="follow", detail=True)
     def follow(self, request, pk):
@@ -117,6 +147,27 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView):
         return Response(
             serializers.EmployerSerializer(
                 self.get_object(), context={"request": request}
+            ).data
+        )
+
+    @action(methods=["post"], url_path="self-jobs", detail=False)
+    def self_job(self, request):
+        jobs = Job.objects.select_related("employer", "industry").filter(
+            employer__user=request.user
+        )
+        return Response(serializers.JobSerializer(jobs, many=True).data)
+
+    @action(methods=["get"], detail=False, url_path="top-followed")
+    def top_followed(self, request):
+        employers = (
+            Employer.objects.filter(is_verified=True, followers__active=True)
+            .annotate(follow_count=Count("followers"))
+            .order_by("-follow_count")[:5]
+        )
+
+        return Response(
+            serializers.EmployerSerializer(
+                employers, many=True, context={"request": request}
             ).data
         )
 
@@ -156,7 +207,7 @@ class ApplicationViewSet(
         return serializers.ApplicationSerializer
 
     def get_queryset(self):
-        if getattr(self, 'swagger_fake_view', False):
+        if getattr(self, "swagger_fake_view", False):
             return Application.objects.none()
 
         user = self.request.user
@@ -172,4 +223,14 @@ class CommentViewSet(viewsets.ViewSet):
             .select_related("user")
             .order_by("created_at")
         )
-        return Response(serializers.CommentSerializer(replies, many=True).data)
+        p = CommentPaginator()
+
+        page = p.paginate_queryset(replies, request)
+        if page is not None:
+            serializer = serializers.CommentSerializer(page, many=True)
+            return p.get_paginated_response(serializer.data)
+
+        return Response(
+            serializers.CommentSerializer(replies, many=True).data,
+            status=status.HTTP_200_OK,
+        )
