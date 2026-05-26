@@ -2,6 +2,7 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from jobs import views as job_views
 from users import views as user_views
+from onlinejobapp import views
 
 router = DefaultRouter()
 
@@ -14,5 +15,8 @@ router.register("comments", job_views.CommentViewSet, basename="comments")
 # users app
 router.register("users", user_views.UserViewSet, basename="users")
 router.register("auth", user_views.AuthViewSet, basename="auth")
+
+# Chat realtime
+router.register("chat", views.ChatViewSet, basename="chat")
 
 urlpatterns = [path("", include(router.urls))]

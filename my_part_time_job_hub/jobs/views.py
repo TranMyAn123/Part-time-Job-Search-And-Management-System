@@ -191,13 +191,6 @@ class ApplicationViewSet(
             return serializers.ApplicationReviewSerializer
         return serializers.ApplicationSerializer
 
-    def get_queryset(self):
-        if getattr(self, "swagger_fake_view", False):
-            return Application.objects.none()
-
-        user = self.request.user
-        return Application.objects.filter(candidate=user)
-
 
 class CommentViewSet(viewsets.ViewSet):
     @action(methods=["get"], detail=True, url_path="replies")

@@ -223,3 +223,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
 TIME_ZONE = "Asia/Ho_Chi_Minh"
+
+
+FIREBASE_CREDENTIALS_PATH = BASE_DIR / "serviceAccountKey.json"
+FIREBASE_DATABASE_URL = "https://jobapp-eed63-default-rtdb.firebaseio.com"
