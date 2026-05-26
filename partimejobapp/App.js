@@ -8,6 +8,9 @@ import { MyUserContext } from "./configs/Contexts";
 import { MyUserReducer } from "./reducers/reducers";
 import { LinearGradient } from 'expo-linear-gradient';
 import Styles from "./styles/Styles";
+import { auth } from "./configs/Firebase";
+import { signInWithCustomToken } from "firebase/auth";
+
 // import Header from "./components/Header";
 import Home from "./screens/Home/Home";
 import Login from "./screens/User/Login";
@@ -22,6 +25,8 @@ import MyApplication from "./screens/MyApplication/MyApplication";
 import EmRegister from "./screens/Employer/EmRegister";
 import ApplicationDetail from "./screens/MyApplication/ApplicationDetail";
 import EmployerList from "./screens/Home/EmployerList";
+import { onAuthStateChanged } from "firebase/auth";
+import ChatScreen from "./screens/Chat/ChatScreen";
 
 const Stack = createNativeStackNavigator();
 const SearchStack = createNativeStackNavigator();
@@ -45,6 +50,7 @@ const SearchStackNavigator = () => {
     >
       <SearchStack.Screen name="SearchJob" component={SearchJob} />
       <SearchStack.Screen name="JobDetail" component={JobDetail} />
+      <SearchStack.Screen name="Chat" component={ChatScreen} />
     </SearchStack.Navigator>
   );
 };
@@ -122,6 +128,27 @@ const App = () => {
           const { data } = await Apis.get(endpoints['current-user'],
             { headers: { Authorization: `Bearer ${access_token}` } }
           );
+
+          if (!auth.currentUser) {
+            const firebaseToken = await Apis.get(endpoints['firebase-token'],
+              { headers: { Authorization: `Bearer ${access_token}` } }
+            );
+            try {
+              const credential = await signInWithCustomToken(
+                auth,
+                firebaseToken.data.firebase_token
+              );
+
+              console.log("SUCCESS");
+              console.log(credential.user);
+
+            } catch (e) {
+              console.log("ERROR");
+              console.log(e);
+              console.log(e.code);
+              console.log(e.message);
+            }
+          }
           dispatch({
             type: "LOGIN",
             payload: { ...data, access_token, refresh_token },
@@ -136,9 +163,17 @@ const App = () => {
                   refresh_token,
                 }
               );
-              const { userData } = await Apis.get(endpoints['current-user'],
-                { headers: { Authorization: `Bearer ${data.access_token}` } }
-              );
+              const [userData, firebaseToken] = await Promise.all([
+                Apis.get(endpoints['current-user'],
+                  { headers: { Authorization: `Bearer ${data.access_token}` } }
+                ),
+
+                Apis.get(endpoints['firebase-token'],
+                  { headers: { Authorization: `Bearer ${data.access_token}` } }
+                )
+              ]);
+
+              await signInWithCustomToken(auth, firebaseToken.data.firebase_token);
               dispatch({
                 type: "LOGIN",
                 payload: {
@@ -158,6 +193,7 @@ const App = () => {
     };
     loadUser();
   }, []);
+
   return (
     <MyUserContext.Provider value={[user, dispatch]}>
       <LinearGradient

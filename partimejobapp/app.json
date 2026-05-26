@@ -2,11 +2,12 @@
   "expo": {
     "name": "partimejobapp",
     "slug": "partimejobapp",
+    "scheme": "partimejobapp",
+    "owner": "trankhanha53",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",

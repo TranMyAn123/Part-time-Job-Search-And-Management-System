@@ -9,6 +9,9 @@ import { MyUserContext } from "../../configs/Contexts";
 import SocialLogin from "../../components/SocialLogin";
 import logo from "../../assets/logo.png";
 import UserStyles from "./Styles";
+import { signInWithCustomToken } from 'firebase/auth';
+import { auth } from '../../configs/Firebase';
+
 
 const Login = () => {
     const userInfo = [{
@@ -50,9 +53,11 @@ const Login = () => {
                     ...user,
                     'grant_type': 'password'
                 });
-                console.info(res.data);
-                let u = await authApis(res.data.access_token).get(endpoints['current-user']);
-                console.info(u.data);
+                const [u, firebaseToken] = await Promise.all([
+                    authApis(res.data.access_token).get(endpoints['current-user']),
+                    authApis(res.data.access_token).get(endpoints['firebase-token']),
+                ]);
+                signInWithCustomToken(auth, firebaseToken.data.firebase_token);
                 dispatch({
                     "type": "LOGIN",
                     payload: {

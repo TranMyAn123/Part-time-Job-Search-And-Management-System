@@ -12,12 +12,14 @@ export const endpoints = {
 
     'jobs': "/jobs/",
     'job': (jobID) => `/jobs/${jobID}/`,
-    'industries': "/industries",
+    'industries': "/industries/",
     'comments': (jobID) => `/jobs/${jobID}/comments/`,
     'replies': (commentID) => `/comments/${commentID}/replies/`,
     'applications': '/users/me/applications',
     'employers': "/employers/",
-    'follow': (employerID) => `/employers/${employerID}/follow/`
+    'follow': (employerID) => `/employers/${employerID}/follow/`,
+
+    'firebase-token': '/chat/firebase-token/'
 };
 
 export const authApis = (token) => {

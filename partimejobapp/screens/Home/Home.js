@@ -20,18 +20,28 @@ export default function App() {
     fetchEmployers()
     fetchJobs();
     fetchIndustries();
-  }, []);
+  }, [user]);
 
   const [employers, setEmployers] = useState([])
   const [loadingEmployers, setLoadingEmployers] = useState(false)
   const fetchEmployers = async () => {
     try {
       setLoadingEmployers(true);
-      const res = await authApis(user.access_token).get(endpoints["employers"]);
+      let res;
+      if (user?.access_token) {
+        res = await authApis(user.access_token)
+          .get(endpoints["employers"]);
+      } else {
+        res = await Apis.get(endpoints["employers"]);
+      }
       setEmployers(res.data.results?.slice(0, 5) ?? []);
     } catch (e) {
-      console.error(e?.response?.data?.detail ??
-        e?.response?.data?.message);
+      console.error(
+        e?.response?.data?.detail ||
+        e?.response?.data?.message ||
+        e.message ||
+        e
+      );
     } finally {
       setLoadingEmployers(false)
     }
@@ -54,7 +64,6 @@ export default function App() {
 
   const [industries, setIndustries] = useState([]);
   const [loadingIndustries, setLoadingIndustries] = useState(false);
-
 
   const fetchIndustries = async () => {
     setLoadingIndustries(true);
