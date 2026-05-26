@@ -11,6 +11,7 @@ from django.conf import settings
 from oauth2_provider.models import AccessToken, Application
 from jobs.serializers import ApplicationSerializer
 from jobs.models import Application as JobApplication
+from django.shortcuts import redirect
 
 # from google.auth.transport import requests
 
@@ -70,7 +71,9 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
             "-apply_date"
         )
         return Response(
-            ApplicationSerializer(applications, many=True).data,
+            ApplicationSerializer(
+                applications, many=True, context={"request": request}
+            ).data,
             status=status.HTTP_200_OK,
         )
 
@@ -153,41 +156,54 @@ class AuthViewSet(viewsets.ViewSet):
         except AuthenticationFailed as e:
             return Response({"message": e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=["post"], url_path="google/login", detail=False)
-    def google_login(self, request):
-        code = request.data.get("code")
+    @action(methods=["get"], url_path="google/login", detail=False)
+    def google_login_redirect(self, request):
+        url = auth_services.build_google_auth_url()
+        return redirect(url)
+
+    @action(methods=["get"], url_path="google/callback", detail=False)
+    def google_callback(self, request):
+        code = request.GET.get("code")
+
         if not code:
-            return Response(
-                {"error": "Code không tồn tại"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        access_token_from_google = auth_services.change_code_to_token("google", code)
+            return Response({"error": "Missing code"}, status=400)
 
-        if not access_token_from_google:
-            return Response(
-                {"Google's token not available !"}, status=status.HTTP_404_NOT_FOUND
-            )
+        token_data = auth_services.exchange_google_code(code)
 
-        data = auth_services.get_google_user(access_token_from_google)
+        if not token_data:
+            return Response({"error": "Token exchange failed"}, status=400)
+
+        access_token = token_data["access_token"]
+
+        user_info = auth_services.get_google_user(access_token)
+
+        if not user_info:
+            return Response({"error": "Cannot get user info"}, status=400)
+
         user, created = auth_services.create_user_from_social_login(
-            data.get("email"), data.get("given_name", ""), data.get("family_name", "")
+            user_info.get("email"),
+            user_info.get("given_name", ""),
+            user_info.get("family_name", ""),
         )
+
         app = Application.objects.first()
+
         if not app:
             return Response(
                 {"error": "OAuth application not configured"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        if AccessToken.objects.filter(user=user).exists():
-            return Response(
-                {"message": "Token available !"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        access_token, refresh_token = auth_services.create_token_from_social_login(
+        # Xóa token cũ nếu có thay vì báo lỗi
+        AccessToken.objects.filter(user=user).delete()
+
+        access_token_sys, refresh_token = auth_services.create_token_from_social_login(
             user, app
         )
-        return Response(
-            {"access_token": access_token, "refresh_token": refresh_token},
-            status=status.HTTP_200_OK,
+
+        return redirect(
+            f"partimejobapp://auth?"
+            f"access_token={access_token_sys}&refresh_token={refresh_token}"
         )
 
     @action(methods=["post"], url_path="facebook/login", detail=False)
