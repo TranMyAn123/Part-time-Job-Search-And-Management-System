@@ -1,69 +1,83 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import { Button } from "react-native-paper";
-import * as Google from 'expo-auth-session/providers/google';
-import * as Facebook from 'expo-auth-session/providers/facebook';
-import * as WebBrowser from 'expo-web-browser';
-import Styles from "../styles/Styles";
-import { Colors } from "../configs/Colors";
-import { endpoints } from "../configs/Apis";
+import { useContext, useEffect } from "react";
+import { MyUserContext } from "../configs/Contexts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Linking from "expo-linking";
 
-WebBrowser.maybeCompleteAuthSession();
 
 const SocialLogin = ({ onGoogleSuccess, onFacebookSuccess }) => {
-    const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-        clientId: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
-    });
+    const [, dispatch] = useContext(MyUserContext);
 
-    const [fbRequest, fbResponse, fbPromptAsync] = Facebook.useAuthRequest({
-        clientId: 'YOUR_FACEBOOK_APP_ID',
-    });
 
-    const handleGoogle = async () => {
-        try {
-            const result = await googlePromptAsync();
-            if (result.type === 'success') {
-                const { access_token } = result.params;
+    const loginGoogle = () => {
+        Linking.openURL("http://192.168.1.111:8000/auth/google/login");
+    };
 
-                let res = await Apis.post(endpoints['loginGg'], {
-                    'access_token': access_token
-                });
+    useEffect(() => {
+        const sub = Linking.addEventListener("url", async ({ url }) => {
+            const { queryParams } = Linking.parse(url);
 
-                await AsyncStorage.setItem('token', res.data.access_token);
+            const access_token = queryParams?.access_token;
+            const refresh_token = queryParams?.refresh_token;
 
-                let u = await authApis(res.data.access_token).get(endpoints['current-user']);
-                dispatchEvent({
-                    "type": "LOGIN",
-                    "payload": u.data
-                });
+            if (!access_token) {
+                console.error("Không lấy được access_token");
+                return;
             }
-        } catch (ex) {
-            console.error(ex);
-        }
-    }
+            try {
+                const tokens = {
+                    access_token,
+                    refresh_token
+                };
 
-    const handleFacebook = async () => {
-        try {
-            const result = await fbPromptAsync();
-            if (result.type === 'success') {
-                const { access_token } = result.params;
+                await AsyncStorage.setItem(
+                    "tokens",
+                    JSON.stringify(tokens)
+                );
 
-                let res = await Apis.post(endpoints['loginFb'], {
-                    'access_token': access_token
+                const u = await authApis(access_token)
+                    .get(endpoints["current-user"]);
+
+                dispatch({
+                    type: "LOGIN",
+                    payload: {
+                        ...u.data,
+                        ...tokens
+                    }
                 });
 
-                await AsyncStorage.setItem('token', res.data.access_token);
-
-                let u = await authApis(res.data.access_token).get(endpoints['current-user']);
-                dispatchEvent({
-                    "type": "LOGIN",
-                    "payload": u.data
-                });
+            } catch (err) {
+                console.error("Login error:", err);
             }
-        } catch (ex) {
-            console.error(ex);
-        }
-    }
+        });
+
+        return () => sub.remove();
+    }, []);
+
+    // const handleFacebook = async () => {
+    //     try {
+    //         const result = await fbPromptAsync(); // ✅ bỏ useProxy
+    //         if (result?.type === 'success') {
+    //             const access_token = result.authentication?.accessToken
+    //                 ?? result.params?.access_token;
+    //             if (!access_token) {
+    //                 console.error('Không lấy được Facebook access_token');
+    //                 return;
+    //             }
+    //             const res = await Apis.post(endpoints['loginFb'], { access_token });
+    //             await AsyncStorage.setItem('tokens', JSON.stringify({
+    //                 access_token: res.data.access_token,
+    //                 refresh_token: res.data.refresh_token,
+    //             }));
+    //             const u = await authApis(res.data.access_token).get(endpoints['current-user']);
+    //             dispatch({ type: 'LOGIN', payload: { ...u.data, ...res.data } });
+    //             onFacebookSuccess?.();
+    //         }
+    //     } catch (ex) {
+    //         console.error('Facebook login error:', ex);
+    //     }
+    // };
+
     return (
         <>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
@@ -73,19 +87,13 @@ const SocialLogin = ({ onGoogleSuccess, onFacebookSuccess }) => {
             </View>
 
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 20 }}>
-                {/* Google */}
                 <TouchableOpacity
-                    onPress={handleGoogle}
-                    disabled={!googleRequest}
+                    onPress={loginGoogle}
+                    // disabled={!googleRequest}
                     style={{
-                        width: 54,
-                        height: 54,
-                        borderRadius: 27,
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        borderWidth: 1,
-                        borderColor: 'black',
+                        width: 54, height: 54, borderRadius: 27,
+                        backgroundColor: 'white', justifyContent: 'center',
+                        alignItems: 'center', borderWidth: 1, borderColor: '#ddd',
                     }}>
                     <Image
                         source={{ uri: 'https://www.google.com/favicon.ico' }}
@@ -93,19 +101,13 @@ const SocialLogin = ({ onGoogleSuccess, onFacebookSuccess }) => {
                     />
                 </TouchableOpacity>
 
-                {/* Facebook */}
                 <TouchableOpacity
                     onPress={handleFacebook}
                     disabled={!fbRequest}
                     style={{
-                        width: 54,
-                        height: 54,
-                        borderRadius: 27,
-                        backgroundColor: '#0168f0',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        borderWidth: 1,
-                        borderColor: 'black',
+                        width: 54, height: 54, borderRadius: 27,
+                        backgroundColor: '#0168f0', justifyContent: 'center',
+                        alignItems: 'center', borderWidth: 1, borderColor: '#0168f0',
                     }}>
                     <Image
                         source={{ uri: 'https://www.facebook.com/favicon.ico' }}
@@ -115,5 +117,6 @@ const SocialLogin = ({ onGoogleSuccess, onFacebookSuccess }) => {
             </View>
         </>
     );
-}
+};
+
 export default SocialLogin;
