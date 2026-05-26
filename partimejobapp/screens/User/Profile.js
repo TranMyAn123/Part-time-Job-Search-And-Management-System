@@ -14,6 +14,13 @@ import UserStyles, { inputTheme } from "./Styles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+const SectionCard = ({ title, children }) => (
+    <View style={Styles.sectionCard}>
+        <Text style={Styles.sectionCardTitle}>{title}</Text>
+        {children}
+    </View>
+);
+
 const Profile = () => {
     const nav = useNavigation();
     const [err, setErr] = useState({});
@@ -86,7 +93,7 @@ const Profile = () => {
             setLoading(true);
             const token = await AsyncStorage.getItem('token');
             await authApis(token).delete(endpoints['employers']);
-            dispatch({ type: "LOGIN", payload: { ...user, is_employer: false } });
+            dispatch({ type: "LOGIN", payload: { ...user, employer: false } });
             setShowCancelModal(false);
         } catch (ex) {
             alert("Hủy yêu cầu thất bại!");
@@ -181,33 +188,76 @@ const Profile = () => {
     return (
         <ScrollView contentContainerStyle={[Styles.padding, Styles.gap]}>
             <View style={Styles.profileHeader} />
-            <TouchableOpacity onPress={picker} style={Styles.avatarPicker}>
+            <TouchableOpacity onPress={editing ? picker : undefined} activeOpacity={editing ? 0.7 : 1} style={Styles.avatarPicker}>
                 {user?.avatar
                     ? <Image source={{ uri: user?.avatar }} style={Styles.avatar} />
                     : <Image source={{ uri: 'https://res.cloudinary.com/duxz5ias9/image/upload/v1779191141/default_avatar_izym3f.png' }} style={Styles.avatar} />
                 }
             </TouchableOpacity>
 
-            <View style={{ marginHorizontal: 16, gap: 12, marginBottom: 16 }}>
-                {userInfo.map(i => (
-                    <Pressable
-                        key={i.field}
-                        onPress={() => i.field === 'dob' && editing && setShowDatePicker(true)}>
-                        <TextInput
-                            label={i.label}
-                            value={userEdit[i.field]}
-                            onChangeText={t => i.field !== 'dob' && setUserEdit({ ...userEdit, [i.field]: t })}
-                            mode="outlined" multiline={true}
-                            editable={editing && i.field !== 'dob'}
-                            style={[UserStyles.input, !editing && { opacity: 0.75 }]}
-                            contentStyle={UserStyles.inputContent}
-                            outlineStyle={UserStyles.outlineStyle}
-                            theme={inputTheme}
-                            left={<TextInput.Icon icon={i.icon} />}
-                            pointerEvents={i.field === 'dob' ? 'none' : 'auto'}
-                        />
-                    </Pressable>
-                ))}
+            <View style={{ paddingHorizontal: 16 }}>
+                <SectionCard title="Thông tin cơ bản">
+                    <View style={{ marginHorizontal: 16, gap: 12, marginBottom: 16 }}>
+                        {userInfo.slice(0, 3).map(i => (
+                            <Pressable
+                                key={i.field}
+                                onPress={() => i.field === 'dob' && editing && setShowDatePicker(true)}>
+                                <TextInput
+                                    label={i.label}
+                                    value={userEdit[i.field]}
+                                    onChangeText={t => i.field !== 'dob' && setUserEdit({ ...userEdit, [i.field]: t })}
+                                    mode="outlined" multiline={true}
+                                    editable={editing && i.field !== 'dob'}
+                                    style={[UserStyles.input, !editing && { opacity: 0.75 }]}
+                                    contentStyle={UserStyles.inputContent}
+                                    outlineStyle={UserStyles.outlineStyle}
+                                    theme={inputTheme}
+                                    left={<TextInput.Icon icon={i.icon} />}
+                                    pointerEvents={i.field === 'dob' ? 'none' : 'auto'}
+                                />
+                            </Pressable>
+                        ))}
+                        <Pressable onPress={() => editing && setShowDatePicker(true)}>
+                            <TextInput
+                                label="Ngày sinh"
+                                value={userEdit.dob}
+                                mode="outlined"
+                                editable={false}
+                                pointerEvents="none"
+                                style={[UserStyles.input, !editing && { opacity: 0.75 }]}
+                                contentStyle={UserStyles.inputContent}
+                                outlineStyle={UserStyles.outlineStyle}
+                                theme={inputTheme}
+                                left={<TextInput.Icon icon="calendar" />}
+                                right={<TextInput.Icon icon="chevron-down" />}
+                            />
+                        </Pressable>
+                    </View>
+                </SectionCard>
+
+                <SectionCard title="Thông tin liên hệ">
+                    <View style={{ marginHorizontal: 16, gap: 12, marginBottom: 16 }}>
+                        {userInfo.slice(3, 6).map(i => (
+                            <Pressable
+                                key={i.field}
+                                onPress={() => i.field === 'dob' && editing && setShowDatePicker(true)}>
+                                <TextInput
+                                    label={i.label}
+                                    value={userEdit[i.field]}
+                                    onChangeText={t => i.field !== 'dob' && setUserEdit({ ...userEdit, [i.field]: t })}
+                                    mode="outlined" multiline={true}
+                                    editable={editing && i.field !== 'dob'}
+                                    style={[UserStyles.input, !editing && { opacity: 0.75 }]}
+                                    contentStyle={UserStyles.inputContent}
+                                    outlineStyle={UserStyles.outlineStyle}
+                                    theme={inputTheme}
+                                    left={<TextInput.Icon icon={i.icon} />}
+                                    pointerEvents={i.field === 'dob' ? 'none' : 'auto'}
+                                />
+                            </Pressable>
+                        ))}
+                    </View>
+                </SectionCard>
 
                 {showDatePicker && (
                     <Modal transparent animationType="fade">
@@ -245,56 +295,53 @@ const Profile = () => {
             </View>
 
             {changingPassword && (
-                <View style={{ marginHorizontal: 16, gap: 12, marginBottom: 16 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
-                        <View style={{ flex: 1, height: 1, backgroundColor: '#ccc' }} />
-                        <Text style={{ marginHorizontal: 10, color: '#aaa', fontSize: 13 }}>Đổi mật khẩu</Text>
-                        <View style={{ flex: 1, height: 1, backgroundColor: '#ccc' }} />
+                <SectionCard title="Đổi mật khẩu">
+                    <View style={{ marginHorizontal: 16, gap: 12, marginBottom: 16 }}>
+
+                        {!!err.non_field_errors && (
+                            <HelperText type="error" visible={true}>
+                                {err.non_field_errors}
+                            </HelperText>
+                        )}
+
+                        {[
+                            { field: 'old_password', label: 'Mật khẩu cũ' },
+                            { field: 'new_password', label: 'Mật khẩu mới' },
+                            { field: 'confirm', label: 'Xác nhận mật khẩu mới' },
+                        ].map(i => (
+                            <View key={i.field}>
+                                <TextInput
+                                    label={i.label}
+                                    value={passwords[i.field]}
+                                    onChangeText={t => {
+                                        setPasswords({ ...passwords, [i.field]: t });
+                                        setErr({ ...err, [i.field]: '' });
+                                    }}
+                                    mode="outlined"
+                                    secureTextEntry
+                                    error={!!err[i.field]}
+                                    style={UserStyles.input}
+                                    contentStyle={UserStyles.inputContent}
+                                    outlineStyle={UserStyles.outlineStyle}
+                                    theme={inputTheme}
+                                    left={<TextInput.Icon icon="lock" />}
+                                />
+                                {!!err[i.field] && (
+                                    <HelperText type="error" visible={true} style={{ marginTop: 4 }}>
+                                        {err[i.field]}
+                                    </HelperText>
+                                )}
+                            </View>
+                        ))}
                     </View>
-
-                    {!!err.non_field_errors && (
-                        <HelperText type="error" visible={true}>
-                            {err.non_field_errors}
-                        </HelperText>
-                    )}
-
-                    {[
-                        { field: 'old_password', label: 'Mật khẩu cũ' },
-                        { field: 'new_password', label: 'Mật khẩu mới' },
-                        { field: 'confirm', label: 'Xác nhận mật khẩu mới' },
-                    ].map(i => (
-                        <View key={i.field}>
-                            <TextInput
-                                label={i.label}
-                                value={passwords[i.field]}
-                                onChangeText={t => {
-                                    setPasswords({ ...passwords, [i.field]: t });
-                                    setErr({ ...err, [i.field]: '' });
-                                }}
-                                mode="outlined"
-                                secureTextEntry
-                                error={!!err[i.field]}
-                                style={UserStyles.input}
-                                contentStyle={UserStyles.inputContent}
-                                outlineStyle={UserStyles.outlineStyle}
-                                theme={inputTheme}
-                                left={<TextInput.Icon icon="lock" />}
-                            />
-                            {!!err[i.field] && (
-                                <HelperText type="error" visible={true} style={{ marginTop: 4 }}>
-                                    {err[i.field]}
-                                </HelperText>
-                            )}
-                        </View>
-                    ))}
-                </View>
+                </SectionCard>
             )}
 
             <View style={{ flexDirection: 'row', marginHorizontal: 16, gap: 10, marginBottom: 12 }}>
                 <Button
                     compact
                     onPress={changingPassword ? () => setChangingPassword(false) : editing ? save : () => setEditing(true)}
-                    style={[Styles.button, { flex: 1, backgroundColor: changingPassword ? '#6b7280' : Colors.navy[700] }]}
+                    style={[Styles.button, { flex: 1, backgroundColor: changingPassword ? '#e53935' : Colors.navy[700] }]}
                     labelStyle={Styles.buttonLabel}
                     mode="contained">
                     {changingPassword ? 'Hủy' : editing ? 'Lưu' : 'Chỉnh sửa'}
@@ -310,7 +357,7 @@ const Profile = () => {
                             setChangingPassword(true);
                         }
                     }}
-                    style={[Styles.button, { flex: 1, backgroundColor: editing ? '#6b7280' : '#F97316' }]}
+                    style={[Styles.button, { flex: 1, backgroundColor: editing ? '#e53935' : '#F97316' }]}
                     labelStyle={Styles.buttonLabel}
                     mode="contained">
                     {editing ? 'Hủy' : 'Đổi mật khẩu'}
@@ -318,7 +365,7 @@ const Profile = () => {
             </View>
 
             <Button
-                onPress={() => !user?.is_employer && nav.navigate('emregister', { user: user })}
+                onPress={() => !user?.employer && nav.navigate('emregister', { user: user })}
                 disabled={!!user?.employer}
                 style={[Styles.margin, Styles.button, { backgroundColor: user?.employer ? '#6b7280' : Colors.navy[500] }]}
                 labelStyle={Styles.buttonLabel}
