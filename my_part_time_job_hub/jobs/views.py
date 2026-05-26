@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics, permissions, status
+from rest_framework import viewsets, generics, permissions, status, request
 from rest_framework.response import Response
 from jobs import serializers
 from jobs.models import Job, Application, Comment, Employer, Industry, CompanyFollow
@@ -171,6 +171,21 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
             ).data
         )
 
+    @action(methods=["get", "patch"], url_path="profile", detail=False)
+    def profile(self, request):
+        employer = Employer.objects.get(user=request.user)
+
+        if request.method == "PATCH":
+            serializer = serializers.EmployerSerializer(
+                employer, data=request.data, partial=True, context={"request": request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(
+            serializers.EmployerSerializer(employer, context={"request": request}).data
+        )
 
 class IndustryViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Industry.objects.filter(active=True)

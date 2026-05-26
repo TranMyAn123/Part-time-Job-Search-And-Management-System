@@ -27,6 +27,8 @@ import ApplicationDetail from "./screens/MyApplication/ApplicationDetail";
 import EmployerList from "./screens/Home/EmployerList";
 import { onAuthStateChanged } from "firebase/auth";
 import ChatScreen from "./screens/Chat/ChatScreen";
+import EmProfile from "./screens/Employer/EmProfile";
+import AddJob from "./screens/Employer/AddJob";
 
 const Stack = createNativeStackNavigator();
 const SearchStack = createNativeStackNavigator();
@@ -107,6 +109,9 @@ const TabNavigator = () => {
       {user === null ? <>
         <Tab.Screen name="login" component={Login} options={{ title: 'Đăng nhập', tabBarIcon: () => <Icon source="account" size={30} /> }} />
         <Tab.Screen name="register" component={Register} options={{ title: 'Đăng ký', tabBarIcon: () => <Icon source="account-plus" size={30} /> }} />
+      </> : user.role === 'EMPLOYER' ? <>
+        <Tab.Screen name="addjob" component={AddJob} options={{ title: 'Đăng tin tuyển dụng', tabBarIcon: () => <Icon source="plus-box" size={30} /> }} />
+        <Tab.Screen name="emprofile" component={EmProfile} options={{ title: 'Thông tin công ty', tabBarIcon: () => <Icon source="office-building" size={30} /> }} />
       </> : <>
         <Tab.Screen name="profiles" component={ProfileStackNavigator} options={{ title: 'Thông tin cá nhân', tabBarIcon: () => <Icon source="account" size={30} /> }} />
       </>}
