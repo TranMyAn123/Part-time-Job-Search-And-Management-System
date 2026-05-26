@@ -131,7 +131,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "job_db",
         "USER": "root",
-        "PASSWORD": "35715982",
+        "PASSWORD": "root",
         "HOST": "",
     }
 }
