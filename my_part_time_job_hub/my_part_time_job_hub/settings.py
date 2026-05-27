@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 # from django.conf.global_settings import AUTH_USER_MODEL
 
 
@@ -126,13 +129,25 @@ import pymysql
 
 pymysql.version_info = (2, 2, 1, "final", 0)
 pymysql.install_as_MySQLdb()
+# Local
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "job_db",
+#         "USER": "root",
+#         "PASSWORD": "root",
+#         "HOST": "",
+#     }
+# }
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "job_db",
-        "USER": "root",
-        "PASSWORD": "root",
-        "HOST": "",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
     }
 }
 
@@ -146,10 +161,6 @@ cloudinary.config(
     api_secret="M7cWBMgvKH0VG5S__EZyOwOTac4",
 )
 
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -192,6 +203,7 @@ CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
 # Config log để bắt lỗi
 # LOGGING = {

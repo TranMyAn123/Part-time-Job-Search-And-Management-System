@@ -6,6 +6,8 @@ from django.utils import timezone
 from django.conf import settings
 from datetime import timedelta
 from oauthlib.common import generate_token
+import urllib.parse
+import os
 
 
 def logout(token):
@@ -22,34 +24,36 @@ def logout(token):
     return {"message": "Đăng xuất thành công!"}
 
 
+def build_google_auth_url():
+    base_url = "https://accounts.google.com/o/oauth2/v2/auth"
+    print(settings.GOOGLE_REDIRECT_URI)
+    params = {
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "select_account",
+    }
+    return f"{base_url}?{urllib.parse.urlencode(params)}"
+
+
 # services/google.py
-def change_code_to_token(provider, code, redirect_uri):
-    if provider == "google":
-        response = requests.post(
-            "https://oauth2.googleapis.com/token",
-            data={
-                "code": code,
-                "client_id": settings.GOOGLE_CLIENT_ID,
-                "client_secret": settings.GOOGLE_CLIENT_SECRET,
-                "redirect_uri": redirect_uri,
-                "grant_type": "authorization_code",
-            },
-        )
+def exchange_google_code(code):
+    response = requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "code": code,
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "client_secret": settings.GOOGLE_CLIENT_SECRET,
+            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            "grant_type": "authorization_code",
+        },
+    )
+    print("Exchange response:", response.status_code, response.json())  # thêm dòng này
 
-    elif provider == "facebook":
-        response = requests.get(
-            "https://graph.facebook.com/v22.0/oauth/access_token",
-            params={
-                "client_id": settings.FACEBOOK_APP_ID,
-                "client_secret": settings.FACEBOOK_APP_SECRET,
-                "redirect_uri": redirect_uri,
-                "code": code,
-            },
-        )
-
-    else:
-        raise Exception("Provider không hợp lệ")
-
+    if response.status_code != 200:
+        return None
     return response.json()
 
 

@@ -11,9 +11,8 @@ from django.conf import settings
 from oauth2_provider.models import AccessToken, Application
 from jobs.serializers import ApplicationSerializer
 from jobs.models import Application as JobApplication
+from django.http import HttpResponse
 from django.shortcuts import redirect
-
-# from google.auth.transport import requests
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
@@ -164,14 +163,18 @@ class AuthViewSet(viewsets.ViewSet):
     @action(methods=["get"], url_path="google/callback", detail=False)
     def google_callback(self, request):
         code = request.GET.get("code")
-
+        print(code)
         if not code:
-            return Response({"error": "Missing code"}, status=400)
+            return Response(
+                {"error": "Missing code"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         token_data = auth_services.exchange_google_code(code)
 
         if not token_data:
-            return Response({"error": "Token exchange failed"}, status=400)
+            return Response(
+                {"error": "Token exchange failed"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         access_token = token_data["access_token"]
 
@@ -200,22 +203,23 @@ class AuthViewSet(viewsets.ViewSet):
         access_token_sys, refresh_token = auth_services.create_token_from_social_login(
             user, app
         )
-
-        return redirect(
-            f"partimejobapp://auth?"
-            f"access_token={access_token_sys}&refresh_token={refresh_token}"
+        return HttpResponse(
+            status=status.HTTP_302_FOUND,
+            headers={
+                "Location": f"partimejobapp://auth?access_token={access_token_sys}&refresh_token={refresh_token}"
+            },
         )
 
-    @action(methods=["post"], url_path="facebook/login", detail=False)
-    def facebook_login(self, request):
-        code = request.data.get("code")
+    # @action(methods=["post"], url_path="facebook/login", detail=False)
+    # def facebook_login(self, request):
+    #     code = request.data.get("code")
 
-        if not code:
-            return Response({"error": "Code không tồn tại"}, status=400)
-        access_token_from_facebook = auth_services.change_code_to_token(
-            "facebook", code
-        )
-        if not access_token_from_facebook:
-            return Response(
-                {"Token của google chưa tồn tại"}, status=status.HTTP_404_NOT_FOUND
-            )
+    #     if not code:
+    #         return Response({"error": "Code không tồn tại"}, status=400)
+    #     access_token_from_facebook = auth_services.change_code_to_token(
+    #         "facebook", code
+    #     )
+    #     if not access_token_from_facebook:
+    #         return Response(
+    #             {"Token của google chưa tồn tại"}, status=status.HTTP_404_NOT_FOUND
+    #         )
