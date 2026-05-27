@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -225,3 +224,4 @@ venv/
 db.sqlite3
 my_part_time_job_hub/errors.log
 my_part_time_job_hub/.env
+my_part_time_job_hub/serviceAccountKey.json

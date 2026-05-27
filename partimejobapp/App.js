@@ -121,7 +121,6 @@ const TabNavigator = () => {
 
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null);
-
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -139,6 +138,11 @@ const App = () => {
               { headers: { Authorization: `Bearer ${access_token}` } }
             );
             try {
+              console.log("Firebase token:", firebaseToken)
+              const token = firebaseToken.data.firebase_token;
+              console.log("Token type:", typeof token);
+              console.log("Token length:", token.length);
+              console.log("Token preview:", token.substring(0, 50));
               const credential = await signInWithCustomToken(
                 auth,
                 firebaseToken.data.firebase_token
@@ -177,7 +181,6 @@ const App = () => {
                   { headers: { Authorization: `Bearer ${data.access_token}` } }
                 )
               ]);
-
               await signInWithCustomToken(auth, firebaseToken.data.firebase_token);
               dispatch({
                 type: "LOGIN",

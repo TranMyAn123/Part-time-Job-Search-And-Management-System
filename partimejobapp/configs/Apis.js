@@ -20,16 +20,13 @@ export const endpoints = {
     'follow': (employerID) => `/employers/${employerID}/follow/`,
 
     'firebase-token': '/chat/firebase-token/',
-
-    'follow': (employerID) => `/employers/${employerID}/follow/`,
     'employers-profile': "/employers/profile/",
     'add-job': "/jobs/",
-    'industries': "/industries/",
 };
 
 export const authApis = (token) => {
     return axios.create({
-        baseURL: "http://192.168.1.14:8000/",
+        baseURL: "https://part-time-job-app-production.up.railway.app",
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -37,7 +34,7 @@ export const authApis = (token) => {
 }
 
 export default axios.create({
-    baseURL: "http://192.168.1.14:8000/",
+    baseURL: "https://part-time-job-app-production.up.railway.app",
 });
 
 

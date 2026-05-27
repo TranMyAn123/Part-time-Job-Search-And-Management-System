@@ -30,7 +30,7 @@ MEDIA_ROOT = BASE_DIR / "onlinejobapp/media/"
 SECRET_KEY = "django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "192.168.1.14",
@@ -39,6 +39,11 @@ ALLOWED_HOSTS = [
     "0.0.0.0",
     "192.168.1.111",
     "172.24.248.51",
+    "part-time-job-app-production.up.railway.app",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://part-time-job-app-production.up.railway.app",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -96,6 +101,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 
@@ -197,6 +203,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 CLIENT_KEY = os.getenv("CLIENT_KEY")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
@@ -204,6 +212,8 @@ CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
+
+INTERNAL_BASE_URL = os.environ.get("INTERNAL_BASE_URL", "http://localhost:8000")
 
 # Config log để bắt lỗi
 # LOGGING = {

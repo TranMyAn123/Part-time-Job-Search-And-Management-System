@@ -53,11 +53,19 @@ const Login = () => {
                     ...user,
                     'grant_type': 'password'
                 });
-                const [u, firebaseToken] = await Promise.all([
+
+                // Gọi song song 2 API lấy thông tin user và lấy firebase token
+                const [u, firebaseTokenResponse] = await Promise.all([
                     authApis(res.data.access_token).get(endpoints['current-user']),
                     authApis(res.data.access_token).get(endpoints['firebase-token']),
                 ]);
-                signInWithCustomToken(auth, firebaseToken.data.firebase_token);
+
+                // CHÚ Ý SỬA TẠI ĐÂY: Bóc tách chính xác chuỗi token từ Axios Response
+                const tokenThucTe = firebaseTokenResponse.data.firebase_token;
+                await signInWithCustomToken(auth, tokenThucTe);
+
+
+                // Cập nhật State Login cho ứng dụng
                 dispatch({
                     "type": "LOGIN",
                     payload: {
@@ -68,6 +76,7 @@ const Login = () => {
                 });
             } catch (ex) {
                 setErr({ api: ex.response?.data?.error_description || ex.message || "Đăng nhập thất bại!" });
+                console.log(ex);
             } finally {
                 setLoading(false);
             }

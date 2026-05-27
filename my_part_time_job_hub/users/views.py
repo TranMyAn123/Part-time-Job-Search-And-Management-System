@@ -13,6 +13,9 @@ from jobs.serializers import ApplicationSerializer
 from jobs.models import Application as JobApplication
 from django.http import HttpResponse
 from django.shortcuts import redirect
+import json
+from django.test import RequestFactory
+from oauth2_provider.views import TokenView
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
@@ -110,8 +113,6 @@ class AuthViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             validated_data = serializer.validated_data
 
-            token_url = request.build_absolute_uri("/o/token/")
-
             data_send_oauth = {
                 "grant_type": "password",
                 "username": validated_data["username"],
@@ -120,15 +121,21 @@ class AuthViewSet(viewsets.ViewSet):
                 "client_secret": settings.CLIENT_SECRET,
             }
 
-            response = requests.post(token_url, json=data_send_oauth)
-
-            if response.status_code == 200:
+            factory = RequestFactory()
+            internal_request = factory.post(
+                "/o/token/",
+                data=json.dumps(data_send_oauth),
+                content_type="application/json",
+            )
+            token_response = TokenView.as_view()(internal_request)
+            token_data = json.loads(token_response.content)
+            if token_response.status_code == 200:
                 user = validated_data.get("user")
                 if user:
                     user.last_login = timezone.now()
                     user.save(update_fields=["last_login"])
 
-            return Response(response.json(), status=status.HTTP_200_OK)
+            return Response(token_data, status=status.HTTP_200_OK)
         except AuthenticationFailed as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -203,23 +210,44 @@ class AuthViewSet(viewsets.ViewSet):
         access_token_sys, refresh_token = auth_services.create_token_from_social_login(
             user, app
         )
-        return HttpResponse(
-            status=status.HTTP_302_FOUND,
-            headers={
-                "Location": f"partimejobapp://auth?access_token={access_token_sys}&refresh_token={refresh_token}"
-            },
+        deep_link = (
+            f"partimejobapp://oauth"
+            f"?access_token={access_token_sys}"
+            f"&refresh_token={refresh_token}"
         )
 
-    # @action(methods=["post"], url_path="facebook/login", detail=False)
-    # def facebook_login(self, request):
-    #     code = request.data.get("code")
+        html = f"""
+        <html>
+            <head>
+                <title>Redirecting...</title>
+            </head>
+            <body>
+                <script>
+                    window.location.href = "{deep_link}";
+                </script>
 
-    #     if not code:
-    #         return Response({"error": "Code không tồn tại"}, status=400)
-    #     access_token_from_facebook = auth_services.change_code_to_token(
-    #         "facebook", code
-    #     )
-    #     if not access_token_from_facebook:
-    #         return Response(
-    #             {"Token của google chưa tồn tại"}, status=status.HTTP_404_NOT_FOUND
-    #         )
+                <p>Redirecting to app...</p>
+
+                <a href="{deep_link}">
+                    Open App
+                </a>
+            </body>
+        </html>
+        """
+
+        return HttpResponse(html)
+
+
+# @action(methods=["post"], url_path="facebook/login", detail=False)
+# def facebook_login(self, request):
+#     code = request.data.get("code")
+
+#     if not code:
+#         return Response({"error": "Code không tồn tại"}, status=400)
+#     access_token_from_facebook = auth_services.change_code_to_token(
+#         "facebook", code
+#     )
+#     if not access_token_from_facebook:
+#         return Response(
+#             {"Token của google chưa tồn tại"}, status=status.HTTP_404_NOT_FOUND
+#         )

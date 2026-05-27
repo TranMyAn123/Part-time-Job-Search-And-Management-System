@@ -9,6 +9,8 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 export default function Header({ user }) {
+
+    const getFullName = user?.last_name + " " + user?.first_name
     const navigation = useNavigation();
 
     const greeting = () => {
@@ -41,7 +43,7 @@ export default function Header({ user }) {
                 </Text>
 
                 <Text style={styles.headerTitle}>
-                    {user ? user.full_name || user.username : "Khách"}
+                    {user ? getFullName || user.username : "Khách"}
                 </Text>
 
                 <Text style={styles.headerSub}>
@@ -63,7 +65,7 @@ export default function Header({ user }) {
                 ) : (
                     <Text style={styles.avatarText}>
                         {user
-                            ? getInitials(user.full_name || user.username)
+                            ? getInitials(getFullName || user.username)
                             : "?"}
                     </Text>
                 )}
