@@ -68,7 +68,7 @@ class JobViewSet(
     @action(methods=["get"], url_path="applications", detail=True)
     def applications(self, request, pk):
         job = self.get_object()
-        applications = job.application.select_related("candidate").all()
+        applications = job.applications.select_related("candidate").all()
 
         return Response(
             serializers.ApplicationSerializer(applications, many=True).data,
@@ -134,6 +134,11 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
         #     )
         return qs.order_by("-follow_count")
 
+    def get_permissions(self):
+        if self.action in ["profile", "follow", "self_job", "applications"]:
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
     @action(methods=["post"], url_path="follow", detail=True)
     def follow(self, request, pk):
         fl, created = CompanyFollow.objects.get_or_create(
@@ -150,12 +155,12 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
             ).data
         )
 
-    @action(methods=["post"], url_path="self-jobs", detail=False)
+    @action(methods=["get","post"], url_path="self-jobs", detail=False)
     def self_job(self, request):
         jobs = Job.objects.select_related("employer", "industry").filter(
             employer__user=request.user
         )
-        return Response(serializers.JobSerializer(jobs, many=True).data)
+        return Response(serializers.JobSerializer(jobs, many=True, context={"request": request}).data)
 
     @action(methods=["get"], detail=False, url_path="top-followed")
     def top_followed(self, request):
@@ -211,6 +216,8 @@ class ApplicationViewSet(
             return Application.objects.none()
 
         user = self.request.user
+        if user.role == "EMPLOYER":
+            return Application.objects.filter(job__employer__user=user)
         return Application.objects.filter(candidate=user)
 
 

@@ -50,9 +50,8 @@ const Login = () => {
                     ...user,
                     'grant_type': 'password'
                 });
-                console.info(res.data);
                 let u = await authApis(res.data.access_token).get(endpoints['current-user']);
-                console.info(u.data);
+                await AsyncStorage.setItem('token', res.data.access_token);
                 dispatch({
                     "type": "LOGIN",
                     payload: {
@@ -62,7 +61,12 @@ const Login = () => {
                     },
                 });
             } catch (ex) {
-                setErr({ api: ex.response?.data?.error_description || ex.message || "Đăng nhập thất bại!" });
+                const httpStatus = ex.response?.status;
+                let msg = "Đăng nhập thất bại!";
+                if (httpStatus === 400 || httpStatus === 401) {
+                    msg = "Sai tên đăng nhập hoặc mật khẩu!";
+                }
+                setErr({ api: msg });
             } finally {
                 setLoading(false);
             }

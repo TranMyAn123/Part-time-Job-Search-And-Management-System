@@ -76,7 +76,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        request = self.context["request"]
+        request = self.context.get("request")
         if request and request.user and request.user.is_authenticated:
             data["is_followed"] = instance.followers.filter(
                 candidate=request.user, active=True
@@ -90,6 +90,29 @@ class EmployerSerializer(serializers.ModelSerializer):
         data["workplace_images"] = [img.image.url for img in instance.workplace_images.all()]
         return data
 
+    def create(self, validated_data):
+        images = validated_data.pop("workplace_images")
+
+        with transaction.atomic():
+            employer = super().create(validated_data)
+            WorkplaceImage.objects.bulk_create([
+                WorkplaceImage(employer=employer, image=img)  # ← phải tạo object
+                for img in images
+            ])
+        return employer
+
+    def update(self, instance, validated_data):
+        images = validated_data.pop("workplace_images", None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if images:
+            instance.workplace_images.all().delete()
+            WorkplaceImage.objects.bulk_create([
+                WorkplaceImage(employer=instance, image=img)
+                for img in images
+            ])
+        return instance
 
 class SimpleJobSerializer(serializers.ModelSerializer):
     employer = EmployerSerializer(read_only=True)
@@ -110,7 +133,6 @@ class SimpleJobSerializer(serializers.ModelSerializer):
 
     def get_industry(self, obj):
         return obj.industry.name if obj.industry else None
-
 
 class JobSerializer(serializers.ModelSerializer):
     employer = EmployerSerializer(read_only=True)
@@ -143,31 +165,6 @@ class JobCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context["request"].user
         return Job.objects.create(employer=user.employer_profile, **validated_data)
-
-    def create(self, validated_data):
-        images = validated_data.pop("workplace_images")
-
-        with transaction.atomic():
-            employer = super().create(validated_data)
-            arrImg = []
-            for img in images:
-                arrImg.append(img)
-            WorkplaceImage.objects.bulk_create(arrImg)
-
-        return employer
-
-    def update(self, instance, validated_data):
-        images = validated_data.pop("workplace_images", None)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        if images:
-            instance.workplace_images.all().delete()
-            WorkplaceImage.objects.bulk_create([
-                WorkplaceImage(employer=instance, image=img)
-                for img in images
-            ])
-        return instance
 
 class IndustrSerializer(serializers.ModelSerializer):
     class Meta:

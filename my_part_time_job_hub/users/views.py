@@ -9,8 +9,9 @@ from users.services import auth_services
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
 from django.conf import settings
 from oauth2_provider.models import AccessToken, Application
-from jobs.serializers import ApplicationSerializer
-from jobs.models import Application as JobApplication
+from jobs.serializers import ApplicationSerializer, EmployerSerializer
+from jobs.models import Application as JobApplication, CompanyFollow
+from django.db.models import Count
 
 # from google.auth.transport import requests
 
@@ -74,6 +75,24 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
             status=status.HTTP_200_OK,
         )
 
+    @action(
+        methods=["get"],
+        url_path="me/follows",
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def follows(self, request):
+        followed = CompanyFollow.objects.filter(
+            candidate=request.user, active=True
+        ).select_related("employer__user").annotate(
+            follow_count=Count("employer__followers"),
+            job_count=Count("employer__jobs"),
+        )
+        employers = [f.employer for f in followed]
+        return Response(
+            EmployerSerializer(employers, many=True, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
 
 class AuthViewSet(viewsets.ViewSet):
     @action(

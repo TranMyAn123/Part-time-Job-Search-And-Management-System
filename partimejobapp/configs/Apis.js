@@ -9,23 +9,25 @@ export const endpoints = {
     'register': "/auth/register/",
     'current-user': "/users/me/",
     'change-password': "/users/me/change_password/",
-
     'jobs': "/jobs/",
     'job': (jobID) => `/jobs/${jobID}/`,
-    'industries': "/industries",
+    'industries': "/industries/",
     'comments': (jobID) => `/jobs/${jobID}/comments/`,
     'replies': (commentID) => `/comments/${commentID}/replies/`,
-    'applications': '/users/me/applications',
+    'applications': '/users/me/applications/',
     'employers': "/employers/",
-    'follow': (employerID) => `/employers/${employerID}/follow/`
+    'follow': (employerID) => `/employers/${employerID}/follow/`,
     'employers-profile': "/employers/profile/",
-    'add-job': "/jobs/",
-    'industries': "/industries/",
+    'self-jobs': "/employers/self-jobs/",
+    'job-applications': (jobID) => `/jobs/${jobID}/applications/`,
+    'application-detail': (id) => `/applications/${id}/`,
+    'applications': "/applications/",
+    'my-follows': '/users/me/follows/',
 };
 
 export const authApis = (token) => {
     return axios.create({
-        baseURL: "http://192.168.1.14:8000/",
+        baseURL: "http://192.168.1.10:8000/",
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -33,7 +35,7 @@ export const authApis = (token) => {
 }
 
 export default axios.create({
-    baseURL: "http://192.168.1.14:8000/",
+    baseURL: "http://192.168.1.10:8000/",
 });
 
 

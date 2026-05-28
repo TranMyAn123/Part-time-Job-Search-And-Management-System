@@ -24,6 +24,10 @@ import ApplicationDetail from "./screens/MyApplication/ApplicationDetail";
 import EmployerList from "./screens/Home/EmployerList";
 import EmProfile from "./screens/Employer/EmProfile";
 import AddJob from "./screens/Employer/AddJob";
+import EmJob from "./screens/Employer/EmJob";
+import JobApplication from "./screens/Employer/JobApplication";
+import EmJobDetail from "./screens/Employer/EmJobDetail";
+import ApplyJob from "./screens/Job_Detail/ApplyJob";
 
 const Stack = createNativeStackNavigator();
 const SearchStack = createNativeStackNavigator();
@@ -47,6 +51,7 @@ const SearchStackNavigator = () => {
     >
       <SearchStack.Screen name="SearchJob" component={SearchJob} />
       <SearchStack.Screen name="JobDetail" component={JobDetail} />
+      <SearchStack.Screen name="ApplyJob" component={ApplyJob} />
     </SearchStack.Navigator>
   );
 };
@@ -56,7 +61,6 @@ const ApplicationStackNavigator = () => {
     <ApplicationStack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "transparent" } }}>
       <ApplicationStack.Screen name="MyApplications" component={MyApplication} />
       <ApplicationStack.Screen name="ApplicationDetail" component={ApplicationDetail} />
-
     </ApplicationStack.Navigator>
   )
 }
@@ -70,6 +74,17 @@ const ProfileStackNavigator = () => {
   );
 }
 
+const EmployerJobStack = createNativeStackNavigator();
+const EmployerJobStackNavigator = () => {
+  return (
+    <EmployerJobStack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+      <EmployerJobStack.Screen name="emjob" component={EmJob} />
+      <EmployerJobStack.Screen name="jobapplication" component={JobApplication} />
+      <EmployerJobStack.Screen name="emjobdetail" component={EmJobDetail} />
+    </EmployerJobStack.Navigator>
+  );
+}
+
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
@@ -77,8 +92,7 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator sceneContainerStyle={{ backgroundColor: 'transparent' }}>
-      <Tab.Screen name="home" component={StackNavigator} options={{ title: 'Trang chủ', tabBarIcon: () => <Icon source="home" size={30} /> }} />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="search"
         component={SearchStackNavigator}
         options={{
@@ -98,16 +112,22 @@ const TabNavigator = () => {
             <Icon source="file-document-outline" size={30} />
           ),
         }}
-      />
+      /> */}
 
-      {user === null ? <>
-        <Tab.Screen name="login" component={Login} options={{ title: 'Đăng nhập', tabBarIcon: () => <Icon source="account" size={30} /> }} />
-        <Tab.Screen name="register" component={Register} options={{ title: 'Đăng ký', tabBarIcon: () => <Icon source="account-plus" size={30} /> }} />
-      </> : user.role === 'EMPLOYER' ? <>
+      {user?.role === 'EMPLOYER' ? <>
+        <Tab.Screen name="jobs" component={EmployerJobStackNavigator} options={{ title: 'Tin tuyển dụng', tabBarIcon: () => <Icon source="briefcase-outline" size={30} /> }} />
         <Tab.Screen name="addjob" component={AddJob} options={{ title: 'Đăng tin tuyển dụng', tabBarIcon: () => <Icon source="plus-box" size={30} /> }} />
-        <Tab.Screen name="emprofile" component={EmProfile} options={{ title: 'Thông tin công ty', tabBarIcon: () => <Icon source="office-building" size={30} /> }} />
+        <Tab.Screen name="emprofile" component={EmProfile} options={{ title: 'Thông tin', tabBarIcon: () => <Icon source="office-building" size={30} /> }} />
       </> : <>
-        <Tab.Screen name="profiles" component={ProfileStackNavigator} options={{ title: 'Thông tin cá nhân', tabBarIcon: () => <Icon source="account" size={30} /> }} />
+        <Tab.Screen name="home" component={StackNavigator} options={{ title: 'Trang chủ', tabBarIcon: () => <Icon source="home" size={30} /> }} />
+        <Tab.Screen name="search" component={SearchStackNavigator} options={{ title: 'Tìm việc', tabBarIcon: () => <Icon source="magnify" size={30} /> }} />
+        <Tab.Screen name="application" component={ApplicationStackNavigator} options={{ title: 'Hồ sơ đã nộp', tabBarIcon: () => <Icon source="file-document-outline" size={30} /> }} />
+        {user === null ? <>
+          <Tab.Screen name="login" component={Login} options={{ title: 'Đăng nhập', tabBarIcon: () => <Icon source="account" size={30} /> }} />
+          <Tab.Screen name="register" component={Register} options={{ title: 'Đăng ký', tabBarIcon: () => <Icon source="account-plus" size={30} /> }} />
+        </> :
+          <Tab.Screen name="profiles" component={ProfileStackNavigator} options={{ title: 'Thông tin cá nhân', tabBarIcon: () => <Icon source="account" size={30} /> }} />
+        }
       </>}
     </Tab.Navigator>
   );

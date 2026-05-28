@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -22,7 +22,8 @@ import {
     parseRequirements,
     benefitIcon
 } from "./Helpers";
-import Apis, { endpoints } from "../../configs/Apis";
+import Apis, { authApis, endpoints } from "../../configs/Apis";
+import { MyUserContext } from "../../configs/Contexts";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function SectionTitle({ title, color }) {
@@ -85,6 +86,19 @@ export default function JobDetail({ navigation, route }) {
     const [saved, setSaved] = useState(false);
     const [applied, setApplied] = useState(false);
     const [loading, setLoading] = useState(false)
+    const [user] = useContext(MyUserContext);
+
+    useEffect(() => {
+        if (!user || !job) return;
+        const checkApplied = async () => {
+            try {
+                const res = await authApis(user.access_token).get(endpoints['applications']);
+                const already = res.data.some(app => app.job?.id === job.id);
+                setApplied(already);
+            } catch (e) { }
+        };
+        checkApplied();
+    }, [job]);
 
     useEffect(() => {
         if (passedJob) return;
@@ -333,10 +347,10 @@ export default function JobDetail({ navigation, route }) {
                     style={[
                         styles.ctaApply,
                         { backgroundColor: applied ? "#16A34A" : color },
-                        !isOpening && styles.ctaDisabled,
+                        (!isOpening || applied) && styles.ctaDisabled,
                     ]}
-                    onPress={() => isOpening && setApplied(true)}
-                    disabled={!isOpening}
+                    onPress={() => isOpening && !applied && navigation.navigate("ApplyJob", { job })}
+                    disabled={!isOpening || applied}
                 >
                     <Icon
                         source={applied ? "check-circle" : "send"}

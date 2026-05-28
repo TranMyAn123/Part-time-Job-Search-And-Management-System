@@ -46,8 +46,9 @@ const EmProfile = () => {
     const loadEmployerInfo = async () => {
         try {
             setLoading(true);
-            const token = await AsyncStorage.getItem('token');
-            const res = await authApis(token).get(endpoints['employers-profile']);
+            const stored = await AsyncStorage.getItem('tokens');
+            const { access_token } = JSON.parse(stored);
+            const res = await authApis(access_token).get(endpoints['employers-profile']);
             setEmployer(res.data);
             setForm({
                 company_name: res.data.company_name || '',
@@ -101,7 +102,8 @@ const EmProfile = () => {
         setErr({});
         try {
             setLoading(true);
-            const token = await AsyncStorage.getItem('token');
+            const stored = await AsyncStorage.getItem('tokens');
+            const { access_token } = JSON.parse(stored);
             let fd = new FormData();
 
             Object.keys(form).forEach(key => fd.append(key, form[key]));
@@ -122,7 +124,7 @@ const EmProfile = () => {
                 });
             }
 
-            const res = await authApis(token).patch(endpoints['employers-profile'], fd, {
+            const res = await authApis(access_token).patch(endpoints['employers-profile'], fd, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 

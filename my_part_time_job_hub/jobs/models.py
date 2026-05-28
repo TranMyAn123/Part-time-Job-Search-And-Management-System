@@ -54,7 +54,7 @@ class Job(BaseActiveModel, TimeStampedModel):
     VALID_TRANSITIONS = {
         Status.PENDING: [Status.OPENING, Status.CLOSED],
         Status.OPENING: [Status.CLOSED],
-        Status.CLOSED: [],
+        Status.CLOSED: [Status.OPENING],
     }
 
     employer = models.ForeignKey(

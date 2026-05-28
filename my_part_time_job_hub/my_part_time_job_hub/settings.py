@@ -30,7 +30,7 @@ SECRET_KEY = "django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "192.168.1.14",
+    "192.168.1.10",
     "localhost",
     "127.0.0.1",
     "0.0.0.0",
@@ -131,7 +131,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "job_db",
         "USER": "root",
-        "PASSWORD": "35715982",
+        "PASSWORD": "root",
         "HOST": "",
     }
 }
