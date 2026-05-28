@@ -2,7 +2,10 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from jobs import views as job_views
 from users import views as user_views
+<<<<<<< HEAD
 from onlinejobapp import views
+=======
+>>>>>>> origin/frontend/login_register
 
 router = DefaultRouter()
 
@@ -16,7 +19,10 @@ router.register("comments", job_views.CommentViewSet, basename="comments")
 router.register("users", user_views.UserViewSet, basename="users")
 router.register("auth", user_views.AuthViewSet, basename="auth")
 
+<<<<<<< HEAD
 # Chat realtime
 router.register("chat", views.ChatViewSet, basename="chat")
 
+=======
+>>>>>>> origin/frontend/login_register
 urlpatterns = [path("", include(router.urls))]

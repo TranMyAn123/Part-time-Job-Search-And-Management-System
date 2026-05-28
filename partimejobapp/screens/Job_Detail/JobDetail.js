@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useEffect, useState } from "react";
+=======
+import React, { useContext, useEffect, useState } from "react";
+>>>>>>> origin/frontend/login_register
 import {
     View,
     Text,
@@ -22,7 +26,12 @@ import {
     parseRequirements,
     benefitIcon
 } from "./Helpers";
+<<<<<<< HEAD
 import Apis, { endpoints } from "../../configs/Apis";
+=======
+import Apis, { authApis, endpoints } from "../../configs/Apis";
+import { MyUserContext } from "../../configs/Contexts";
+>>>>>>> origin/frontend/login_register
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function SectionTitle({ title, color }) {
@@ -85,6 +94,22 @@ export default function JobDetail({ navigation, route }) {
     const [saved, setSaved] = useState(false);
     const [applied, setApplied] = useState(false);
     const [loading, setLoading] = useState(false)
+<<<<<<< HEAD
+=======
+    const [user] = useContext(MyUserContext);
+
+    useEffect(() => {
+        if (!user || !job) return;
+        const checkApplied = async () => {
+            try {
+                const res = await authApis(user.access_token).get(endpoints['applications']);
+                const already = res.data.some(app => app.job?.id === job.id);
+                setApplied(already);
+            } catch (e) { }
+        };
+        checkApplied();
+    }, [job]);
+>>>>>>> origin/frontend/login_register
 
     useEffect(() => {
         if (passedJob) return;
@@ -326,6 +351,7 @@ export default function JobDetail({ navigation, route }) {
 
             {/* ── CTA ──────────────────────────────────────────────────── */}
             <View style={styles.cta}>
+<<<<<<< HEAD
                 <Pressable
                     style={[styles.ctaChat, { borderColor: color + "50", backgroundColor: bgColor }]}
                     onPress={() => navigation.navigate('Chat', {
@@ -334,16 +360,26 @@ export default function JobDetail({ navigation, route }) {
                         receiverName: job.employer.company_name || job.employer.full_name
                     })}
                 >
+=======
+                <Pressable style={[styles.ctaChat, { borderColor: color + "50", backgroundColor: bgColor }]}>
+>>>>>>> origin/frontend/login_register
                     <Icon source="message-text-outline" size={22} color={color} />
                 </Pressable>
                 <Pressable
                     style={[
                         styles.ctaApply,
                         { backgroundColor: applied ? "#16A34A" : color },
+<<<<<<< HEAD
                         !isOpening && styles.ctaDisabled,
                     ]}
                     onPress={() => isOpening && setApplied(true)}
                     disabled={!isOpening}
+=======
+                        (!isOpening || applied) && styles.ctaDisabled,
+                    ]}
+                    onPress={() => isOpening && !applied && navigation.navigate("ApplyJob", { job })}
+                    disabled={!isOpening || applied}
+>>>>>>> origin/frontend/login_register
                 >
                     <Icon
                         source={applied ? "check-circle" : "send"}

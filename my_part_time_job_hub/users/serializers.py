@@ -20,7 +20,11 @@ class AvatarSerializer(serializers.ModelSerializer):
 class SimpleUserSerializer(AvatarSerializer):
     class Meta:
         model = User
+<<<<<<< HEAD
         fields = ["id", "first_name", "last_name", "avatar", "phone_num"]
+=======
+        fields = ["first_name", "last_name", "avatar", "phone_num", "email"]
+>>>>>>> origin/frontend/login_register
         extra_kwargs = {"phone_num": {"validators": []}}
 
     def validate_phone_num(self, value):
@@ -62,6 +66,7 @@ class UserSerializer(SimpleUserSerializer):
     class Meta:
         model = SimpleUserSerializer.Meta.model
         fields = SimpleUserSerializer.Meta.fields + [
+<<<<<<< HEAD
             "username",
             "password",
             "email",
@@ -69,6 +74,15 @@ class UserSerializer(SimpleUserSerializer):
             "last_login",
             "employer",
             "role",
+=======
+            "id",
+            "username",
+            "password",
+            "profile",
+            "last_login",
+            "employer",
+            "role"
+>>>>>>> origin/frontend/login_register
         ]
         extra_kwargs = {"password": {"write_only": True}}
 

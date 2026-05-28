@@ -6,8 +6,11 @@ from django.utils import timezone
 from django.conf import settings
 from datetime import timedelta
 from oauthlib.common import generate_token
+<<<<<<< HEAD
 import urllib.parse
 import os
+=======
+>>>>>>> origin/frontend/login_register
 
 
 def logout(token):
@@ -24,6 +27,7 @@ def logout(token):
     return {"message": "Đăng xuất thành công!"}
 
 
+<<<<<<< HEAD
 def build_google_auth_url():
     base_url = "https://accounts.google.com/o/oauth2/v2/auth"
     print(settings.GOOGLE_REDIRECT_URI)
@@ -54,6 +58,36 @@ def exchange_google_code(code):
 
     if response.status_code != 200:
         return None
+=======
+# services/google.py
+def change_code_to_token(provider, code, redirect_uri):
+    if provider == "google":
+        response = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": settings.GOOGLE_CLIENT_ID,
+                "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code",
+            },
+        )
+
+    elif provider == "facebook":
+        response = requests.get(
+            "https://graph.facebook.com/v22.0/oauth/access_token",
+            params={
+                "client_id": settings.FACEBOOK_APP_ID,
+                "client_secret": settings.FACEBOOK_APP_SECRET,
+                "redirect_uri": redirect_uri,
+                "code": code,
+            },
+        )
+
+    else:
+        raise Exception("Provider không hợp lệ")
+
+>>>>>>> origin/frontend/login_register
     return response.json()
 
 

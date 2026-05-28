@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/frontend/login_register
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -6,8 +10,11 @@ __pycache__/
 # C extensions
 *.so
 
+<<<<<<< HEAD
 staticfiles/
 
+=======
+>>>>>>> origin/frontend/login_register
 # Distribution / packaging
 .Python
 build/
@@ -225,5 +232,9 @@ venv/
 
 db.sqlite3
 my_part_time_job_hub/errors.log
+<<<<<<< HEAD
 my_part_time_job_hub/.env
 my_part_time_job_hub/serviceAccountKey.json
+=======
+my_part_time_job_hub/.env
+>>>>>>> origin/frontend/login_register

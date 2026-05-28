@@ -2,12 +2,19 @@
   "expo": {
     "name": "partimejobapp",
     "slug": "partimejobapp",
+<<<<<<< HEAD
     "scheme": "partimejobapp",
     "owner": "trankhanha53",
+=======
+>>>>>>> origin/frontend/login_register
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+<<<<<<< HEAD
+=======
+    "newArchEnabled": false,
+>>>>>>> origin/frontend/login_register
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -32,4 +39,8 @@
       "@react-native-community/datetimepicker"
     ]
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/frontend/login_register

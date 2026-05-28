@@ -10,11 +10,14 @@ export function getInitials(name = "") {
         .toUpperCase();
 }
 
+<<<<<<< HEAD
 export function getFullName(candidate) {
     const full = `${candidate.last_name} ${candidate.first_name}`.trim();
     return full || "Chưa có tên";
 }
 
+=======
+>>>>>>> origin/frontend/login_register
 export function formatSalary(min, max) {
     const a = parseFloat(min ?? 0);
     const b = parseFloat(max ?? 0);

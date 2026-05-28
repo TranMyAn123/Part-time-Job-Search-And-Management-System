@@ -1,11 +1,14 @@
 import json
 from oauth2_provider.views import TokenView
 from django.conf import settings
+<<<<<<< HEAD
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 import firebase_admin
 from firebase_admin import auth as firebase_auth
+=======
+>>>>>>> origin/frontend/login_register
 
 
 class CustomTokenView(TokenView):
@@ -25,6 +28,7 @@ class CustomTokenView(TokenView):
         print("FINAL BODY:", request._body)
 
         return super().post(request, *args, **kwargs)
+<<<<<<< HEAD
 
 
 class ChatViewSet(viewsets.ViewSet):
@@ -42,3 +46,5 @@ class ChatViewSet(viewsets.ViewSet):
         token_str = firebase_token.decode("utf-8")
         print("RAW TOKEN:", repr(token_str))
         return Response({"firebase_token": firebase_token.decode("utf-8")})
+=======
+>>>>>>> origin/frontend/login_register

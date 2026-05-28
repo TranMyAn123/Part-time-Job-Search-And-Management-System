@@ -20,13 +20,18 @@ export default function App() {
     fetchEmployers()
     fetchJobs();
     fetchIndustries();
+<<<<<<< HEAD
   }, [user]);
+=======
+  }, []);
+>>>>>>> origin/frontend/login_register
 
   const [employers, setEmployers] = useState([])
   const [loadingEmployers, setLoadingEmployers] = useState(false)
   const fetchEmployers = async () => {
     try {
       setLoadingEmployers(true);
+<<<<<<< HEAD
       let res;
       if (user?.access_token) {
         res = await authApis(user.access_token)
@@ -42,6 +47,13 @@ export default function App() {
         e.message ||
         e
       );
+=======
+      const res = await authApis(user.access_token).get(endpoints["employers"]);
+      setEmployers(res.data.results?.slice(0, 5) ?? []);
+    } catch (e) {
+      console.error(e?.response?.data?.detail ??
+        e?.response?.data?.message);
+>>>>>>> origin/frontend/login_register
     } finally {
       setLoadingEmployers(false)
     }
@@ -65,6 +77,10 @@ export default function App() {
   const [industries, setIndustries] = useState([]);
   const [loadingIndustries, setLoadingIndustries] = useState(false);
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/frontend/login_register
   const fetchIndustries = async () => {
     setLoadingIndustries(true);
     try {

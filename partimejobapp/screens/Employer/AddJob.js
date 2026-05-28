@@ -5,7 +5,11 @@ import { authApis, endpoints } from "../../configs/Apis";
 import { useNavigation } from "@react-navigation/native";
 import { Colors } from "../../configs/Colors";
 import Styles, { inputTheme } from "../../styles/Styles";
+<<<<<<< HEAD
 import EmployerStyles from "./Styles"
+=======
+import { EmployerStyles } from "./Styles"
+>>>>>>> origin/frontend/login_register
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 

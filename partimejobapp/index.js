@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 import 'expo-dev-client';
+=======
+>>>>>>> origin/frontend/login_register
 import { registerRootComponent } from 'expo';
 
 import App from './App';

@@ -138,4 +138,50 @@ export default StyleSheet.create({
         fontSize: 13,
         color: Colors.text.muted,
     },
+<<<<<<< HEAD
+=======
+    followCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        backgroundColor: '#F0F7FF',
+        borderRadius: 12,
+        padding: 12,
+    },
+    followLogo: {
+        width: 42,
+        height: 42,
+        borderRadius: 10,
+        backgroundColor: '#fff',
+    },
+    followLogoFallback: {
+        width: 42,
+        height: 42,
+        borderRadius: 10,
+        backgroundColor: '#DBEAFE',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    followLogoFallbackText: {
+        fontWeight: '800',
+        color: '#185FA5',
+        fontSize: 16,
+    },
+    followCompanyName: {
+        fontWeight: '700',
+        color: '#111827',
+        fontSize: 14,
+    },
+    followMeta: {
+        fontSize: 12,
+        color: '#6B7280',
+        marginTop: 2,
+    },
+    followEmpty: {
+        fontSize: 13,
+        color: '#9CA3AF',
+        textAlign: 'center',
+        paddingVertical: 12,
+    },
+>>>>>>> origin/frontend/login_register
 });
