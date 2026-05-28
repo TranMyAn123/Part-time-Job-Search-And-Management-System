@@ -7,10 +7,13 @@ import {
     Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
+import { getInitials } from "../helpers";
 export default function Header({ user }) {
 
-    const getFullName = user?.last_name + " " + user?.first_name
+    const getFullName =
+        user?.last_name && user?.first_name
+            ? `${user.last_name} ${user.first_name}`
+            : user?.username || "";
     const navigation = useNavigation();
 
     const greeting = () => {
@@ -22,19 +25,6 @@ export default function Header({ user }) {
         return "Chào buổi tối 🌙";
     };
 
-    function getInitials(name = "") {
-        const words = name.trim().split(/\s+/);
-
-        if (words.length === 1)
-            return words[0].slice(0, 2).toUpperCase();
-
-        return words
-            .slice(0, 2)
-            .map((w) => w[0])
-            .join("")
-            .toUpperCase();
-    }
-
     return (
         <View style={styles.header}>
             <View style={styles.left}>
@@ -43,7 +33,7 @@ export default function Header({ user }) {
                 </Text>
 
                 <Text style={styles.headerTitle}>
-                    {user ? getFullName || user.username : "Khách"}
+                    {user ? getFullName : "Khách"}
                 </Text>
 
                 <Text style={styles.headerSub}>
@@ -65,7 +55,7 @@ export default function Header({ user }) {
                 ) : (
                     <Text style={styles.avatarText}>
                         {user
-                            ? getInitials(getFullName || user.username)
+                            ? getInitials(getFullName)
                             : "?"}
                     </Text>
                 )}

@@ -7,7 +7,7 @@ import { Icon } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { MyUserContext } from "../../configs/Contexts";
 import { authApis, endpoints } from "../../configs/Apis";
-import { STATUS_CONFIG, FILTERS } from "../../configs/ApplicationStatus"
+import { STATUS_CONFIG, FILTERS } from "../../configs/ApplicationStatus";
 import ApplicationCard from "../../components/ApplicationCard";
 import { styles } from "./Styles";
 
@@ -40,7 +40,6 @@ function EmptyState({ filter }) {
 export default function MyApplication() {
     const navigation = useNavigation();
     const [user] = useContext(MyUserContext);
-
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
@@ -152,7 +151,7 @@ export default function MyApplication() {
             <View style={[styles.container, styles.center]}>
                 <Icon source="account-lock-outline" size={52} color="#D1D5DB" />
                 <Text style={styles.emptyTitle}>Bạn chưa đăng nhập</Text>
-                <Pressable style={styles.findJobBtn} onPress={() => nav.navigate("Login")}>
+                <Pressable style={styles.findJobBtn} onPress={() => navigation.navigate("Login")}>
                     <Text style={styles.findJobText}>Đăng nhập ngay</Text>
                 </Pressable>
             </View>

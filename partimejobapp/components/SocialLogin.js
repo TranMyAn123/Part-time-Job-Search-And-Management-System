@@ -14,7 +14,6 @@ const SocialLogin = ({ onGoogleSuccess }) => {
     const loginGoogle = async () => {
         try {
             const redirectUrl = Linking.createURL("oauth");
-            console.log(redirectUrl)
             const result = await WebBrowser.openAuthSessionAsync(
                 "https://part-time-job-app-production.up.railway.app/auth/google/login/",
                 redirectUrl

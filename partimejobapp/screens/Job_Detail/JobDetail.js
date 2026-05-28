@@ -329,8 +329,8 @@ export default function JobDetail({ navigation, route }) {
                 <Pressable
                     style={[styles.ctaChat, { borderColor: color + "50", backgroundColor: bgColor }]}
                     onPress={() => navigation.navigate('Chat', {
-                        jobID: String(job.id),
-                        receiverID: String(job.employer.user_id),
+                        jobId: String(job.id),
+                        receiverId: String(job.employer.user_id),
                         receiverName: job.employer.company_name || job.employer.full_name
                     })}
                 >

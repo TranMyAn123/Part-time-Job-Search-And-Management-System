@@ -15,18 +15,22 @@ export const endpoints = {
     'industries': "/industries/",
     'comments': (jobID) => `/jobs/${jobID}/comments/`,
     'replies': (commentID) => `/comments/${commentID}/replies/`,
-    'applications': '/users/me/applications',
+    'applications': '/users/me/applications/',
     'employers': "/employers/",
     'follow': (employerID) => `/employers/${employerID}/follow/`,
 
     'firebase-token': '/chat/firebase-token/',
     'employers-profile': "/employers/profile/",
     'add-job': "/jobs/",
+    'update-job': (jobID) => `/jobs/${jobID}/`,
+    'em-application': (jobID) => `/jobs/${jobID}/applications/`,
+    'update-application': (applicationID) => `/applications/${applicationID}/`
 };
 
 export const authApis = (token) => {
     return axios.create({
-        baseURL: "https://part-time-job-app-production.up.railway.app",
+        // baseURL: "https://part-time-job-app-production.up.railway.app",
+        baseURL: "http://192.168.1.111:8000/",
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -34,7 +38,8 @@ export const authApis = (token) => {
 }
 
 export default axios.create({
-    baseURL: "https://part-time-job-app-production.up.railway.app",
+    // baseURL: "https://part-time-job-app-production.up.railway.app",
+    baseURL: "http://192.168.1.111:8000/",
 });
 
 

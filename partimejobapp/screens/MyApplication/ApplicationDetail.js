@@ -5,59 +5,17 @@ import {
 } from "react-native";
 import { Icon } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import { CARD_COLORS } from "../../configs/Colors";
+import { STATUS_CONFIG } from "../../configs/ApplicationStatus";
+import { getInitials, formatSalary, formatDate, formatDateTime, getFullName } from "../../helpers";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-const CARD_COLORS = [
-    { color: "#FF6B6B", bgColor: "#FFF0F0" },
-    { color: "#4ECDC4", bgColor: "#EEFAF9" },
-    { color: "#A78BFA", bgColor: "#F5F0FF" },
-    { color: "#F97316", bgColor: "#FFF4ED" },
-    { color: "#185FA5", bgColor: "#EBF4FF" },
-];
 
-const STATUS_CONFIG = {
-    REVIEWING: { label: "Chờ xét duyệt", color: "#F97316", bgColor: "#FFF4ED", icon: "clock-outline", desc: "Hồ sơ của bạn đang được nhà tuyển dụng xem xét." },
-    INTERVIEW: { label: "Hẹn phỏng vấn", color: "#185FA5", bgColor: "#EBF4FF", icon: "calendar-check-outline", desc: "Chúc mừng! Nhà tuyển dụng muốn mời bạn phỏng vấn." },
-    ACCEPTED: { label: "Trúng tuyển", color: "#16A34A", bgColor: "#DCFCE7", icon: "check-circle-outline", desc: "Chúc mừng bạn đã trúng tuyển vị trí này! 🎉" },
-    REJECTED: { label: "Trượt", color: "#EF4444", bgColor: "#FEF2F2", icon: "close-circle-outline", desc: "Rất tiếc, hồ sơ của bạn không phù hợp lần này." },
-    WITHDRAWN: { label: "Đã rút đơn", color: "#6B7280", bgColor: "#F3F4F6", icon: "undo-variant", desc: "Bạn đã rút đơn ứng tuyển này." },
-    CANCELLED: { label: "Đã hủy", color: "#9CA3AF", bgColor: "#F9FAFB", icon: "cancel", desc: "Đơn ứng tuyển này đã bị hủy." },
-};
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function getInitials(name = "") {
-    return name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-}
-
-function formatSalary(min, max) {
-    const a = parseFloat(min ?? 0);
-    const b = parseFloat(max ?? 0);
-    if (!a && !b) return "Thỏa thuận";
-    if (a && b) return `${(a / 1e6).toFixed(0)}–${(b / 1e6).toFixed(0)} triệu/tháng`;
-    return "Thỏa thuận";
-}
-
-function formatDate(iso) {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} lúc ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
-
-function formatDeadline(str) {
-    if (!str) return "—";
-    const parts = str.split("-");
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-}
 
 function getCvFileName(url = "") {
     const parts = url.split("/");
     return parts[parts.length - 1] || "cv_file";
 }
 
-function getFullName(candidate) {
-    const full = `${candidate?.first_name ?? ""} ${candidate?.last_name ?? ""}`.trim();
-    return full || "—";
-}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function SectionTitle({ title }) {
@@ -220,7 +178,7 @@ export default function ApplicationDetail({ route }) {
                     </View>
                     <View style={styles.statusRight}>
                         <Text style={styles.applyDateLabel}>Ngày ứng tuyển</Text>
-                        <Text style={styles.applyDateValue}>{formatDate(application.apply_date)}</Text>
+                        <Text style={styles.applyDateValue}>{formatDateTime(application.apply_date)}</Text>
                     </View>
                 </View>
             </View>
@@ -243,7 +201,7 @@ export default function ApplicationDetail({ route }) {
                 <View style={styles.infoCard}>
                     <InfoRow icon="currency-usd" label="Mức lương" value={salary} color={color} />
                     <View style={styles.infoSep} />
-                    <InfoRow icon="calendar-remove-outline" label="Hạn nộp hồ sơ" value={formatDeadline(job.available_date)} color={color} />
+                    <InfoRow icon="calendar-remove-outline" label="Hạn nộp hồ sơ" value={formatDate(job.available_date)} color={color} />
                     <View style={styles.infoSep} />
                     <InfoRow icon="domain" label="Ngành nghề" value={job.industry} color={color} />
                 </View>

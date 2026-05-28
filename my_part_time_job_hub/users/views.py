@@ -100,9 +100,6 @@ class AuthViewSet(viewsets.ViewSet):
     @action(methods=["post"], url_path="login", detail=False)
     def login_user(self, request):
         data = request.data
-        print("BODY:", data)
-        print("CONTENT TYPE:", request.content_type)
-        print("POST:", request.POST)
 
         if not data:
             return Response(
@@ -129,6 +126,9 @@ class AuthViewSet(viewsets.ViewSet):
             )
             token_response = TokenView.as_view()(internal_request)
             token_data = json.loads(token_response.content)
+            print(token_data)
+            print(token_response.status_code)
+            print(token_response.content)
             if token_response.status_code == 200:
                 user = validated_data.get("user")
                 if user:

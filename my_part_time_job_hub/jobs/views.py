@@ -4,11 +4,12 @@ from jobs import serializers
 from jobs.models import Job, Application, Comment, Employer, Industry, CompanyFollow
 from jobs.utils import search
 from rest_framework.decorators import action
-from jobs.perms import IsOwnerOrReadOnly, IsEmployer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from jobs.perms import IsEmployer, IsJobOwner, IsApplicationJobOwner
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from jobs.paginators import CommentPaginator, ItemPaginator
+from rest_framework.permissions import IsAuthenticated
 
 
 class JobViewSet(
@@ -23,9 +24,17 @@ class JobViewSet(
     pagination_class = ItemPaginator
 
     def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
         if self.action == "comments":
             return [IsAuthenticatedOrReadOnly()]
-        return [IsAuthenticatedOrReadOnly(), IsEmployer(), IsOwnerOrReadOnly()]
+        if self.action == "create":
+            return [IsAuthenticated(), IsEmployer()]
+        if self.action in ["update", "partial_update", "destroy"]:
+            return [IsAuthenticated(), IsEmployer(), IsJobOwner()]
+        if self.action == "applications":
+            return [IsAuthenticated(), IsEmployer(), IsJobOwner()]
+        return [IsAuthenticatedOrReadOnly()]
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -36,7 +45,8 @@ class JobViewSet(
         queryset = self.queryset
         if not self.request.user.is_authenticated or self.request.user.role == "USER":
             queryset = queryset.filter(status=Job.Status.OPENING)
-
+        elif self.request.user.role == "EMPLOYER":
+            queryset = queryset.filter(employer__user=self.request.user)
         keyword = self.request.query_params.get("q")
         if keyword:
             fields = [
@@ -62,16 +72,17 @@ class JobViewSet(
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.active = False
+        instance.status = Job.Status.CLOSED
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=["get"], url_path="applications", detail=True)
     def applications(self, request, pk):
         job = self.get_object()
-        applications = job.application.select_related("candidate").all()
+        applications = job.applications.select_related("candidate").all()
 
         return Response(
-            serializers.ApplicationSerializer(applications, many=True).data,
+            serializers.SimpleApplicationSerializer(applications, many=True).data,
             status=status.HTTP_200_OK,
         )
 
@@ -171,7 +182,12 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
             ).data
         )
 
-    @action(methods=["get", "patch"], url_path="profile", detail=False)
+    @action(
+        methods=["get", "patch"],
+        url_path="profile",
+        detail=False,
+        permission_classes=[IsAuthenticated],
+    )
     def profile(self, request):
         employer = Employer.objects.get(user=request.user)
 
@@ -187,6 +203,7 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
             serializers.EmployerSerializer(employer, context={"request": request}).data
         )
 
+
 class IndustryViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Industry.objects.filter(active=True)
     serializer_class = serializers.IndustrSerializer
@@ -194,11 +211,16 @@ class IndustryViewSet(viewsets.ViewSet, generics.ListAPIView):
 
 class ApplicationViewSet(
     viewsets.ViewSet,
-    generics.ListAPIView,
     generics.CreateAPIView,
-    generics.RetrieveAPIView,
     generics.UpdateAPIView,
 ):
+    queryset = Application.objects.all()
+
+    def get_permissions(self):
+        if self.action in ["update", "partial_update"]:
+            return [IsAuthenticated(), IsEmployer(), IsApplicationJobOwner()]
+        return [IsAuthenticated()]
+
     def get_serializer_class(self):
         if self.action == "create":
             return serializers.ApplicationCreateSerializer

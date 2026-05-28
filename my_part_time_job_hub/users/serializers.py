@@ -20,7 +20,7 @@ class AvatarSerializer(serializers.ModelSerializer):
 class SimpleUserSerializer(AvatarSerializer):
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "avatar", "phone_num"]
+        fields = ["id", "first_name", "last_name", "avatar", "phone_num"]
         extra_kwargs = {"phone_num": {"validators": []}}
 
     def validate_phone_num(self, value):
@@ -62,14 +62,13 @@ class UserSerializer(SimpleUserSerializer):
     class Meta:
         model = SimpleUserSerializer.Meta.model
         fields = SimpleUserSerializer.Meta.fields + [
-            "id",
             "username",
             "password",
             "email",
             "profile",
             "last_login",
             "employer",
-            "role"
+            "role",
         ]
         extra_kwargs = {"password": {"write_only": True}}
 

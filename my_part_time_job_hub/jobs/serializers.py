@@ -35,7 +35,9 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     def validate_workplace_images(self, value):
         if not self.instance and len(value) < 3:
-            raise serializers.ValidationError("Cần ít nhất 3 ảnh mô tả môi trường làm việc!")
+            raise serializers.ValidationError(
+                "Cần ít nhất 3 ảnh mô tả môi trường làm việc!"
+            )
         return value
 
     def validate_logo_company(self, value):
@@ -74,6 +76,28 @@ class EmployerSerializer(serializers.ModelSerializer):
             )
         return attrs
 
+    def create(self, validated_data):
+        images = validated_data.pop("workplace_images")
+        with transaction.atomic():
+            employer = super().create(validated_data)
+            arrImg = []
+            for img in images:
+                arrImg.append(img)
+            WorkplaceImage.objects.bulk_create(arrImg)
+        return employer
+
+    def update(self, instance, validated_data):
+        images = validated_data.pop("workplace_images", None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if images:
+            instance.workplace_images.all().delete()
+            WorkplaceImage.objects.bulk_create(
+                [WorkplaceImage(employer=instance, image=img) for img in images]
+            )
+        return instance
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         request = self.context["request"]
@@ -81,13 +105,12 @@ class EmployerSerializer(serializers.ModelSerializer):
             data["is_followed"] = instance.followers.filter(
                 candidate=request.user, active=True
             ).exists()
-        # from django.db import connection, reset_queries
-        # print("TOTAL QUERIES:", len(connection.queries))
-        # for q in connection.queries:
-        #     print(q["sql"])
+
         if instance.logo_company:
             data["logo_company"] = instance.logo_company.url
-        data["workplace_images"] = [img.image.url for img in instance.workplace_images.all()]
+        data["workplace_images"] = [
+            img.image.url for img in instance.workplace_images.all()
+        ]
         return data
 
 
@@ -144,30 +167,17 @@ class JobCreateSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         return Job.objects.create(employer=user.employer_profile, **validated_data)
 
-    def create(self, validated_data):
-        images = validated_data.pop("workplace_images")
-
-        with transaction.atomic():
-            employer = super().create(validated_data)
-            arrImg = []
-            for img in images:
-                arrImg.append(img)
-            WorkplaceImage.objects.bulk_create(arrImg)
-
-        return employer
-
     def update(self, instance, validated_data):
-        images = validated_data.pop("workplace_images", None)
+        if instance.status != "PENDING":
+            raise serializers.ValidationError(
+                "Chỉ có thể chỉnh sửa job khi ở trạng thái PENDING."
+            )
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+
         instance.save()
-        if images:
-            instance.workplace_images.all().delete()
-            WorkplaceImage.objects.bulk_create([
-                WorkplaceImage(employer=instance, image=img)
-                for img in images
-            ])
         return instance
+
 
 class IndustrSerializer(serializers.ModelSerializer):
     class Meta:
@@ -180,9 +190,38 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         model = Application
         fields = ["job", "cv_file"]
 
+    def validate_job(self, value):
+        if Application.objects.filter(job=value).exists():
+            raise serializers.ValidationError("Đã ứng tuyển cho công việc này !")
+
     def create(self, validated_data):
         validated_data["candidate"] = self.context["request"].user
         return super().create(validated_data)
+
+
+class SimpleApplicationSerializer(serializers.ModelSerializer):
+    candidate = SimpleUserSerializer(read_only=True)
+
+    class Meta:
+        model = Application
+        fields = [
+            "id",
+            "candidate",
+            "apply_date",
+            "cv_file",
+            "status",
+            "evaluation",
+            "note",
+        ]
+        read_only_fields = fields
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        if instance.cv_file:
+            data["cv_file"] = instance.cv_file.url
+
+        return data
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
@@ -190,8 +229,10 @@ class ApplicationSerializer(serializers.ModelSerializer):
     candidate = SimpleUserSerializer(read_only=True)
 
     class Meta:
-        model = Application
-        fields = ["id", "job", "candidate", "apply_date", "cv_file", "status"]
+        model = SimpleApplicationSerializer.Meta.model
+        fields = SimpleApplicationSerializer.Meta.fields + [
+            "job",
+        ]
         read_only_fields = fields
 
     def to_representation(self, instance):
@@ -209,12 +250,17 @@ class ApplicationReviewSerializer(serializers.ModelSerializer):
         fields = ["status", "evaluation", "note"]
 
     def update(self, instance, validated_data):
-        status = validated_data.get("status")
+        status = validated_data.get("status") or None
         user = self.context["request"].user
-        try:
-            instance.transition_to(status, user)
-        except ValueError as e:
-            raise serializers.ValidationError(str(e))
+        if status:
+            try:
+                instance.transition_to(status, user)
+            except ValueError as e:
+                raise serializers.ValidationError(str(e))
+
+        instance.evaluation = validated_data.get("evaluation", instance.evaluation)
+        instance.note = validated_data.get("note", instance.note)
+        instance.save()
         return instance
 
 
@@ -252,10 +298,10 @@ class CommentSerializer(serializers.ModelSerializer):
         job_id = self.context["job_id"]
 
         if value.job_id != int(job_id):
-            raise serializers.ValidationError("Can't reply comment from another job !")
+            raise serializers.ValidationError("Không thể reply comment từ 1 job khác !")
 
         if value.parent is not None:
-            raise serializers.ValidationError("Can't reply into this reply !")
+            raise serializers.ValidationError("Không thể trả lời tin nhắn đã reply !")
 
         return value
 

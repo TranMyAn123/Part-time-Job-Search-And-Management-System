@@ -10,6 +10,11 @@ export function getInitials(name = "") {
         .toUpperCase();
 }
 
+export function getFullName(candidate) {
+    const full = `${candidate.last_name} ${candidate.first_name}`.trim();
+    return full || "Chưa có tên";
+}
+
 export function formatSalary(min, max) {
     const a = parseFloat(min ?? 0);
     const b = parseFloat(max ?? 0);

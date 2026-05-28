@@ -9,8 +9,8 @@ import { MyUserContext } from "../../configs/Contexts";
 import SocialLogin from "../../components/SocialLogin";
 import logo from "../../assets/logo.png";
 import UserStyles from "./Styles";
-import { signInWithCustomToken } from 'firebase/auth';
-import { auth } from '../../configs/Firebase';
+import { signInWithCustomToken } from "firebase/auth";
+import { auth } from "../../configs/Firebase";
 
 
 const Login = () => {
@@ -49,39 +49,44 @@ const Login = () => {
             setErr({});
             try {
                 setLoading(true);
+
                 let res = await Apis.post(endpoints['login'], {
                     ...user,
-                    'grant_type': 'password'
+                    grant_type: 'password'
                 });
+                const access_token = res.data.access_token
+                const refresh_token = res.data.refresh_token
 
-                // Gọi song song 2 API lấy thông tin user và lấy firebase token
                 const [u, firebaseTokenResponse] = await Promise.all([
-                    authApis(res.data.access_token).get(endpoints['current-user']),
-                    authApis(res.data.access_token).get(endpoints['firebase-token']),
+                    authApis(access_token).get(endpoints['current-user']),
+                    authApis(access_token).get(endpoints['firebase-token']),
                 ]);
-
-                // CHÚ Ý SỬA TẠI ĐÂY: Bóc tách chính xác chuỗi token từ Axios Response
-                const tokenThucTe = firebaseTokenResponse.data.firebase_token;
-                await signInWithCustomToken(auth, tokenThucTe);
-
-
-                // Cập nhật State Login cho ứng dụng
+                console.log(firebaseTokenResponse.data.firebase_token)
+                await AsyncStorage.setItem(
+                    "tokens",
+                    JSON.stringify({ access_token, refresh_token })
+                ); await signInWithCustomToken(auth, firebaseTokenResponse.data.firebase_token);
                 dispatch({
-                    "type": "LOGIN",
+                    type: "LOGIN",
                     payload: {
                         ...u.data,
                         access_token: res.data.access_token,
-                        refresh_token: res.data.refresh_token,
+                        refresh_token: res.data.refresh_token
                     },
                 });
+
             } catch (ex) {
-                setErr({ api: ex.response?.data?.error_description || ex.message || "Đăng nhập thất bại!" });
+                setErr({
+                    api: ex.response?.data?.error_description
+                        || ex.message
+                        || "Đăng nhập thất bại!"
+                });
                 console.log(ex);
             } finally {
                 setLoading(false);
             }
         }
-    }
+    };
 
     const handleSelectRole = (role) => {
         setShowRole(false);

@@ -73,6 +73,7 @@ class Job(BaseActiveModel, TimeStampedModel):
     benefits = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=150)
     available_date = models.DateField()
+    max_applicants = models.IntegerField()
     description = models.TextField(null=True, blank=True)
 
     def is_expired(self):
@@ -89,6 +90,11 @@ class Job(BaseActiveModel, TimeStampedModel):
             )
         self.status = new_status
         self.save()
+
+    @property
+    def remaining_slots(self):
+        applicants = self.applications.count()
+        return self.max_applicants - applicants
 
     def __str__(self):
         return self.title
@@ -131,7 +137,6 @@ class Application(TimeStampedModel):
     )
     evaluation = models.CharField(max_length=25, null=True, blank=True)
     cv_file = CloudinaryField(resource_type="auto", blank=True, null=True)
-    max_applicants = models.IntegerField()
 
     note = models.TextField(null=True, blank=True)
 
@@ -152,11 +157,6 @@ class Application(TimeStampedModel):
             )
         self.status = new_status
         self.save()
-
-    @property
-    def remaining_slots(self):
-        applicants = self.applications.count()
-        return self.max_applicants - applicants
 
 
 class Comment(TimeStampedModel):
