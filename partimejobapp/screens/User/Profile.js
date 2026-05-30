@@ -55,6 +55,20 @@ const Profile = () => {
         { field: 'dob', label: 'Ngày sinh', icon: 'calendar' },
     ];
 
+    useEffect(() => {
+        const fetchFollowed = async () => {
+            try {
+                const res = await authApis(user.access_token).get(endpoints['my-follows']);
+                const results = Array.isArray(res.data) ? res.data : (res.data.results ?? []);
+                setFollowedEmployers(results);
+            } catch (e) {
+                console.log('fetch follow error', e);
+            }
+        };
+        if (user) fetchFollowed();
+    }, [user]);
+
+
     const save = async () => {
         try {
             setLoading(true);
@@ -90,8 +104,7 @@ const Profile = () => {
     const cancelEmployerRequest = async () => {
         try {
             setLoading(true);
-            const token = await AsyncStorage.getItem('token');
-            await authApis(token).delete(endpoints['employers']);
+            await authApis(user.access_token).delete(endpoints['employers']);
             dispatch({ type: "LOGIN", payload: { ...user, employer: false } });
             setShowCancelModal(false);
         } catch (ex) {
@@ -123,8 +136,7 @@ const Profile = () => {
 
         try {
             setLoading(true);
-            const token = await AsyncStorage.getItem('token');
-            await authApis(token).patch(endpoints['change-password'], {
+            await authApis(user.access_token).patch(endpoints['change-password'], {
                 old_password: passwords.old_password,
                 new_password: passwords.new_password,
             });
@@ -158,14 +170,13 @@ const Profile = () => {
             if (!result.canceled) {
                 try {
                     setLoading(true);
-                    const token = await AsyncStorage.getItem('token');
                     let form = new FormData();
                     form.append('avatar', {
                         uri: result.assets[0].uri,
                         name: result.assets[0].fileName,
                         type: "image/jpeg"
                     });
-                    let res = await authApis(token).patch(endpoints['current-user'], form, {
+                    let res = await authApis(user.access_token).patch(endpoints['current-user'], form, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }
@@ -335,6 +346,39 @@ const Profile = () => {
                     </View>
                 </SectionCard>
             )}
+
+            <SectionCard title="🏢 Công ty đang theo dõi">
+                <View style={{ marginHorizontal: 16, marginBottom: 16, gap: 10 }}>
+                    {followedEmployers.length === 0 ? (
+                        <Text style={UserStyles.followEmpty}>Bạn chưa theo dõi công ty nào.</Text>
+                    ) : (
+                        followedEmployers.map(emp => (
+                            <Pressable key={emp.user_id} style={UserStyles.followCard}>
+                                {emp.logo_company ? (
+                                    <Image
+                                        source={{ uri: emp.logo_company }}
+                                        style={UserStyles.followLogo}
+                                        resizeMode="contain"
+                                    />
+                                ) : (
+                                    <View style={UserStyles.followLogoFallback}>
+                                        <Text style={UserStyles.followLogoFallbackText}>
+                                            {emp.company_name?.[0] ?? '?'}
+                                        </Text>
+                                    </View>
+                                )}
+                                <View style={{ flex: 1 }}>
+                                    <Text style={UserStyles.followCompanyName}>{emp.company_name}</Text>
+                                    <Text style={UserStyles.followMeta}>
+                                        {emp.follow_count} người theo dõi · {emp.job_count} việc làm
+                                    </Text>
+                                </View>
+                                <Icon source="chevron-right" size={18} color="#9CA3AF" />
+                            </Pressable>
+                        ))
+                    )}
+                </View>
+            </SectionCard>
 
             <View style={{ flexDirection: 'row', marginHorizontal: 16, gap: 10, marginBottom: 12 }}>
                 <Button

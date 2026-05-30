@@ -77,15 +77,6 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         applications = JobApplication.objects.filter(candidate=u).order_by(
             "-apply_date"
         )
-        p = ItemPaginator()
-        page = p.paginate_queryset(applications)
-
-        if page is not None:
-            serializer = ApplicationSerializer(
-                page, many=True, context={"request": request}
-            )
-            return p.get_paginated_response(serializer.data)
-
         serializer = ApplicationSerializer(
             applications, many=True, context={"request": request}
         )

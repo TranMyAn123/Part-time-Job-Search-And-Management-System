@@ -40,12 +40,9 @@ function EmptyState({ filter }) {
 export default function MyApplication() {
     const navigation = useNavigation();
     const [user] = useContext(MyUserContext);
-    const [applications, setApplications] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [refreshing, setRefreshing] = useState(false);
-    const [activeFilter, setActiveFilter] = useState("ALL");
 
 
+    const { applications, activeFilter, setActiveFilter, loading, refreshing, refresh } = useApplications(user);
 
     const filtered = activeFilter === "ALL"
         ? applications
@@ -55,7 +52,6 @@ export default function MyApplication() {
         key === "ALL"
             ? applications.length
             : applications.filter((a) => a.status === key).length;
-
     const ListHeader = () => (
         <View>
             <View style={styles.header}>
@@ -157,7 +153,7 @@ export default function MyApplication() {
                     ListHeaderComponent={<ListHeader />}
                     ListEmptyComponent={<EmptyState filter={activeFilter} />}
                     contentContainerStyle={styles.listContent}
-                    onRefresh={() => fetchApplications(true)}
+                    onRefresh={refresh}
                     refreshing={refreshing}
                     showsVerticalScrollIndicator={false}
                 />
