@@ -8,6 +8,7 @@ export const endpoints = {
     'logout': "/auth/logout/",
     'register': "/auth/register/",
     'current-user': "/users/me/",
+    'my-follows': '/users/me/follows/',
     'change-password': "/users/me/change_password/",
     'jobs': "/jobs/",
     'job': (jobID) => `/jobs/${jobID}/`,
@@ -17,13 +18,15 @@ export const endpoints = {
     'applications': '/users/me/applications/',
     'employers': "/employers/",
     'follow': (employerID) => `/employers/${employerID}/follow/`,
+    'notifications': (followID) => `/company-follows/${followID}/toggle-notify/`,
 
     'firebase-token': '/chat/firebase-token/',
     'employers-profile': "/employers/profile/",
     'add-job': "/jobs/",
     'update-job': (jobID) => `/jobs/${jobID}/`,
     'em-application': (jobID) => `/jobs/${jobID}/applications/`,
-    'update-application': (applicationID) => `/applications/${applicationID}/`
+    'update-application': (applicationID) => `/applications/${applicationID}/`,
+
 };
 
 export const authApis = (token) => {

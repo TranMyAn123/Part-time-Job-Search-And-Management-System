@@ -249,3 +249,15 @@ class CommentViewSet(viewsets.ViewSet):
             serializers.CommentSerializer(replies, many=True).data,
             status=status.HTTP_200_OK,
         )
+
+
+class CompanyFollowViewSet(viewsets.ViewSet):
+    @action(methods=["patch"], detail=True, url_path="toggle-notify")
+    def toggle_notify(self, request, pk=None):
+        follow = get_object_or_404(CompanyFollow, pk=pk)
+        serializer = serializers.CompanyFollowSerializer(
+            follow, data=request.data, partial=True, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

@@ -1,5 +1,13 @@
 from rest_framework import serializers
-from jobs.models import Job, Application, Employer, Comment, Industry, WorkplaceImage
+from jobs.models import (
+    Job,
+    Application,
+    Employer,
+    Comment,
+    Industry,
+    WorkplaceImage,
+    CompanyFollow,
+)
 from jobs.utils import validators
 from django.db import transaction
 from users.serializers import SimpleUserSerializer
@@ -102,10 +110,12 @@ class EmployerSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         request = self.context["request"]
         if request and request.user and request.user.is_authenticated:
-            data["is_followed"] = instance.followers.filter(
+            follow = instance.followers.filter(
                 candidate=request.user, active=True
-            ).exists()
-
+            ).first()
+            data["is_followed"] = follow is not None
+            data["notify_email"] = follow.notify_email if follow else False
+            data["follow_id"] = follow.id if follow else None
         if instance.logo_company:
             data["logo_company"] = instance.logo_company.url
         data["workplace_images"] = [
@@ -319,4 +329,17 @@ class CommentSerializer(serializers.ModelSerializer):
         return Comment.objects.create(job_id=job_id, user=user, **validated_data)
 
 
-# class JobNotificationSerializer(serializers.ModelSerializer):
+class CompanyFollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyFollow
+        fields = ["notify_email"]
+
+    def update(self, instance, validated_data):
+        user = self.context["request"].user
+        if instance.candidate != user:
+            raise serializers.ValidationError(
+                "Không có quyền thực hiện hành động này !"
+            )
+        instance.notify_email = not instance.notify_email
+        instance.save()
+        return instance

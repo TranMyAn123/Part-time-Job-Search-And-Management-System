@@ -44,7 +44,23 @@ const Profile = () => {
         address: user?.profile?.address || '',
         dob: user?.profile?.dob || '',
     });
+    const [followedEmployers, setFollowedEmployers] = useState([]);
 
+    const toggleNotify = async (emp) => {
+        try {
+            const res = await authApis(user.access_token).patch(F
+                `${endpoints['notifications'](emp.follow_id)}`
+            );
+            setFollowedEmployers(prev =>
+                prev.map(e => e.user_id === emp.user_id
+                    ? { ...e, notify_email: res.data.notify_email }
+                    : e
+                )
+            );
+        } catch (e) {
+            console.error(e);
+        }
+    };
     const userInfo = [
         { field: 'first_name', label: 'Tên', icon: 'account' },
         { field: 'last_name', label: 'Họ', icon: 'account' },
@@ -355,16 +371,10 @@ const Profile = () => {
                         followedEmployers.map(emp => (
                             <Pressable key={emp.user_id} style={UserStyles.followCard}>
                                 {emp.logo_company ? (
-                                    <Image
-                                        source={{ uri: emp.logo_company }}
-                                        style={UserStyles.followLogo}
-                                        resizeMode="contain"
-                                    />
+                                    <Image source={{ uri: emp.logo_company }} style={UserStyles.followLogo} resizeMode="contain" />
                                 ) : (
                                     <View style={UserStyles.followLogoFallback}>
-                                        <Text style={UserStyles.followLogoFallbackText}>
-                                            {emp.company_name?.[0] ?? '?'}
-                                        </Text>
+                                        <Text style={UserStyles.followLogoFallbackText}>{emp.company_name?.[0] ?? '?'}</Text>
                                     </View>
                                 )}
                                 <View style={{ flex: 1 }}>
@@ -373,6 +383,19 @@ const Profile = () => {
                                         {emp.follow_count} người theo dõi · {emp.job_count} việc làm
                                     </Text>
                                 </View>
+
+                                <Pressable
+                                    onPress={() => toggleNotify(emp)}
+                                    style={{ padding: 6, marginRight: 4 }}
+                                    hitSlop={8}
+                                >
+                                    <Icon
+                                        source={emp.notify_email ? "bell" : "bell-off-outline"}
+                                        size={20}
+                                        color={emp.notify_email ? "#185FA5" : "#9CA3AF"}
+                                    />
+                                </Pressable>
+
                                 <Icon source="chevron-right" size={18} color="#9CA3AF" />
                             </Pressable>
                         ))
