@@ -8,7 +8,6 @@ import { CARD_COLORS } from "../configs/Colors";
 import { getInitials, formatSalary } from "../helpers";
 
 
-// ─── Job Card (ngang, nhỏ gọn) ───────────────────────────────────────────────
 function JobCard({ item, index }) {
     const navigation = useNavigation();
     const { color, bgColor } = CARD_COLORS[index % CARD_COLORS.length];
@@ -55,7 +54,6 @@ function JobCard({ item, index }) {
 
 
 
-// ─── Section Header ───────────────────────────────────────────────────────────
 function SectionHeader({ title, onSeeAll }) {
     return (
         <View style={styles.sectionHeader}>
@@ -64,7 +62,7 @@ function SectionHeader({ title, onSeeAll }) {
                 <Text style={styles.sectionTitle}>{title}</Text>
             </View>
             {onSeeAll && (
-                <Pressable onPress={onSeeAll} style={styles.seeAllBtn}>
+                <Pressable onPress={onSeeAll} style={styles.seeAllBtn} >
                     <Text style={styles.seeAllText}>Xem tất cả</Text>
                     <Icon source="chevron-right" size={14} color="#185FA5" />
                 </Pressable>
@@ -73,7 +71,6 @@ function SectionHeader({ title, onSeeAll }) {
     );
 }
 
-// ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function NewestJob({ jobs, loading }) {
     const navigation = useNavigation();
 
@@ -81,7 +78,7 @@ export default function NewestJob({ jobs, loading }) {
         <View>
             <SectionHeader
                 title="Việc làm mới nhất"
-                onSeeAll={() => navigation.navigate("search")}
+                onSeeAll={() => navigation.navigate("SearchJob")}
             />
             {
                 loading ? (
@@ -104,7 +101,6 @@ export default function NewestJob({ jobs, loading }) {
     );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
     jobsScroll: { paddingHorizontal: 16, gap: 12 },
     jobCard: {

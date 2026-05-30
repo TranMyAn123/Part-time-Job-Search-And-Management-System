@@ -4,20 +4,12 @@ from jobs import serializers
 from jobs.models import Job, Application, Comment, Employer, Industry, CompanyFollow
 from jobs.utils import search
 from rest_framework.decorators import action
-<<<<<<< HEAD
 from jobs.perms import IsEmployer, IsJobOwner, IsApplicationJobOwner
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from jobs.paginators import CommentPaginator, ItemPaginator
 from rest_framework.permissions import IsAuthenticated
-=======
-from jobs.perms import IsOwnerOrReadOnly, IsEmployer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from django.db.models import Count
-from django.shortcuts import get_object_or_404
-from jobs.paginators import CommentPaginator, ItemPaginator
->>>>>>> origin/frontend/login_register
 
 
 class JobViewSet(
@@ -32,7 +24,6 @@ class JobViewSet(
     pagination_class = ItemPaginator
 
     def get_permissions(self):
-<<<<<<< HEAD
         if self.action in ["list", "retrieve"]:
             return [AllowAny()]
         if self.action == "comments":
@@ -44,11 +35,6 @@ class JobViewSet(
         if self.action == "applications":
             return [IsAuthenticated(), IsEmployer(), IsJobOwner()]
         return [IsAuthenticatedOrReadOnly()]
-=======
-        if self.action == "comments":
-            return [IsAuthenticatedOrReadOnly()]
-        return [IsAuthenticatedOrReadOnly(), IsEmployer(), IsOwnerOrReadOnly()]
->>>>>>> origin/frontend/login_register
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -59,12 +45,8 @@ class JobViewSet(
         queryset = self.queryset
         if not self.request.user.is_authenticated or self.request.user.role == "USER":
             queryset = queryset.filter(status=Job.Status.OPENING)
-<<<<<<< HEAD
         elif self.request.user.role == "EMPLOYER":
             queryset = queryset.filter(employer__user=self.request.user)
-=======
-
->>>>>>> origin/frontend/login_register
         keyword = self.request.query_params.get("q")
         if keyword:
             fields = [
@@ -90,10 +72,7 @@ class JobViewSet(
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.active = False
-<<<<<<< HEAD
         instance.status = Job.Status.CLOSED
-=======
->>>>>>> origin/frontend/login_register
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -103,11 +82,7 @@ class JobViewSet(
         applications = job.applications.select_related("candidate").all()
 
         return Response(
-<<<<<<< HEAD
             serializers.SimpleApplicationSerializer(applications, many=True).data,
-=======
-            serializers.ApplicationSerializer(applications, many=True).data,
->>>>>>> origin/frontend/login_register
             status=status.HTTP_200_OK,
         )
 
@@ -170,14 +145,6 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
         #     )
         return qs.order_by("-follow_count")
 
-<<<<<<< HEAD
-=======
-    def get_permissions(self):
-        if self.action in ["profile", "follow", "self_job", "applications"]:
-            return [permissions.IsAuthenticated()]
-        return [permissions.AllowAny()]
-
->>>>>>> origin/frontend/login_register
     @action(methods=["post"], url_path="follow", detail=True)
     def follow(self, request, pk):
         fl, created = CompanyFollow.objects.get_or_create(
@@ -194,20 +161,12 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
             ).data
         )
 
-<<<<<<< HEAD
     @action(methods=["post"], url_path="self-jobs", detail=False)
-=======
-    @action(methods=["get","post"], url_path="self-jobs", detail=False)
->>>>>>> origin/frontend/login_register
     def self_job(self, request):
         jobs = Job.objects.select_related("employer", "industry").filter(
             employer__user=request.user
         )
-<<<<<<< HEAD
         return Response(serializers.JobSerializer(jobs, many=True).data)
-=======
-        return Response(serializers.JobSerializer(jobs, many=True, context={"request": request}).data)
->>>>>>> origin/frontend/login_register
 
     @action(methods=["get"], detail=False, url_path="top-followed")
     def top_followed(self, request):
@@ -223,16 +182,12 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
             ).data
         )
 
-<<<<<<< HEAD
     @action(
         methods=["get", "patch"],
         url_path="profile",
         detail=False,
         permission_classes=[IsAuthenticated],
     )
-=======
-    @action(methods=["get", "patch"], url_path="profile", detail=False)
->>>>>>> origin/frontend/login_register
     def profile(self, request):
         employer = Employer.objects.get(user=request.user)
 
@@ -248,10 +203,7 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
             serializers.EmployerSerializer(employer, context={"request": request}).data
         )
 
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/frontend/login_register
 class IndustryViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Industry.objects.filter(active=True)
     serializer_class = serializers.IndustrSerializer
@@ -259,7 +211,6 @@ class IndustryViewSet(viewsets.ViewSet, generics.ListAPIView):
 
 class ApplicationViewSet(
     viewsets.ViewSet,
-<<<<<<< HEAD
     generics.CreateAPIView,
     generics.UpdateAPIView,
 ):
@@ -270,13 +221,6 @@ class ApplicationViewSet(
             return [IsAuthenticated(), IsEmployer(), IsApplicationJobOwner()]
         return [IsAuthenticated()]
 
-=======
-    generics.ListAPIView,
-    generics.CreateAPIView,
-    generics.RetrieveAPIView,
-    generics.UpdateAPIView,
-):
->>>>>>> origin/frontend/login_register
     def get_serializer_class(self):
         if self.action == "create":
             return serializers.ApplicationCreateSerializer
@@ -284,18 +228,6 @@ class ApplicationViewSet(
             return serializers.ApplicationReviewSerializer
         return serializers.ApplicationSerializer
 
-<<<<<<< HEAD
-=======
-    def get_queryset(self):
-        if getattr(self, "swagger_fake_view", False):
-            return Application.objects.none()
-
-        user = self.request.user
-        if user.role == "EMPLOYER":
-            return Application.objects.filter(job__employer__user=user)
-        return Application.objects.filter(candidate=user)
-
->>>>>>> origin/frontend/login_register
 
 class CommentViewSet(viewsets.ViewSet):
     @action(methods=["get"], detail=True, url_path="replies")

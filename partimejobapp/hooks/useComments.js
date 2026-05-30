@@ -46,7 +46,7 @@ export function useComments(jobID) {
                 ...prev,
                 [commentID]: {
                     data: url
-                        ? [...(prev[commentID]?.data ?? []), ...data.results]
+                        ? [...(prev[commentID]?.data), ...data.results]
                         : data.results,
                     loading: false,
                     nextUrl: data.next,
@@ -62,14 +62,12 @@ export function useComments(jobID) {
         }
     }, []);
 
-    // ── Post comment hoặc reply ───────────────────────────────────────────────
-    const postComment = useCallback(async (content, parentID = null) => {
+    const postComment = async (content, parentID = null) => {
         if (!content.trim()) return;
         if (!user) alert("Bạn phải đăng nhập để thực hiện bình luận")
 
         try {
             setPosting(true);
-            // Dùng authApis để gửi token (ở đây đang dùng token từ database
             const res = await authApis(user.access_token).post(
                 endpoints['comments'](jobID),
                 {
@@ -79,10 +77,8 @@ export function useComments(jobID) {
             );
             const newComment = res.data
             if (!parentID) {
-                // Comment cha
                 setComments((prev) => [...prev, newComment]);
             } else {
-                // Reply
                 setReplies((prev) => ({
                     ...prev,
                     [parentID]: {
@@ -94,7 +90,6 @@ export function useComments(jobID) {
                     },
                 }));
 
-                // Tăng số lượng replies
                 setComments((prev) =>
                     prev.map((c) =>
                         c.id === parentID
@@ -116,7 +111,7 @@ export function useComments(jobID) {
         } finally {
             setPosting(false);
         }
-    }, [jobID]);
+    }
 
     return {
         comments,

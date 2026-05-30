@@ -10,9 +10,8 @@ import { MyUserContext } from "../../configs/Contexts";
 import { CARD_COLORS } from "../../configs/Colors";
 import { getInitials } from "../../helpers";
 
-// ─── Employer Card ────────────────────────────────────────────────────────────
 function EmployerCard({ item, index, onFollow, followLoading }) {
-    const nav = useNavigation();
+    const navigation = useNavigation();
     const { color, bgColor } = CARD_COLORS[index % CARD_COLORS.length];
     const initials = getInitials(item.company_name);
     const isFollowed = item.is_followed;
@@ -22,11 +21,10 @@ function EmployerCard({ item, index, onFollow, followLoading }) {
                 styles.card,
                 pressed && { opacity: 0.95, transform: [{ scale: 0.985 }] },
             ]}
-            onPress={() => nav.navigate("EmployerDetail", { employer: item })}
+            onPress={() => navigation.navigate("EmployerDetail", { employer: item })}
         >
             <View style={[styles.cardAccent, { backgroundColor: color }]} />
             <View style={styles.cardInner}>
-                {/* Logo + info */}
                 <View style={styles.cardTop}>
                     <View style={styles.cardLeft}>
                         {item.logo_company ? (
@@ -50,7 +48,6 @@ function EmployerCard({ item, index, onFollow, followLoading }) {
                         </View>
                     </View>
 
-                    {/* Follow button */}
                     <Pressable
                         style={[
                             styles.followBtn,
@@ -81,7 +78,6 @@ function EmployerCard({ item, index, onFollow, followLoading }) {
                     </Pressable>
                 </View>
 
-                {/* Stats */}
                 <View style={styles.statsRow}>
                     <View style={[styles.statItem, { backgroundColor: bgColor }]}>
                         <Icon source="account-multiple-outline" size={14} color={color} />
@@ -97,7 +93,6 @@ function EmployerCard({ item, index, onFollow, followLoading }) {
                     </View>
                 </View>
 
-                {/* Description */}
                 {!!item.description && (
                     <Text style={styles.description} numberOfLines={2}>
                         {item.description}
@@ -108,7 +103,6 @@ function EmployerCard({ item, index, onFollow, followLoading }) {
     );
 }
 
-// ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function EmployerList() {
     const [user] = useContext(MyUserContext);
     const [employers, setEmployers] = useState([]);
@@ -232,7 +226,6 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#F4F6FB" },
     listContent: { paddingBottom: 100 },
 
-    // Header
     header: {
         flexDirection: "row", justifyContent: "space-between",
         alignItems: "flex-start",
@@ -246,7 +239,6 @@ const styles = StyleSheet.create({
         justifyContent: "center", alignItems: "center",
     },
 
-    // Card
     card: {
         backgroundColor: "#fff", borderRadius: 20,
         marginHorizontal: 16, marginBottom: 14,
@@ -277,7 +269,6 @@ const styles = StyleSheet.create({
     companyName: { fontSize: 15, fontWeight: "800", color: "#111827", marginBottom: 2 },
     fullName: { fontSize: 12, color: "#9CA3AF", fontWeight: "500" },
 
-    // Follow button
     followBtn: {
         flexDirection: "row", alignItems: "center", gap: 5,
         paddingHorizontal: 12, paddingVertical: 7,
@@ -286,7 +277,6 @@ const styles = StyleSheet.create({
     },
     followBtnText: { fontSize: 12, fontWeight: "700" },
 
-    // Stats
     statsRow: { flexDirection: "row", gap: 8 },
     statItem: {
         flexDirection: "row", alignItems: "center", gap: 5,
@@ -294,16 +284,13 @@ const styles = StyleSheet.create({
     },
     statText: { fontSize: 12, fontWeight: "600" },
 
-    // Description
     description: { fontSize: 13, color: "#6B7280", lineHeight: 19 },
 
-    // Empty
     empty: {
         alignItems: "center", paddingVertical: 60, gap: 10,
     },
     emptyTitle: { fontSize: 15, fontWeight: "700", color: "#6B7280" },
 
-    // Loading overlay
     loadingOverlay: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: "center", alignItems: "center",

@@ -113,16 +113,21 @@ export default function EditJobScreen({ route, navigation }) {
         industry: form.industry,
         description: form.description.trim(),
       };
-      const res = await authApis(user.access_token).patch(endpoints['update-job'](job.id))
+      const res = await authApis(user.access_token).patch(
+        endpoints['update-job'](job.id),
+        payload
+      );
       Alert.alert("Thành công", "Tin tuyển dụng đã được cập nhật.", [
         { text: "OK", onPress: () => navigation.goBack() },
       ]);
     } catch (err) {
-      Alert.alert("Lỗi", err?.response?.data?.detail ?? "Không thể cập nhật tin.");
+      const data = err?.response?.data;
+      const msg = typeof data === "string" ? data : "Không thể cập nhật tin.";
+      Alert.alert("Lỗi", msg);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const formattedDate = form.available_date.toLocaleDateString("vi-VN");
 
@@ -294,7 +299,6 @@ export default function EditJobScreen({ route, navigation }) {
           />
         )}
 
-        {/* Section: Phân loại */}
         <Text style={styles.section}>Phân loại</Text>
 
         <Field label="Ngành nghề">
@@ -311,7 +315,6 @@ export default function EditJobScreen({ route, navigation }) {
 
 
 
-        {/* Bottom action */}
         <TouchableOpacity
           style={[styles.submitBtn, loading && { opacity: 0.6 }]}
           onPress={handleSave}
@@ -327,7 +330,6 @@ export default function EditJobScreen({ route, navigation }) {
         <View style={{ height: 32 }} />
       </ScrollView>
 
-      {/* Industry bottom sheet */}
       {showIndustrySheet && (
         <TouchableOpacity
           style={styles.overlay}

@@ -7,7 +7,6 @@ import {
     Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-<<<<<<< HEAD
 import { getInitials } from "../helpers";
 export default function Header({ user }) {
 
@@ -15,10 +14,6 @@ export default function Header({ user }) {
         user?.last_name && user?.first_name
             ? `${user.last_name} ${user.first_name}`
             : user?.username || "";
-=======
-
-export default function Header({ user }) {
->>>>>>> origin/frontend/login_register
     const navigation = useNavigation();
 
     const greeting = () => {
@@ -30,22 +25,6 @@ export default function Header({ user }) {
         return "Chào buổi tối 🌙";
     };
 
-<<<<<<< HEAD
-=======
-    function getInitials(name = "") {
-        const words = name.trim().split(/\s+/);
-
-        if (words.length === 1)
-            return words[0].slice(0, 2).toUpperCase();
-
-        return words
-            .slice(0, 2)
-            .map((w) => w[0])
-            .join("")
-            .toUpperCase();
-    }
-
->>>>>>> origin/frontend/login_register
     return (
         <View style={styles.header}>
             <View style={styles.left}>
@@ -54,11 +33,7 @@ export default function Header({ user }) {
                 </Text>
 
                 <Text style={styles.headerTitle}>
-<<<<<<< HEAD
                     {user ? getFullName : "Khách"}
-=======
-                    {user ? user.full_name || user.username : "Khách"}
->>>>>>> origin/frontend/login_register
                 </Text>
 
                 <Text style={styles.headerSub}>
@@ -80,11 +55,7 @@ export default function Header({ user }) {
                 ) : (
                     <Text style={styles.avatarText}>
                         {user
-<<<<<<< HEAD
                             ? getInitials(getFullName)
-=======
-                            ? getInitials(user.full_name || user.username)
->>>>>>> origin/frontend/login_register
                             : "?"}
                     </Text>
                 )}

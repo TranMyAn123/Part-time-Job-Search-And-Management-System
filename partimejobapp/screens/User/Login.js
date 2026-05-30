@@ -9,12 +9,9 @@ import { MyUserContext } from "../../configs/Contexts";
 import SocialLogin from "../../components/SocialLogin";
 import logo from "../../assets/logo.png";
 import UserStyles from "./Styles";
-<<<<<<< HEAD
 import { signInWithCustomToken } from "firebase/auth";
 import { auth } from "../../configs/Firebase";
 
-=======
->>>>>>> origin/frontend/login_register
 
 const Login = () => {
     const userInfo = [{
@@ -52,7 +49,6 @@ const Login = () => {
             setErr({});
             try {
                 setLoading(true);
-<<<<<<< HEAD
 
                 let res = await Apis.post(endpoints['login'], {
                     ...user,
@@ -86,38 +82,11 @@ const Login = () => {
                         || "Đăng nhập thất bại!"
                 });
                 console.log(ex);
-=======
-                let res = await Apis.post(endpoints['login'], {
-                    ...user,
-                    'grant_type': 'password'
-                });
-                let u = await authApis(res.data.access_token).get(endpoints['current-user']);
-                await AsyncStorage.setItem('token', res.data.access_token);
-                dispatch({
-                    "type": "LOGIN",
-                    payload: {
-                        ...u.data,
-                        access_token: res.data.access_token,
-                        refresh_token: res.data.refresh_token,
-                    },
-                });
-            } catch (ex) {
-                const httpStatus = ex.response?.status;
-                let msg = "Đăng nhập thất bại!";
-                if (httpStatus === 400 || httpStatus === 401) {
-                    msg = "Sai tên đăng nhập hoặc mật khẩu!";
-                }
-                setErr({ api: msg });
->>>>>>> origin/frontend/login_register
             } finally {
                 setLoading(false);
             }
         }
-<<<<<<< HEAD
     };
-=======
-    }
->>>>>>> origin/frontend/login_register
 
     const handleSelectRole = (role) => {
         setShowRole(false);

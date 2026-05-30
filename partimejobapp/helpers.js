@@ -10,14 +10,11 @@ export function getInitials(name = "") {
         .toUpperCase();
 }
 
-<<<<<<< HEAD
 export function getFullName(candidate) {
     const full = `${candidate.last_name} ${candidate.first_name}`.trim();
     return full || "Chưa có tên";
 }
 
-=======
->>>>>>> origin/frontend/login_register
 export function formatSalary(min, max) {
     const a = parseFloat(min ?? 0);
     const b = parseFloat(max ?? 0);
@@ -29,7 +26,6 @@ export function formatSalary(min, max) {
 
 export function formatDate(iso) {
     if (!iso) return "—";
-    // "2026-06-30" → "30/06/2026"
     const parts = iso.split("-");
     if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
     return iso;

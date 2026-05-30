@@ -2,6 +2,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
 from ..models import JobNotification
+import logging
 
 
 def send_job_opening_notification(notification: JobNotification):
@@ -25,7 +26,7 @@ def send_job_opening_notification(notification: JobNotification):
         send_mail(
             subject=f"[{employer.company_name}] Có việc làm mới: {job.title}",
             message="",
-            from_email="trankhanha53@gmail.com",
+            from_email=employer.user.email,
             recipient_list=[candidate.email],
             html_message=html_body,
             fail_silently=False,
@@ -37,7 +38,6 @@ def send_job_opening_notification(notification: JobNotification):
     except Exception as e:
         notification.status = JobNotification.Status.FAILED
         notification.save(update_fields=["status"])
-        import logging
 
         logging.getLogger(__name__).error(
             f"Failed to send notification id={notification.id}: {e}"

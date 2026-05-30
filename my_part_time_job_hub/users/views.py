@@ -9,21 +9,18 @@ from users.services import auth_services
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
 from django.conf import settings
 from oauth2_provider.models import AccessToken, Application
-<<<<<<< HEAD
-from jobs.serializers import ApplicationSerializer
-from jobs.models import Application as JobApplication
+
 from django.http import HttpResponse
 from django.shortcuts import redirect
 import json
 from django.test import RequestFactory
 from oauth2_provider.views import TokenView
-=======
 from jobs.serializers import ApplicationSerializer, EmployerSerializer
 from jobs.models import Application as JobApplication, CompanyFollow
 from django.db.models import Count
+from jobs.paginators import ItemPaginator
 
 # from google.auth.transport import requests
->>>>>>> origin/frontend/login_register
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
@@ -80,18 +77,19 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         applications = JobApplication.objects.filter(candidate=u).order_by(
             "-apply_date"
         )
-        return Response(
-<<<<<<< HEAD
-            ApplicationSerializer(
-                applications, many=True, context={"request": request}
-            ).data,
-            status=status.HTTP_200_OK,
-        )
+        p = ItemPaginator()
+        page = p.paginate_queryset(applications)
 
-=======
-            ApplicationSerializer(applications, many=True).data,
-            status=status.HTTP_200_OK,
+        if page is not None:
+            serializer = ApplicationSerializer(
+                page, many=True, context={"request": request}
+            )
+            return p.get_paginated_response(serializer.data)
+
+        serializer = ApplicationSerializer(
+            applications, many=True, context={"request": request}
         )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         methods=["get"],
@@ -100,18 +98,20 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         permission_classes=[permissions.IsAuthenticated],
     )
     def follows(self, request):
-        followed = CompanyFollow.objects.filter(
-            candidate=request.user, active=True
-        ).select_related("employer__user").annotate(
-            follow_count=Count("employer__followers"),
-            job_count=Count("employer__jobs"),
+        followed = (
+            CompanyFollow.objects.filter(candidate=request.user, active=True)
+            .select_related("employer__user")
+            .annotate(
+                follow_count=Count("employer__followers"),
+                job_count=Count("employer__jobs"),
+            )
         )
         employers = [f.employer for f in followed]
         return Response(
             EmployerSerializer(employers, many=True, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
->>>>>>> origin/frontend/login_register
+
 
 class AuthViewSet(viewsets.ViewSet):
     @action(
@@ -133,12 +133,6 @@ class AuthViewSet(viewsets.ViewSet):
     @action(methods=["post"], url_path="login", detail=False)
     def login_user(self, request):
         data = request.data
-<<<<<<< HEAD
-=======
-        print("BODY:", data)
-        print("CONTENT TYPE:", request.content_type)
-        print("POST:", request.POST)
->>>>>>> origin/frontend/login_register
 
         if not data:
             return Response(
@@ -149,11 +143,8 @@ class AuthViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             validated_data = serializer.validated_data
 
-<<<<<<< HEAD
-=======
             token_url = request.build_absolute_uri("/o/token/")
 
->>>>>>> origin/frontend/login_register
             data_send_oauth = {
                 "grant_type": "password",
                 "username": validated_data["username"],
@@ -162,7 +153,6 @@ class AuthViewSet(viewsets.ViewSet):
                 "client_secret": settings.CLIENT_SECRET,
             }
 
-<<<<<<< HEAD
             factory = RequestFactory()
             internal_request = factory.post(
                 "/o/token/",
@@ -171,25 +161,17 @@ class AuthViewSet(viewsets.ViewSet):
             )
             token_response = TokenView.as_view()(internal_request)
             token_data = json.loads(token_response.content)
-            print(token_data)
-            print(token_response.status_code)
-            print(token_response.content)
+
             if token_response.status_code == 200:
-=======
-            response = requests.post(token_url, json=data_send_oauth)
+                response = requests.post(token_url, json=data_send_oauth)
 
             if response.status_code == 200:
->>>>>>> origin/frontend/login_register
                 user = validated_data.get("user")
                 if user:
                     user.last_login = timezone.now()
                     user.save(update_fields=["last_login"])
 
-<<<<<<< HEAD
             return Response(token_data, status=status.HTTP_200_OK)
-=======
-            return Response(response.json(), status=status.HTTP_200_OK)
->>>>>>> origin/frontend/login_register
         except AuthenticationFailed as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -216,7 +198,6 @@ class AuthViewSet(viewsets.ViewSet):
         except AuthenticationFailed as e:
             return Response({"message": e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
-<<<<<<< HEAD
     @action(methods=["get"], url_path="google/login", detail=False)
     def google_login_redirect(self, request):
         url = auth_services.build_google_auth_url()
@@ -253,35 +234,12 @@ class AuthViewSet(viewsets.ViewSet):
 
         app = Application.objects.first()
 
-=======
-    @action(methods=["post"], url_path="google/login", detail=False)
-    def google_login(self, request):
-        code = request.data.get("code")
-        if not code:
-            return Response(
-                {"error": "Code không tồn tại"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        access_token_from_google = auth_services.change_code_to_token("google", code)
-
-        if not access_token_from_google:
-            return Response(
-                {"Google's token not available !"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        data = auth_services.get_google_user(access_token_from_google)
-        user, created = auth_services.create_user_from_social_login(
-            data.get("email"), data.get("given_name", ""), data.get("family_name", "")
-        )
-        app = Application.objects.first()
->>>>>>> origin/frontend/login_register
         if not app:
             return Response(
                 {"error": "OAuth application not configured"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-<<<<<<< HEAD
-        # Xóa token cũ nếu có thay vì báo lỗi
         AccessToken.objects.filter(user=user).delete()
 
         access_token_sys, refresh_token = auth_services.create_token_from_social_login(
@@ -328,30 +286,3 @@ class AuthViewSet(viewsets.ViewSet):
 #         return Response(
 #             {"Token của google chưa tồn tại"}, status=status.HTTP_404_NOT_FOUND
 #         )
-=======
-        if AccessToken.objects.filter(user=user).exists():
-            return Response(
-                {"message": "Token available !"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        access_token, refresh_token = auth_services.create_token_from_social_login(
-            user, app
-        )
-        return Response(
-            {"access_token": access_token, "refresh_token": refresh_token},
-            status=status.HTTP_200_OK,
-        )
-
-    @action(methods=["post"], url_path="facebook/login", detail=False)
-    def facebook_login(self, request):
-        code = request.data.get("code")
-
-        if not code:
-            return Response({"error": "Code không tồn tại"}, status=400)
-        access_token_from_facebook = auth_services.change_code_to_token(
-            "facebook", code
-        )
-        if not access_token_from_facebook:
-            return Response(
-                {"Token của google chưa tồn tại"}, status=status.HTTP_404_NOT_FOUND
-            )
->>>>>>> origin/frontend/login_register

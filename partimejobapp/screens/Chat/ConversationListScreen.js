@@ -14,7 +14,7 @@ function formatTime(timestamp) {
     const now = new Date();
     const isToday = d.toDateString() === now.toDateString();
     if (isToday) {
-        return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digits' });
     }
     return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
 }

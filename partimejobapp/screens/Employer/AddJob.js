@@ -1,17 +1,14 @@
 import { View, ScrollView, Text, Platform, Modal, Pressable } from "react-native";
 import { Button, HelperText, TextInput, Snackbar } from "react-native-paper";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { authApis, endpoints } from "../../configs/Apis";
 import { useNavigation } from "@react-navigation/native";
 import { Colors } from "../../configs/Colors";
 import Styles, { inputTheme } from "../../styles/Styles";
-<<<<<<< HEAD
 import EmployerStyles from "./Styles"
-=======
-import { EmployerStyles } from "./Styles"
->>>>>>> origin/frontend/login_register
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { MyUserContext } from "../../configs/Contexts";
 
 const SectionCard = ({ title, children }) => (
     <View style={Styles.sectionCard}>
@@ -32,11 +29,10 @@ const AddJob = () => {
         title: '', requirement: '', salary_min: '', salary_max: '',
         benefits: '', location: '', available_date: '', industry: null, description: '',
     });
-
+    const [user] = useContext(MyUserContext)
     const loadIndustries = async () => {
         try {
-            const token = await AsyncStorage.getItem('token');
-            const res = await authApis(token).get(endpoints['industries']);
+            const res = await authApis(user.access_token).get(endpoints['industries']);
             setIndustries(res.data.results || res.data);
         } catch (ex) { console.log(ex); }
     };
@@ -75,11 +71,12 @@ const AddJob = () => {
             const token = await AsyncStorage.getItem('token');
             const parts = form.available_date.split('/');
             const dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-            await authApis(token).post(endpoints['add-job'], {
+            await authApis(user.access_token).post(endpoints['add-job'], {
                 title: form.title, requirement: form.requirement,
                 salary_min: form.salary_min, salary_max: form.salary_max,
                 benefits: form.benefits, location: form.location,
                 available_date: dateStr, industry: form.industry,
+                max_applicants: 10,
                 description: form.description,
             });
             setVisible(true);

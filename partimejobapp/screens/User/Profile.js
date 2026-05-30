@@ -1,20 +1,11 @@
 import {
     Image, Text, ScrollView, TouchableOpacity, View,
-<<<<<<< HEAD
     Pressable, Platform, Modal
 } from "react-native";
 import { useContext, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { MyUserContext } from "../../configs/Contexts";
 import { Button, TextInput, HelperText } from "react-native-paper";
-=======
-    Pressable, Platform, Modal,
-} from "react-native";
-import { useContext, useState, useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { MyUserContext } from "../../configs/Contexts";
-import { Button, TextInput, HelperText, Icon } from "react-native-paper";
->>>>>>> origin/frontend/login_register
 import { authApis, endpoints } from "../../configs/Apis";
 import { Colors } from "../../configs/Colors";
 import * as ImgPicker from 'expo-image-picker';
@@ -39,10 +30,6 @@ const Profile = () => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [changingPassword, setChangingPassword] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
-<<<<<<< HEAD
-=======
-    const [followedEmployers, setFollowedEmployers] = useState([]);
->>>>>>> origin/frontend/login_register
     const [passwords, setPasswords] = useState({
         old_password: '',
         new_password: '',
@@ -68,27 +55,9 @@ const Profile = () => {
         { field: 'dob', label: 'Ngày sinh', icon: 'calendar' },
     ];
 
-<<<<<<< HEAD
-=======
-    useEffect(() => {
-        const fetchFollowed = async () => {
-            try {
-                const token = await AsyncStorage.getItem('token');
-                const res = await authApis(token).get(endpoints['my-follows']);
-                const results = Array.isArray(res.data) ? res.data : (res.data.results ?? []);
-                setFollowedEmployers(results);
-            } catch (e) {
-                console.log('fetch follow error', e);
-            }
-        };
-        if (user) fetchFollowed();
-    }, [user]);
-
->>>>>>> origin/frontend/login_register
     const save = async () => {
         try {
             setLoading(true);
-            const token = await AsyncStorage.getItem('token');
             let dob = userEdit.dob;
             if (dob && dob.includes('/')) {
                 const parts = dob.split('/');
@@ -104,7 +73,7 @@ const Profile = () => {
                 dob: dob,
                 cityzenID: userEdit.cityzenID,
             };
-            let res = await authApis(token).patch(endpoints['current-user'], dataToSend);
+            let res = await authApis(user.access_token).patch(endpoints['current-user'], dataToSend);
             dispatch({ type: "LOGIN", payload: res.data });
             setEditing(false);
         } catch (ex) {
@@ -116,11 +85,7 @@ const Profile = () => {
         } finally {
             setLoading(false);
         }
-<<<<<<< HEAD
     }
-=======
-    };
->>>>>>> origin/frontend/login_register
 
     const cancelEmployerRequest = async () => {
         try {
@@ -134,11 +99,7 @@ const Profile = () => {
         } finally {
             setLoading(false);
         }
-<<<<<<< HEAD
     }
-=======
-    };
->>>>>>> origin/frontend/login_register
 
     const dobValue = () => {
         if (!userEdit.dob) return new Date();
@@ -147,11 +108,7 @@ const Profile = () => {
             return new Date(parts[2], parts[1] - 1, parts[0]);
         }
         return new Date();
-<<<<<<< HEAD
     }
-=======
-    };
->>>>>>> origin/frontend/login_register
 
     const changePassword = async () => {
         let newErr = {};
@@ -185,11 +142,7 @@ const Profile = () => {
         } finally {
             setLoading(false);
         }
-<<<<<<< HEAD
     }
-=======
-    };
->>>>>>> origin/frontend/login_register
 
     const picker = async () => {
         let { status, canAskAgain } = await ImgPicker.requestMediaLibraryPermissionsAsync();
@@ -200,7 +153,6 @@ const Profile = () => {
                 alert("Cần quyền truy cập ảnh để đổi avatar!");
             }
             return;
-<<<<<<< HEAD
         } else {
             const result = await ImgPicker.launchImageLibraryAsync();
             if (!result.canceled) {
@@ -231,32 +183,6 @@ const Profile = () => {
             }
         }
     }
-=======
-        }
-        const result = await ImgPicker.launchImageLibraryAsync();
-        if (!result.canceled) {
-            try {
-                setLoading(true);
-                const token = await AsyncStorage.getItem('token');
-                let form = new FormData();
-                form.append('avatar', {
-                    uri: result.assets[0].uri,
-                    name: result.assets[0].fileName,
-                    type: "image/jpeg"
-                });
-                let res = await authApis(token).patch(endpoints['current-user'], form, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                dispatch({ type: "UPDATE_AVATAR", payload: res.data });
-            } catch (ex) {
-                console.error(ex);
-                alert("Cập nhật avatar thất bại!");
-            } finally {
-                setLoading(false);
-            }
-        }
-    };
->>>>>>> origin/frontend/login_register
 
     return (
         <ScrollView contentContainerStyle={[Styles.padding, Styles.gap]}>
@@ -335,7 +261,6 @@ const Profile = () => {
                 {showDatePicker && (
                     <Modal transparent animationType="fade">
                         <View style={{
-<<<<<<< HEAD
                             flex: 1,
                             backgroundColor: 'rgba(0,0,0,0.5)',
                             justifyContent: 'center',
@@ -347,12 +272,6 @@ const Profile = () => {
                                 padding: 16,
                                 width: '90%',
                             }}>
-=======
-                            flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',
-                            justifyContent: 'center', alignItems: 'center',
-                        }}>
-                            <View style={{ backgroundColor: 'white', borderRadius: 16, padding: 16, width: '90%' }}>
->>>>>>> origin/frontend/login_register
                                 <DateTimePicker
                                     value={dobValue()}
                                     mode="date"
@@ -377,7 +296,6 @@ const Profile = () => {
             {changingPassword && (
                 <SectionCard title="Đổi mật khẩu">
                     <View style={{ marginHorizontal: 16, gap: 12, marginBottom: 16 }}>
-<<<<<<< HEAD
 
                         {!!err.non_field_errors && (
                             <HelperText type="error" visible={true}>
@@ -385,11 +303,6 @@ const Profile = () => {
                             </HelperText>
                         )}
 
-=======
-                        {!!err.non_field_errors && (
-                            <HelperText type="error" visible={true}>{err.non_field_errors}</HelperText>
-                        )}
->>>>>>> origin/frontend/login_register
                         {[
                             { field: 'old_password', label: 'Mật khẩu cũ' },
                             { field: 'new_password', label: 'Mật khẩu mới' },
@@ -423,42 +336,6 @@ const Profile = () => {
                 </SectionCard>
             )}
 
-<<<<<<< HEAD
-=======
-            <SectionCard title="🏢 Công ty đang theo dõi">
-                <View style={{ marginHorizontal: 16, marginBottom: 16, gap: 10 }}>
-                    {followedEmployers.length === 0 ? (
-                        <Text style={UserStyles.followEmpty}>Bạn chưa theo dõi công ty nào.</Text>
-                    ) : (
-                        followedEmployers.map(emp => (
-                            <Pressable key={emp.user_id} style={UserStyles.followCard}>
-                                {emp.logo_company ? (
-                                    <Image
-                                        source={{ uri: emp.logo_company }}
-                                        style={UserStyles.followLogo}
-                                        resizeMode="contain"
-                                    />
-                                ) : (
-                                    <View style={UserStyles.followLogoFallback}>
-                                        <Text style={UserStyles.followLogoFallbackText}>
-                                            {emp.company_name?.[0] ?? '?'}
-                                        </Text>
-                                    </View>
-                                )}
-                                <View style={{ flex: 1 }}>
-                                    <Text style={UserStyles.followCompanyName}>{emp.company_name}</Text>
-                                    <Text style={UserStyles.followMeta}>
-                                        {emp.follow_count} người theo dõi · {emp.job_count} việc làm
-                                    </Text>
-                                </View>
-                                <Icon source="chevron-right" size={18} color="#9CA3AF" />
-                            </Pressable>
-                        ))
-                    )}
-                </View>
-            </SectionCard>
-
->>>>>>> origin/frontend/login_register
             <View style={{ flexDirection: 'row', marginHorizontal: 16, gap: 10, marginBottom: 12 }}>
                 <Button
                     compact
@@ -473,16 +350,11 @@ const Profile = () => {
                     compact
                     disabled={loading}
                     onPress={editing ? () => setEditing(false) : () => {
-<<<<<<< HEAD
                         if (changingPassword) {
                             changePassword();
                         } else {
                             setChangingPassword(true);
                         }
-=======
-                        if (changingPassword) changePassword();
-                        else setChangingPassword(true);
->>>>>>> origin/frontend/login_register
                     }}
                     style={[Styles.button, { flex: 1, backgroundColor: editing ? '#e53935' : '#F97316' }]}
                     labelStyle={Styles.buttonLabel}
@@ -507,10 +379,6 @@ const Profile = () => {
                 mode="contained">Đăng xuất</Button>
         </ScrollView>
     );
-<<<<<<< HEAD
 }
-=======
-};
->>>>>>> origin/frontend/login_register
 
 export default Profile;

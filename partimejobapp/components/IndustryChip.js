@@ -3,7 +3,6 @@ import { ScrollView, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 export default function IndustryChip({ industries = [], active, setActive }) {
 
-    // thêm "Tất cả" vào đầu list
     const data = [
         { id: "all", name: "Tất cả" },
         ...industries,

@@ -4,13 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
-<<<<<<< HEAD
     "android": "expo run:android",
     "ios": "expo run:ios",
-=======
-    "android": "expo start --android",
-    "ios": "expo start --ios",
->>>>>>> origin/frontend/login_register
     "web": "expo start --web"
   },
   "dependencies": {
@@ -23,19 +18,13 @@
     "expo": "~54.0.0",
     "expo-auth-session": "~7.0.11",
     "expo-crypto": "~15.0.9",
-<<<<<<< HEAD
     "expo-dev-client": "~6.0.21",
-=======
     "expo-document-picker": "~14.0.8",
->>>>>>> origin/frontend/login_register
     "expo-image-picker": "~17.0.11",
     "expo-linear-gradient": "~15.0.8",
     "expo-status-bar": "~3.0.9",
     "expo-web-browser": "~15.0.11",
-<<<<<<< HEAD
     "firebase": "^12.13.0",
-=======
->>>>>>> origin/frontend/login_register
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-paper": "^5.15.2",

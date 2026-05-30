@@ -11,8 +11,7 @@ import {
 } from "react-native";
 import { Icon } from "react-native-paper";
 import { useComments } from "../hooks/useComments";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import { getInitials } from "../helpers";
 function timeAgo(isoString) {
     const diff = Date.now() - new Date(isoString).getTime();
     const mins = Math.floor(diff / 60000);
@@ -25,11 +24,8 @@ function timeAgo(isoString) {
     return `${Math.floor(days / 30)} tháng trước`;
 }
 
-function getInitials(name = "") {
-    return name.split(" ").slice(-2).map((w) => w[0]).join("").toUpperCase();
-}
 
-// ─── Avatar ───────────────────────────────────────────────────────────────────
+
 const AVATAR_COLORS = ["#185FA5", "#4ECDC4", "#A78BFA", "#F97316", "#FF6B6B"];
 function Avatar({ name, size = 36 }) {
     const colorIndex =
@@ -50,7 +46,6 @@ function Avatar({ name, size = 36 }) {
     );
 }
 
-// ─── Reply item ───────────────────────────────────────────────────────────────
 function ReplyItem({ reply }) {
     return (
         <View style={styles.replyItem}>
@@ -66,7 +61,6 @@ function ReplyItem({ reply }) {
     );
 }
 
-// ─── Comment item ─────────────────────────────────────────────────────────────
 function CommentItem({ comment, onReply, replies, onLoadReplies }) {
     const replyState = replies[comment.id];
     const repliesLoaded = Array.isArray(replyState?.data);
@@ -78,14 +72,12 @@ function CommentItem({ comment, onReply, replies, onLoadReplies }) {
         if (!repliesLoaded) {
             onLoadReplies(comment.id);
         } else {
-            // Đã load rồi → load more nếu còn
             if (hasMoreReplies) onLoadReplies(comment.id, replyState.nextUrl);
         }
     };
 
     return (
         <View style={styles.commentItem}>
-            {/* Main comment */}
             <View style={styles.commentRow}>
                 <Avatar name={comment.user.fullname} size={36} />
                 <View style={styles.commentBody}>
@@ -97,7 +89,6 @@ function CommentItem({ comment, onReply, replies, onLoadReplies }) {
                         <Text style={styles.commentContent}>{comment.content}</Text>
                     </View>
 
-                    {/* Actions */}
                     <View style={styles.commentActions}>
                         <Pressable
                             style={styles.actionBtn}
@@ -110,9 +101,7 @@ function CommentItem({ comment, onReply, replies, onLoadReplies }) {
                 </View>
             </View>
 
-            {/* Replies */}
             <View style={styles.repliesSection}>
-                {/* Show/load replies button */}
                 {comment.reply_count > 0 && !repliesLoaded && (
                     <Pressable style={styles.loadRepliesBtn} onPress={handleToggleReplies}>
                         {replyLoading ? (
@@ -126,12 +115,10 @@ function CommentItem({ comment, onReply, replies, onLoadReplies }) {
                     </Pressable>
                 )}
 
-                {/* Reply list */}
                 {repliesLoaded && replyList.map((r) => (
                     <ReplyItem key={r.id} reply={r} />
                 ))}
 
-                {/* Load more replies */}
                 {repliesLoaded && hasMoreReplies && (
                     <Pressable style={styles.loadRepliesBtn} onPress={handleToggleReplies}>
                         {replyLoading ? (
@@ -147,7 +134,6 @@ function CommentItem({ comment, onReply, replies, onLoadReplies }) {
     );
 }
 
-// ─── Main Export ──────────────────────────────────────────────────────────────
 export default function CommentSection({ jobID, labelColor = "#185FA5" }) {
     const {
         comments,
@@ -169,9 +155,9 @@ export default function CommentSection({ jobID, labelColor = "#185FA5" }) {
         fetchComments();
     }, []);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (!text.trim()) return;
-        postComment(text.trim(), replyingTo?.id ?? null);
+        await postComment(text.trim(), replyingTo?.id ?? null);
         setText("");
         setReplyingTo(null);
     };
@@ -187,7 +173,6 @@ export default function CommentSection({ jobID, labelColor = "#185FA5" }) {
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-            {/* Header */}
             <View style={styles.sectionTitleRow}>
                 <View style={[styles.sectionAccent, { backgroundColor: labelColor }]} />
                 <Text style={styles.sectionTitle}>Bình luận</Text>
@@ -196,7 +181,6 @@ export default function CommentSection({ jobID, labelColor = "#185FA5" }) {
                 </Text>
             </View>
 
-            {/* Comment list */}
             {loading && comments.length === 0 ? (
                 <ActivityIndicator
                     color={labelColor}
@@ -233,9 +217,7 @@ export default function CommentSection({ jobID, labelColor = "#185FA5" }) {
                 </>
             )}
 
-            {/* Input box */}
             <View style={styles.inputWrapper}>
-                {/* Replying to banner */}
                 {replyingTo && (
                     <View style={[styles.replyBanner, { borderLeftColor: labelColor }]}>
                         <Icon source="reply" size={14} color={labelColor} />
@@ -288,9 +270,7 @@ export default function CommentSection({ jobID, labelColor = "#185FA5" }) {
     );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-    // Section header
     sectionTitleRow: {
         flexDirection: "row", alignItems: "center", gap: 8,
         marginTop: 22, marginBottom: 14,
@@ -299,7 +279,6 @@ const styles = StyleSheet.create({
     sectionTitle: { fontSize: 16, fontWeight: "800", color: "#111827", flex: 1 },
     commentCount: { fontSize: 13, color: "#9CA3AF", fontWeight: "500" },
 
-    // Empty
     emptyBox: {
         alignItems: "center", paddingVertical: 28, gap: 6,
         backgroundColor: "#fff", borderRadius: 16, marginBottom: 12,
@@ -307,11 +286,9 @@ const styles = StyleSheet.create({
     emptyText: { fontSize: 14, fontWeight: "700", color: "#6B7280" },
     emptySubText: { fontSize: 13, color: "#9CA3AF" },
 
-    // Avatar
     avatar: { justifyContent: "center", alignItems: "center", flexShrink: 0 },
     avatarText: { color: "#fff", fontWeight: "800" },
 
-    // Comment
     commentItem: { marginBottom: 16 },
     commentRow: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
     commentBody: { flex: 1 },
@@ -334,7 +311,6 @@ const styles = StyleSheet.create({
     actionText: { fontSize: 12, color: "#9CA3AF", fontWeight: "600" },
 
 
-    // Replies
     repliesSection: { marginLeft: 46, marginTop: 6, gap: 8 },
     loadRepliesBtn: {
         flexDirection: "row", alignItems: "center", gap: 6,
@@ -348,14 +324,12 @@ const styles = StyleSheet.create({
         padding: 10,
     },
 
-    // Load more comments
     loadMoreBtn: {
         alignItems: "center", paddingVertical: 12,
         marginBottom: 4,
     },
     loadMoreText: { fontSize: 14, fontWeight: "700" },
 
-    // Input
     inputWrapper: {
         backgroundColor: "#fff", borderRadius: 18,
         borderWidth: 1, borderColor: "#E5E7EB",

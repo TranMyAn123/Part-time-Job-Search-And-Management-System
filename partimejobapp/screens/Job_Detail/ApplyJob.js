@@ -111,7 +111,6 @@ const ApplyJob = () => {
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#F4F6FB" />
 
-            {/* Header */}
             <View style={styles.header}>
                 <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
                     <Icon source="arrow-left" size={22} color="#111827" />
@@ -126,7 +125,6 @@ const ApplyJob = () => {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Job info */}
                 <SectionCard title="Thông tin vị trí" icon="briefcase-outline">
                     <View style={styles.jobInfoRow}>
                         <View style={styles.jobIconWrap}>
@@ -163,7 +161,6 @@ const ApplyJob = () => {
                     </View>
                 </SectionCard>
 
-                {/* CV upload */}
                 <SectionCard title="CV đính kèm" icon="file-pdf-box">
                     <Pressable onPress={pickDocument} style={[styles.cvUpload, cvFile && styles.cvUploaded]}>
                         <Icon
@@ -188,7 +185,6 @@ const ApplyJob = () => {
                     )}
                 </SectionCard>
 
-                {/* Note */}
                 <SectionCard title="Ghi chú cho nhà tuyển dụng" icon="note-text-outline">
                     <TextInput
                         mode="outlined"
@@ -204,7 +200,6 @@ const ApplyJob = () => {
                     />
                 </SectionCard>
 
-                {/* Applicant info */}
                 <SectionCard title="Thông tin của bạn" icon="account-outline">
                     <View style={styles.jobInfoRow}>
                         <View style={styles.jobIconWrap}>
@@ -244,7 +239,6 @@ const ApplyJob = () => {
                 <View style={{ height: 110 }} />
             </ScrollView>
 
-            {/* Submit button */}
             <View style={styles.cta}>
                 <Pressable
                     onPress={handleSubmit}

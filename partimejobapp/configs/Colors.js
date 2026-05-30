@@ -25,19 +25,19 @@ export const Colors = {
 
 
 export const CARD_COLORS = [
-    { color: "#FF6B6B", bgColor: "#FFF0F0" }, // đỏ
-    { color: "#4ECDC4", bgColor: "#EEFAF9" }, // xanh mint
-    { color: "#A78BFA", bgColor: "#F5F0FF" }, // tím
-    { color: "#F97316", bgColor: "#FFF4ED" }, // cam
-    { color: "#185FA5", bgColor: "#EBF4FF" }, // xanh dương
+    { color: "#FF6B6B", bgColor: "#FFF0F0" },
+    { color: "#4ECDC4", bgColor: "#EEFAF9" },
+    { color: "#A78BFA", bgColor: "#F5F0FF" },
+    { color: "#F97316", bgColor: "#FFF4ED" },
+    { color: "#185FA5", bgColor: "#EBF4FF" },
 
-    { color: "#10B981", bgColor: "#ECFDF5" }, // xanh lá
-    { color: "#EAB308", bgColor: "#FEFCE8" }, // vàng
-    { color: "#EC4899", bgColor: "#FDF2F8" }, // hồng
-    { color: "#6366F1", bgColor: "#EEF2FF" }, // indigo
-    { color: "#14B8A6", bgColor: "#F0FDFA" }, // teal
-    { color: "#8B5CF6", bgColor: "#F3E8FF" }, // violet
-    { color: "#F43F5E", bgColor: "#FFF1F2" }, // rose
+    { color: "#10B981", bgColor: "#ECFDF5" },
+    { color: "#EAB308", bgColor: "#FEFCE8" },
+    { color: "#EC4899", bgColor: "#FDF2F8" },
+    { color: "#6366F1", bgColor: "#EEF2FF" },
+    { color: "#14B8A6", bgColor: "#F0FDFA" },
+    { color: "#8B5CF6", bgColor: "#F3E8FF" },
+    { color: "#F43F5E", bgColor: "#FFF1F2" },
 ];
 
 export const INDUSTRY_COLORS = [

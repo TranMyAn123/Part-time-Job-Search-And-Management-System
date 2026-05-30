@@ -80,7 +80,6 @@ function ApplicationCard({ item, onUpdateStatus, onChat, token }) {
 
   return (
     <View style={styles.card}>
-      {/* Top row */}
       <View style={styles.cardTop}>
         <Avatar uri={candidate.avatar} name={name} />
         <View style={{ flex: 1 }}>
@@ -102,7 +101,6 @@ function ApplicationCard({ item, onUpdateStatus, onChat, token }) {
         </View>
       </View>
 
-      {/* Expanded: evaluation + note */}
       {expanded && (
         <View style={styles.expandBox}>
           <Text style={styles.expandLabel}>Đánh giá</Text>
@@ -140,7 +138,6 @@ function ApplicationCard({ item, onUpdateStatus, onChat, token }) {
         </View>
       )}
 
-      {/* Actions */}
       <View style={styles.actionRow}>
         <TouchableOpacity
           style={[styles.btn, !cv_file && styles.btnDisabled]}
@@ -208,7 +205,6 @@ export default function ApplicationsScreen({ route, navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [user] = useContext(MyUserContext)
-  // token lấy từ context/store của bạn
 
   const fetchApplications = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -324,7 +320,6 @@ export default function ApplicationsScreen({ route, navigation }) {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Text style={styles.backIcon}>←</Text>
@@ -337,7 +332,6 @@ export default function ApplicationsScreen({ route, navigation }) {
         </View>
       </View>
 
-      {/* Error */}
       {error && (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>⚠️ {error}</Text>
@@ -347,7 +341,6 @@ export default function ApplicationsScreen({ route, navigation }) {
         </View>
       )}
 
-      {/* Loading */}
       {loading ? (
         <View style={styles.loadingBox}>
           <ActivityIndicator size="large" color="#555" />
@@ -385,7 +378,6 @@ export default function ApplicationsScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
-  // Header
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -402,7 +394,6 @@ const styles = StyleSheet.create({
 
   listContent: { padding: 16, paddingBottom: 32 },
 
-  // Stats
   statsRow: {
     flexDirection: "row",
     gap: 8,
@@ -418,7 +409,6 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 20, fontWeight: "600", color: "#1a1a1a" },
   statLabel: { fontSize: 11, color: "#888", marginTop: 2 },
 
-  // Card
   card: {
     backgroundColor: "#fff",
     borderWidth: 0.5,
@@ -433,7 +423,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
-  // Avatar
   avatar: {
     width: 44,
     height: 44,
@@ -450,12 +439,10 @@ const styles = StyleSheet.create({
   },
   avatarInitial: { fontSize: 18, fontWeight: "600", color: "#3730A3" },
 
-  // Candidate info
   candidateName: { fontSize: 15, fontWeight: "600", color: "#1a1a1a", marginBottom: 2 },
   phone: { fontSize: 12, color: "#666", marginBottom: 2 },
   applyDate: { fontSize: 12, color: "#999" },
 
-  // Badge
   badge: {
     borderRadius: 6,
     paddingHorizontal: 8,
@@ -493,7 +480,6 @@ const styles = StyleSheet.create({
   },
   saveBtnText: { color: "#fff", fontSize: 13, fontWeight: "500" },
 
-  // Actions
   actionRow: {
     flexDirection: "row",
     gap: 8,
@@ -516,7 +502,6 @@ const styles = StyleSheet.create({
   btnChat: { backgroundColor: "#EBF4FF", borderColor: "#185FA5" },
   btnText: { fontSize: 12, color: "#555" },
 
-  // States
   loadingBox: { flex: 1, alignItems: "center", justifyContent: "center", gap: 10 },
   loadingText: { fontSize: 14, color: "#999" },
   emptyBox: { alignItems: "center", paddingVertical: 48 },

@@ -165,7 +165,7 @@ function EditJobModal({ visible, job, jobId, color, onClose, onSaved }) {
     const [showIndustryPicker, setShowIndustryPicker] = useState(false);
     const jobIdRef = React.useRef(null);
     const [industries, setIndustries] = useState([]);
-    const [selectedIndustry, setSelectedIndustry] = useState(null); // { id, name }
+    const [selectedIndustry, setSelectedIndustry] = useState(null);
     const [stableJobId, setStableJobId] = useState(null);
 
     useEffect(() => {
@@ -570,12 +570,12 @@ const JobDetailEmployer = ({ navigation, route }) => {
                         setToggling(true);
                         try {
                             const token = await AsyncStorage.getItem('token');
-                            console.log("job.id trước khi toggle:", job.id);  // ← thêm
+                            console.log("job.id trước khi toggle:", job.id);
                             const res = await authApis(token).patch(
                                 endpoints["job"](job.id),
                                 { status: nextStatus }
                             );
-                            console.log("response:", JSON.stringify(res.data)); // ← thêm
+                            console.log("response:", JSON.stringify(res.data));
                             setJob(prev => ({ ...prev, ...res.data }));
                         } catch (e) {
                             console.log("toggle error:", JSON.stringify(e?.response?.data));

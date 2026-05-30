@@ -21,8 +21,7 @@ export default function ChatScreen({ route, navigation }) {
     const messagesRef = ref(database, `chats/${chatID}/messages`);
 
     useEffect(() => {
-        const msgRef = ref(database, `chats/${chatID}/messages`); // tạo ref bên trong
-        const unsubscribe = onValue(msgRef, (snapshot) => {
+        const unsubscribe = onValue(messagesRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) {
                 setMessages([]);
@@ -44,7 +43,6 @@ export default function ChatScreen({ route, navigation }) {
         if (!text.trim()) return;
 
         try {
-            // Set info nếu chat chưa tồn tại
             const infoRef = ref(database, `chats/${chatID}/info`);
             const snapshot = await get(infoRef);
             if (!snapshot.exists()) {
@@ -63,11 +61,9 @@ export default function ChatScreen({ route, navigation }) {
                     lastTimestamp: Date.now(),
                 });
 
-                // Set user_chats cho cả 2 người
                 await set(ref(database, `user_chats/${String(user.id)}/${chatID}`), true);
                 await set(ref(database, `user_chats/${String(receiverId)}/${chatID}`), true);
             } else {
-                // Cập nhật lastMessage
                 await set(infoRef, {
                     ...snapshot.val(),
                     lastMessage: text.trim(),

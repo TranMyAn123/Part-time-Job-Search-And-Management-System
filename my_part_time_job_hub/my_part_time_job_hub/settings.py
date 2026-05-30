@@ -11,14 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-<<<<<<< HEAD
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-=======
-
->>>>>>> origin/frontend/login_register
 # from django.conf.global_settings import AUTH_USER_MODEL
 
 
@@ -37,24 +33,17 @@ SECRET_KEY = "django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g
 DEBUG = True
 
 ALLOWED_HOSTS = [
-<<<<<<< HEAD
     "192.168.1.14",
-=======
-    "192.168.1.10",
->>>>>>> origin/frontend/login_register
     "localhost",
     "127.0.0.1",
     "0.0.0.0",
     "192.168.1.111",
     "172.24.248.51",
-<<<<<<< HEAD
     "part-time-job-app-production.up.railway.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://part-time-job-app-production.up.railway.app",
-=======
->>>>>>> origin/frontend/login_register
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -112,10 +101,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-<<<<<<< HEAD
     "whitenoise.middleware.WhiteNoiseMiddleware",
-=======
->>>>>>> origin/frontend/login_register
 ]
 
 
@@ -149,35 +135,29 @@ import pymysql
 
 pymysql.version_info = (2, 2, 1, "final", 0)
 pymysql.install_as_MySQLdb()
-<<<<<<< HEAD
 # Local
-=======
->>>>>>> origin/frontend/login_register
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "job_db",
-        "USER": "root",
-        "PASSWORD": "root",
-        "HOST": "",
-    }
-}
-
-<<<<<<< HEAD
-# Deploy
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.mysql",
-#         "NAME": os.getenv("DB_NAME"),
-#         "USER": os.getenv("DB_USER"),
-#         "PASSWORD": os.getenv("DB_PASSWORD"),
-#         "HOST": os.getenv("DB_HOST"),
-#         "PORT": os.getenv("DB_PORT"),
+#         "NAME": "job_db",
+#         "USER": "root",
+#         "PASSWORD": "root",
+#         "HOST": "",
 #     }
 # }
 
-=======
->>>>>>> origin/frontend/login_register
+# Deploy
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
+    }
+}
+
 
 # Config Cloudinary
 import cloudinary.api
@@ -188,13 +168,6 @@ cloudinary.config(
     api_secret="M7cWBMgvKH0VG5S__EZyOwOTac4",
 )
 
-<<<<<<< HEAD
-=======
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
->>>>>>> origin/frontend/login_register
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -231,23 +204,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
-<<<<<<< HEAD
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-=======
->>>>>>> origin/frontend/login_register
 
 CLIENT_KEY = os.getenv("CLIENT_KEY")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-<<<<<<< HEAD
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
 INTERNAL_BASE_URL = os.environ.get("INTERNAL_BASE_URL", "http://localhost:8000")
-=======
->>>>>>> origin/frontend/login_register
 
 # Config log để bắt lỗi
 # LOGGING = {
@@ -277,12 +244,17 @@ INTERNAL_BASE_URL = os.environ.get("INTERNAL_BASE_URL", "http://localhost:8000")
 # Dev: in mail ra console thay vì gửi thật
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+# Gửi maik thật
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 TIME_ZONE = "Asia/Ho_Chi_Minh"
-<<<<<<< HEAD
 
 
-FIREBASE_CREDENTIALS_PATH = BASE_DIR / "serviceAccountKey.json"
+# FIREBASE_CREDENTIALS = BASE_DIR / "serviceAccountKey.json"
+FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS")
 FIREBASE_DATABASE_URL = "https://jobapp-eed63-default-rtdb.firebaseio.com"
-=======
->>>>>>> origin/frontend/login_register

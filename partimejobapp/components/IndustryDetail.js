@@ -22,7 +22,6 @@ function formatDate(iso) {
     return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 }
 
-// Mock INDUSTRY — fallback nếu không có route.params
 
 export default function IndustryDetail({ route, navigation }) {
     const nav = useNavigation();
@@ -30,19 +29,16 @@ export default function IndustryDetail({ route, navigation }) {
     const { color, bgColor } = INDUSTRY_COLORS[(industry.id - 1) % INDUSTRY_COLORS.length];
     const icon = getIndustryIcon(industry.name);
 
-    // Tách description thành các đoạn
     const paragraphs = (industry.description || "").split(/\r?\n\r?\n/).filter(Boolean);
 
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor={color} />
 
-            {/* ── Hero ── */}
             <View style={[styles.hero, { backgroundColor: color }]}>
                 <View style={styles.bubble1} />
                 <View style={styles.bubble2} />
 
-                {/* Nav */}
                 <View style={styles.nav}>
                     <Pressable style={styles.navBtn} onPress={() => nav.goBack()}>
                         <Icon source="arrow-left" size={22} color="#fff" />
@@ -51,7 +47,6 @@ export default function IndustryDetail({ route, navigation }) {
                     <View style={{ width: 38 }} />
                 </View>
 
-                {/* Icon + name */}
                 <View style={styles.heroBody}>
                     <View style={[styles.iconWrap, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
                         <Icon source={icon} size={34} color="#fff" />
@@ -66,13 +61,11 @@ export default function IndustryDetail({ route, navigation }) {
                 </View>
             </View>
 
-            {/* ── Body ── */}
             <ScrollView
                 style={styles.body}
                 contentContainerStyle={styles.bodyContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Description card */}
                 <View style={styles.descCard}>
                     <View style={styles.descHeader}>
                         <View style={[styles.descAccent, { backgroundColor: color }]} />
@@ -83,7 +76,6 @@ export default function IndustryDetail({ route, navigation }) {
                     ))}
                 </View>
 
-                {/* CTA tìm việc theo ngành */}
                 <Pressable
                     style={[styles.ctaCard, { backgroundColor: color }]}
                     onPress={() => nav.navigate("SearchJob", { industry })}
@@ -106,7 +98,6 @@ export default function IndustryDetail({ route, navigation }) {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#F4F6FB" },
 
-    // Hero
     hero: {
         paddingBottom: 32,
         borderBottomLeftRadius: 28,
@@ -122,7 +113,6 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255,255,255,0.05)", bottom: 10, left: -30,
     },
 
-    // Nav
     nav: {
         flexDirection: "row", alignItems: "center",
         justifyContent: "space-between",
@@ -135,7 +125,6 @@ const styles = StyleSheet.create({
     },
     navTitle: { color: "#fff", fontWeight: "700", fontSize: 16 },
 
-    // Hero body
     heroBody: { paddingHorizontal: 20, alignItems: "center", paddingTop: 8 },
     iconWrap: {
         width: 72, height: 72, borderRadius: 22,
@@ -152,11 +141,9 @@ const styles = StyleSheet.create({
     },
     metaPillText: { color: "rgba(255,255,255,0.9)", fontSize: 12, fontWeight: "500" },
 
-    // Body
     body: { flex: 1 },
     bodyContent: { padding: 16, gap: 14 },
 
-    // Description
     descCard: {
         backgroundColor: "#fff", borderRadius: 20, padding: 18,
         shadowColor: "#000", shadowOpacity: 0.04,
@@ -170,7 +157,6 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
 
-    // CTA
     ctaCard: {
         borderRadius: 20, padding: 20,
         flexDirection: "row", alignItems: "center", justifyContent: "space-between",

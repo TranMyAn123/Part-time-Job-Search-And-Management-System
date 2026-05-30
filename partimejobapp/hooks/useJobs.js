@@ -1,13 +1,7 @@
 import { useRef, useCallback, useEffect, useState } from "react";
-<<<<<<< HEAD
 import Apis, { authApis, endpoints } from "../configs/Apis";
 
 export function useJobs({ industry = "Tất cả", query = "", token }) {
-=======
-import Apis, { endpoints } from "../configs/Apis";
-
-export function useJobs({ industry = "Tất cả", query = "" }) {
->>>>>>> origin/frontend/login_register
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
@@ -29,16 +23,11 @@ export function useJobs({ industry = "Tất cả", query = "" }) {
                 ...(industry !== "Tất cả" && { industry_name: industry }),
                 ...(query.trim() && { q: query.trim() }),
             };
-<<<<<<< HEAD
             let res;
             if (token)
                 res = await authApis(token).get(endpoints["jobs"], { params })
             else
                 res = await Apis.get(endpoints["jobs"], { params });
-=======
-
-            const res = await Apis.get(endpoints["jobs"], { params });
->>>>>>> origin/frontend/login_register
             const newJobs = res.data.results ?? [];
 
             setJobs((prev) => (append ? [...prev, ...newJobs] : newJobs));
@@ -84,16 +73,11 @@ export function useJobs({ industry = "Tất cả", query = "" }) {
                 ...(query.trim() && { search: query.trim() }),
             };
 
-<<<<<<< HEAD
             let res;
             if (token)
                 res = await authApis(token).get(endpoints["jobs"], { params })
             else
                 res = await Apis.get(endpoints["jobs"], { params }); setJobs(res.data.results ?? []);
-=======
-            const res = await Apis.get(endpoints["jobs"], { params });
-            setJobs(res.data.results ?? []);
->>>>>>> origin/frontend/login_register
             setHasMore(!!res.data.next);
         } catch (err) {
             const msg =

@@ -30,7 +30,6 @@ export function formatSalary(min, max) {
 
 export function formatDate(iso) {
     if (!iso) return "—";
-    // "2026-06-30" → "30/06/2026"
     const parts = iso.split("-");
     if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
     return iso;
@@ -46,12 +45,10 @@ export function timeAgo(isoString) {
     return `${months} tháng trước`;
 }
 
-// Parse benefits string thành mảng (split by dấu phẩy)
 export function parseBenefits(str = "") {
     return str.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-// Parse requirement string thành mảng (split by dấu phẩy hoặc xuống dòng)
 export function parseRequirements(str = "") {
     return str
         .split(/,|\n/)

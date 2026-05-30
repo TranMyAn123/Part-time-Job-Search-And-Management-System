@@ -122,7 +122,6 @@ const styles = StyleSheet.create({
         paddingRight: 8,
     },
 
-    // Card
     card: {
         width: 190,
         backgroundColor: "#ffffff",
@@ -130,12 +129,10 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         overflow: "hidden",
         paddingBottom: 14,
-        // Shadow iOS
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.09,
         shadowRadius: 10,
-        // Shadow Android
         elevation: 4,
     },
     accentBar: {
@@ -143,7 +140,6 @@ const styles = StyleSheet.create({
         width: "100%",
     },
 
-    // Logo
     logoWrapper: {
         width: 52,
         height: 52,
@@ -159,7 +155,6 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
     },
 
-    // Text
     companyName: {
         fontSize: 14,
         fontWeight: "800",
@@ -182,7 +177,6 @@ const styles = StyleSheet.create({
         lineHeight: 16,
     },
 
-    // Jobs badge
     jobsBadge: {
         marginHorizontal: 14,
         marginTop: 10,
@@ -198,7 +192,6 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
 
-    // Follow button
     followBtn: {
         marginHorizontal: 14,
         marginTop: 12,

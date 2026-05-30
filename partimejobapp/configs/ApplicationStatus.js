@@ -15,8 +15,4 @@ export const FILTERS = [
     { key: "REJECTED", label: "Trượt" },
     { key: "WITHDRAWN", label: "Rút đơn" },
     { key: "CANCELLED", label: "Đã hủy" },
-<<<<<<< HEAD
 ];
-=======
-];
->>>>>>> origin/frontend/login_register

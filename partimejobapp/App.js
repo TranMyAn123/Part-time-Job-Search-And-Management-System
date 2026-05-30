@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { Modal, View, TouchableOpacity, Text, StyleSheet } from "react-native";
-=======
-import { View } from "react-native";
->>>>>>> origin/frontend/login_register
 import { useContext, useEffect, useReducer, useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Icon } from "react-native-paper";
@@ -12,13 +8,9 @@ import { MyUserContext } from "./configs/Contexts";
 import { MyUserReducer } from "./reducers/reducers";
 import { LinearGradient } from 'expo-linear-gradient';
 import Styles from "./styles/Styles";
-<<<<<<< HEAD
 import { auth } from "./configs/Firebase";
 import { signInWithCustomToken } from "firebase/auth";
 
-=======
-// import Header from "./components/Header";
->>>>>>> origin/frontend/login_register
 import Home from "./screens/Home/Home";
 import Login from "./screens/User/Login";
 import Register from "./screens/User/Register";
@@ -32,7 +24,6 @@ import MyApplication from "./screens/MyApplication/MyApplication";
 import EmRegister from "./screens/Employer/EmRegister";
 import ApplicationDetail from "./screens/MyApplication/ApplicationDetail";
 import EmployerList from "./screens/Home/EmployerList";
-<<<<<<< HEAD
 import { onAuthStateChanged } from "firebase/auth";
 import ChatScreen from "./screens/Chat/ChatScreen";
 import EmProfile from "./screens/Employer/EmProfile";
@@ -41,16 +32,8 @@ import EmJobsScreen from "./screens/Employer/EmJobsScreen";
 import EditJobScreen from "./screens/Employer/EditJobScreen"
 import EmApplicationsScreen from "./screens/Employer/EmApplicationsScreen";
 import ConversationListScreen from "./screens/Chat/ConversationListScreen";
-import { useNavigation } from "@react-navigation/native";
-=======
-import EmProfile from "./screens/Employer/EmProfile";
-import AddJob from "./screens/Employer/AddJob";
-import EmJob from "./screens/Employer/EmJob";
-import JobApplication from "./screens/Employer/JobApplication";
-import EmJobDetail from "./screens/Employer/EmJobDetail";
 import ApplyJob from "./screens/Job_Detail/ApplyJob";
 
->>>>>>> origin/frontend/login_register
 const Stack = createNativeStackNavigator();
 const SearchStack = createNativeStackNavigator();
 const ApplicationStack = createNativeStackNavigator();
@@ -73,11 +56,9 @@ const SearchStackNavigator = () => {
     >
       <SearchStack.Screen name="SearchJob" component={SearchJob} />
       <SearchStack.Screen name="JobDetail" component={JobDetail} />
-<<<<<<< HEAD
       <SearchStack.Screen name="Chat" component={ChatScreen} />
-=======
       <SearchStack.Screen name="ApplyJob" component={ApplyJob} />
->>>>>>> origin/frontend/login_register
+
     </SearchStack.Navigator>
   );
 };
@@ -87,10 +68,7 @@ const ApplicationStackNavigator = () => {
     <ApplicationStack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "transparent" } }}>
       <ApplicationStack.Screen name="MyApplications" component={MyApplication} />
       <ApplicationStack.Screen name="ApplicationDetail" component={ApplicationDetail} />
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/frontend/login_register
     </ApplicationStack.Navigator>
   )
 }
@@ -104,7 +82,6 @@ const ProfileStackNavigator = () => {
   );
 }
 
-<<<<<<< HEAD
 const EmJobStack = createNativeStackNavigator();
 const EmJobStackNavigator = () => {
   return (
@@ -119,18 +96,17 @@ const EmJobStackNavigator = () => {
       <EmJobStack.Screen name="Chat" component={ChatScreen} options={{ animation: "slide_from_right" }} />
     </EmJobStack.Navigator>
   )
-=======
-const EmployerJobStack = createNativeStackNavigator();
-const EmployerJobStackNavigator = () => {
-  return (
-    <EmployerJobStack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
-      <EmployerJobStack.Screen name="emjob" component={EmJob} />
-      <EmployerJobStack.Screen name="jobapplication" component={JobApplication} />
-      <EmployerJobStack.Screen name="emjobdetail" component={EmJobDetail} />
-    </EmployerJobStack.Navigator>
-  );
->>>>>>> origin/frontend/login_register
 }
+
+const ConversationStack = createNativeStackNavigator();
+const ConversationStackNavigator = () => {
+  return (
+    <ConversationStack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+      <ConversationStack.Screen name="ConversationList" component={ConversationListScreen} />
+      <ConversationStack.Screen name="Chat" component={ChatScreen} options={{ animation: "slide_from_right" }} />
+    </ConversationStack.Navigator>
+  );
+};
 
 const Tab = createBottomTabNavigator();
 
@@ -139,7 +115,6 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator sceneContainerStyle={{ backgroundColor: 'transparent' }}>
-<<<<<<< HEAD
 
       <Tab.Screen name="home" component={StackNavigator} options={{ title: 'Trang chủ', tabBarIcon: () => <Icon source="home" size={30} /> }} />
       {user === null ? <>
@@ -162,9 +137,11 @@ const TabNavigator = () => {
         <Tab.Screen name="addjob" component={AddJob} options={{ title: 'Đăng tin tuyển dụng', tabBarIcon: () => <Icon source="plus-box" size={30} /> }} />
         <Tab.Screen
           name="conversations"
-          component={ConversationListScreen}
+          component={ConversationStackNavigator}
           options={{ title: 'Tin nhắn', tabBarIcon: () => <Icon source="message" size={30} /> }}
         />
+        <EmJobStack.Screen name="Chat" component={ChatScreen} options={{ animation: "slide_from_right" }} />
+
         <Tab.Screen name="emprofile" component={EmProfile} options={{ title: 'Thông tin công ty', tabBarIcon: () => <Icon source="office-building" size={30} /> }} />
       </> : <>
         <Tab.Screen
@@ -190,48 +167,11 @@ const TabNavigator = () => {
         />
         <Tab.Screen
           name="conversations"
-          component={ConversationListScreen}
+          component={ConversationStackNavigator}
           options={{ title: 'Tin nhắn', tabBarIcon: () => <Icon source="message" size={30} /> }}
         />
         <Tab.Screen name="profiles" component={ProfileStackNavigator} options={{ title: 'Thông tin cá nhân', tabBarIcon: () => <Icon source="account" size={30} /> }} />
-=======
-      {/* <Tab.Screen
-        name="search"
-        component={SearchStackNavigator}
-        options={{
-          title: "Tìm việc",
-          tabBarIcon: () => (
-            <Icon source="magnify" size={30} />
-          ),
-        }}
-      />
 
-      <Tab.Screen
-        name="application"
-        component={ApplicationStackNavigator}
-        options={{
-          title: "Hồ sơ đã nộp",
-          tabBarIcon: () => (
-            <Icon source="file-document-outline" size={30} />
-          ),
-        }}
-      /> */}
-
-      {user?.role === 'EMPLOYER' ? <>
-        <Tab.Screen name="jobs" component={EmployerJobStackNavigator} options={{ title: 'Tin tuyển dụng', tabBarIcon: () => <Icon source="briefcase-outline" size={30} /> }} />
-        <Tab.Screen name="addjob" component={AddJob} options={{ title: 'Đăng tin tuyển dụng', tabBarIcon: () => <Icon source="plus-box" size={30} /> }} />
-        <Tab.Screen name="emprofile" component={EmProfile} options={{ title: 'Thông tin', tabBarIcon: () => <Icon source="office-building" size={30} /> }} />
-      </> : <>
-        <Tab.Screen name="home" component={StackNavigator} options={{ title: 'Trang chủ', tabBarIcon: () => <Icon source="home" size={30} /> }} />
-        <Tab.Screen name="search" component={SearchStackNavigator} options={{ title: 'Tìm việc', tabBarIcon: () => <Icon source="magnify" size={30} /> }} />
-        <Tab.Screen name="application" component={ApplicationStackNavigator} options={{ title: 'Hồ sơ đã nộp', tabBarIcon: () => <Icon source="file-document-outline" size={30} /> }} />
-        {user === null ? <>
-          <Tab.Screen name="login" component={Login} options={{ title: 'Đăng nhập', tabBarIcon: () => <Icon source="account" size={30} /> }} />
-          <Tab.Screen name="register" component={Register} options={{ title: 'Đăng ký', tabBarIcon: () => <Icon source="account-plus" size={30} /> }} />
-        </> :
-          <Tab.Screen name="profiles" component={ProfileStackNavigator} options={{ title: 'Thông tin cá nhân', tabBarIcon: () => <Icon source="account" size={30} /> }} />
-        }
->>>>>>> origin/frontend/login_register
       </>}
     </Tab.Navigator>
   );
@@ -239,11 +179,10 @@ const TabNavigator = () => {
 
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null);
-<<<<<<< HEAD
   const [sessionExpired, setSessionExpired] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [appReady, setAppReady] = useState(false);
-  const navigation = useNavigation()
+
   const refreshAndLogin = async () => {
     const stored = await AsyncStorage.getItem("tokens");
     if (!stored) throw new Error("NO_TOKEN");
@@ -292,64 +231,20 @@ const App = () => {
       });
     }
   };
-=======
->>>>>>> origin/frontend/login_register
 
   useEffect(() => {
     const loadUser = async () => {
       try {
-<<<<<<< HEAD
         await refreshAndLogin();
       } catch {
         dispatch({ type: "LOGOUT" });
         setSessionExpired(true);
-=======
-        const stored = await AsyncStorage.getItem("tokens");
-        if (!stored) return;
-
-        const { access_token, refresh_token } = JSON.parse(stored);
-        try {
-          const { data } = await Apis.get(endpoints['current-user'],
-            { headers: { Authorization: `Bearer ${access_token}` } }
-          );
-          dispatch({
-            type: "LOGIN",
-            payload: { ...data, access_token, refresh_token },
-          });
-
-        } catch (e) {
-          if (e.response?.status === 401) {
-            try {
-              const { data } = await Apis.post(endpoints['refresh'],
-                {
-                  grant_type: "refresh_token",
-                  refresh_token,
-                }
-              );
-              const { userData } = await Apis.get(endpoints['current-user'],
-                { headers: { Authorization: `Bearer ${data.access_token}` } }
-              );
-              dispatch({
-                type: "LOGIN",
-                payload: {
-                  ...userData,
-                  access_token: data.access_token,
-                  refresh_token: data.refresh_token,
-                },
-              });
-            } catch {
-              dispatch({ type: "LOGOUT" });
-            }
-          }
-        }
->>>>>>> origin/frontend/login_register
       } finally {
         setAppReady(true);
       }
     };
     loadUser();
   }, []);
-<<<<<<< HEAD
 
   const handleKeepSession = async () => {
     setIsRefreshing(true);
@@ -359,7 +254,6 @@ const App = () => {
       await AsyncStorage.removeItem("tokens");
       dispatch({ type: "LOGOUT" });
       setSessionExpired(false);
-      navigation.navigate("login")
     } finally {
       setIsRefreshing(false);
     }
@@ -369,13 +263,12 @@ const App = () => {
     await AsyncStorage.removeItem("tokens");
     dispatch({ type: "LOGOUT" });
     setSessionExpired(false);
-    navigationRef.current?.navigate("login");
   };
 
   return (
     <MyUserContext.Provider value={[user, dispatch]}>
       <LinearGradient colors={['#f3eeff', '#e5d9fc', '#f8f5ff']} style={{ flex: 1 }}>
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer >
           <TabNavigator />
         </NavigationContainer>
 
@@ -426,19 +319,5 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
-=======
-  return (
-    <MyUserContext.Provider value={[user, dispatch]}>
-      <LinearGradient
-        colors={['#f3eeff', '#e5d9fc', '#f8f5ff']}
-        style={{ flex: 1 }}>
-        <NavigationContainer>
-          <TabNavigator />
-        </NavigationContainer>
-      </LinearGradient>
-    </MyUserContext.Provider>
-  );
-}
->>>>>>> origin/frontend/login_register
 
 export default App;

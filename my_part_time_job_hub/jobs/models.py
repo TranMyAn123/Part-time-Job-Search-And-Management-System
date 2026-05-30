@@ -54,11 +54,7 @@ class Job(BaseActiveModel, TimeStampedModel):
     VALID_TRANSITIONS = {
         Status.PENDING: [Status.OPENING, Status.CLOSED],
         Status.OPENING: [Status.CLOSED],
-<<<<<<< HEAD
         Status.CLOSED: [],
-=======
-        Status.CLOSED: [Status.OPENING],
->>>>>>> origin/frontend/login_register
     }
 
     employer = models.ForeignKey(
@@ -77,10 +73,7 @@ class Job(BaseActiveModel, TimeStampedModel):
     benefits = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=150)
     available_date = models.DateField()
-<<<<<<< HEAD
     max_applicants = models.IntegerField()
-=======
->>>>>>> origin/frontend/login_register
     description = models.TextField(null=True, blank=True)
 
     def is_expired(self):
@@ -98,14 +91,11 @@ class Job(BaseActiveModel, TimeStampedModel):
         self.status = new_status
         self.save()
 
-<<<<<<< HEAD
     @property
     def remaining_slots(self):
         applicants = self.applications.count()
         return self.max_applicants - applicants
 
-=======
->>>>>>> origin/frontend/login_register
     def __str__(self):
         return self.title
 
@@ -147,10 +137,6 @@ class Application(TimeStampedModel):
     )
     evaluation = models.CharField(max_length=25, null=True, blank=True)
     cv_file = CloudinaryField(resource_type="auto", blank=True, null=True)
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/frontend/login_register
     note = models.TextField(null=True, blank=True)
 
     def get_status_display(self):

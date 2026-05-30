@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import React, { useEffect, useState } from "react";
-=======
-import React, { useContext, useEffect, useState } from "react";
->>>>>>> origin/frontend/login_register
 import {
     View,
     Text,
@@ -26,14 +22,8 @@ import {
     parseRequirements,
     benefitIcon
 } from "./Helpers";
-<<<<<<< HEAD
 import Apis, { endpoints } from "../../configs/Apis";
-=======
-import Apis, { authApis, endpoints } from "../../configs/Apis";
-import { MyUserContext } from "../../configs/Contexts";
->>>>>>> origin/frontend/login_register
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
 function SectionTitle({ title, color }) {
     return (
         <View style={styles.sectionTitleRow}>
@@ -86,7 +76,6 @@ function InfoRow({ icon, label, value, color }) {
     );
 }
 
-// ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function JobDetail({ navigation, route }) {
     const passedJob = route?.params?.job
     const jobID = route?.params?.jobID
@@ -94,22 +83,6 @@ export default function JobDetail({ navigation, route }) {
     const [saved, setSaved] = useState(false);
     const [applied, setApplied] = useState(false);
     const [loading, setLoading] = useState(false)
-<<<<<<< HEAD
-=======
-    const [user] = useContext(MyUserContext);
-
-    useEffect(() => {
-        if (!user || !job) return;
-        const checkApplied = async () => {
-            try {
-                const res = await authApis(user.access_token).get(endpoints['applications']);
-                const already = res.data.some(app => app.job?.id === job.id);
-                setApplied(already);
-            } catch (e) { }
-        };
-        checkApplied();
-    }, [job]);
->>>>>>> origin/frontend/login_register
 
     useEffect(() => {
         if (passedJob) return;
@@ -156,11 +129,9 @@ export default function JobDetail({ navigation, route }) {
             <StatusBar barStyle="light-content" backgroundColor={color} />
 
             <View style={[styles.hero, { backgroundColor: color }]}>
-                {/* Decorative bubbles */}
                 <View style={styles.bubble1} />
                 <View style={styles.bubble2} />
 
-                {/* Nav bar */}
                 <View style={styles.nav}>
                     <Pressable
                         style={styles.navBtn}
@@ -186,7 +157,6 @@ export default function JobDetail({ navigation, route }) {
                     </View>
                 </View>
 
-                {/* Company logo / initials */}
                 <View style={styles.heroBody}>
                     {job.employer?.logo_company ? (
                         <Image
@@ -200,15 +170,12 @@ export default function JobDetail({ navigation, route }) {
                         </View>
                     )}
 
-                    {/* Company name */}
                     <Text style={styles.companyName}>
                         {job.employer?.company_name || job.employer?.full_name}
                     </Text>
 
-                    {/* Job title */}
                     <Text style={styles.jobTitle}>{job.title}</Text>
 
-                    {/* Pill tags */}
                     <View style={styles.pillRow}>
                         <StatPill icon="map-marker-outline" label={job.location} />
                         <StatPill icon="briefcase-outline" label={job.industry} />
@@ -220,7 +187,6 @@ export default function JobDetail({ navigation, route }) {
                     </View>
                 </View>
 
-                {/* ── Salary card (floats) ── */}
                 <View style={styles.salaryCard}>
                     <View>
                         <Text style={styles.salaryLabel}>Mức lương</Text>
@@ -237,13 +203,11 @@ export default function JobDetail({ navigation, route }) {
                 </View>
             </View>
 
-            {/* ── BODY ─────────────────────────────────────────────────── */}
             <ScrollView
                 style={styles.body}
                 contentContainerStyle={styles.bodyContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Quick info list */}
                 <View style={styles.infoCard}>
                     <InfoRow
                         icon="domain"
@@ -297,7 +261,6 @@ export default function JobDetail({ navigation, route }) {
                     </>
                 )}
 
-                {/* Requirements */}
                 {requirements.length > 0 && (
                     <>
                         <SectionTitle title="Yêu cầu ứng viên" color={color} />
@@ -309,7 +272,6 @@ export default function JobDetail({ navigation, route }) {
                     </>
                 )}
 
-                {/* Benefits */}
                 {benefits.length > 0 && (
                     <>
                         <SectionTitle title="Phúc lợi" color={color} />
@@ -326,7 +288,6 @@ export default function JobDetail({ navigation, route }) {
                     </>
                 )}
 
-                {/* Employer description (if any) */}
                 {job.employer?.description && (
                     <>
                         <SectionTitle title="Về công ty" color={color} />
@@ -337,7 +298,6 @@ export default function JobDetail({ navigation, route }) {
                 )}
                 <CommentSection jobID={job.id} labelColor={color} />
 
-                {/* Footer meta */}
                 <View style={styles.metaRow}>
                     <Icon source="clock-outline" size={13} color="#9CA3AF" />
                     <Text style={styles.metaText}>
@@ -349,9 +309,7 @@ export default function JobDetail({ navigation, route }) {
 
             </ScrollView>
 
-            {/* ── CTA ──────────────────────────────────────────────────── */}
             <View style={styles.cta}>
-<<<<<<< HEAD
                 <Pressable
                     style={[styles.ctaChat, { borderColor: color + "50", backgroundColor: bgColor }]}
                     onPress={() => navigation.navigate('Chat', {
@@ -360,26 +318,16 @@ export default function JobDetail({ navigation, route }) {
                         receiverName: job.employer.company_name || job.employer.full_name
                     })}
                 >
-=======
-                <Pressable style={[styles.ctaChat, { borderColor: color + "50", backgroundColor: bgColor }]}>
->>>>>>> origin/frontend/login_register
                     <Icon source="message-text-outline" size={22} color={color} />
                 </Pressable>
                 <Pressable
                     style={[
                         styles.ctaApply,
                         { backgroundColor: applied ? "#16A34A" : color },
-<<<<<<< HEAD
                         !isOpening && styles.ctaDisabled,
                     ]}
-                    onPress={() => isOpening && setApplied(true)}
-                    disabled={!isOpening}
-=======
-                        (!isOpening || applied) && styles.ctaDisabled,
-                    ]}
                     onPress={() => isOpening && !applied && navigation.navigate("ApplyJob", { job })}
-                    disabled={!isOpening || applied}
->>>>>>> origin/frontend/login_register
+                    disabled={!isOpening}
                 >
                     <Icon
                         source={applied ? "check-circle" : "send"}
@@ -399,7 +347,6 @@ export default function JobDetail({ navigation, route }) {
     );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
 
     loadingContainer: {
@@ -410,7 +357,6 @@ const styles = StyleSheet.create({
 
     container: { flex: 1, backgroundColor: "#F4F6FB" },
 
-    // Hero
     hero: {
         paddingBottom: 56,
         borderBottomLeftRadius: 28,
@@ -426,7 +372,6 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255,255,255,0.05)", bottom: 30, left: -40,
     },
 
-    // Nav
     nav: {
         flexDirection: "row", alignItems: "center",
         justifyContent: "space-between",
@@ -441,7 +386,6 @@ const styles = StyleSheet.create({
     },
     navBtnSaved: { backgroundColor: "rgba(255,255,255,0.35)" },
 
-    // Hero body
     heroBody: { paddingHorizontal: 20, paddingTop: 6 },
     logoImg: {
         width: 64, height: 64, borderRadius: 18,
@@ -470,7 +414,6 @@ const styles = StyleSheet.create({
     },
     urgentPillText: { fontSize: 12, fontWeight: "700", color: "#FED7AA" },
 
-    // Salary card
     salaryCard: {
         position: "absolute", bottom: -20, left: 20, right: 20,
         backgroundColor: "#fff", borderRadius: 20,
@@ -486,11 +429,9 @@ const styles = StyleSheet.create({
     deadlineBlock: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8 },
     deadlineValue: { fontSize: 14, fontWeight: "700" },
 
-    // Body
     body: { flex: 1, marginTop: 16 },
     bodyContent: { paddingHorizontal: 16, paddingTop: 6 },
 
-    // Info card
     infoCard: {
         backgroundColor: "#fff", borderRadius: 20, padding: 4,
         shadowColor: "#000", shadowOpacity: 0.04,
@@ -510,7 +451,6 @@ const styles = StyleSheet.create({
     infoValue: { fontSize: 13, fontWeight: "700", color: "#111827" },
     infoSep: { height: 1, backgroundColor: "#F9FAFB", marginHorizontal: 14 },
 
-    // Status badge
     statusBadge: {
         flexDirection: "row", alignItems: "center", gap: 7,
         alignSelf: "flex-start",
@@ -520,7 +460,6 @@ const styles = StyleSheet.create({
     statusDot: { width: 7, height: 7, borderRadius: 4 },
     statusText: { fontSize: 13, fontWeight: "700" },
 
-    // Section title
     sectionTitleRow: {
         flexDirection: "row", alignItems: "center", gap: 8,
         marginTop: 22, marginBottom: 10,
@@ -528,7 +467,6 @@ const styles = StyleSheet.create({
     sectionAccent: { width: 4, height: 18, borderRadius: 2, backgroundColor: "#185FA5" },
     sectionTitle: { fontSize: 16, fontWeight: "800", color: "#111827" },
 
-    // Description
     descCard: {
         backgroundColor: "#fff", borderRadius: 16, padding: 16,
         shadowColor: "#000", shadowOpacity: 0.04,
@@ -536,7 +474,6 @@ const styles = StyleSheet.create({
     },
     descText: { fontSize: 14, color: "#4B5563", lineHeight: 23 },
 
-    // Requirements
     reqCard: {
         backgroundColor: "#fff", borderRadius: 16, padding: 16, gap: 12,
         shadowColor: "#000", shadowOpacity: 0.04,
@@ -549,7 +486,6 @@ const styles = StyleSheet.create({
     },
     reqText: { flex: 1, fontSize: 14, color: "#374151", lineHeight: 22 },
 
-    // Benefits
     benefitsList: { gap: 10 },
     benefitItem: {
         flexDirection: "row", alignItems: "center", gap: 12,
@@ -561,14 +497,12 @@ const styles = StyleSheet.create({
     },
     benefitText: { fontSize: 14, color: "#374151", fontWeight: "600", flex: 1 },
 
-    // Meta
     metaRow: {
         flexDirection: "row", alignItems: "center", gap: 6,
         marginTop: 20, justifyContent: "center",
     },
     metaText: { fontSize: 12, color: "#9CA3AF" },
 
-    // CTA
     cta: {
         position: "absolute", bottom: 0, left: 0, right: 0,
         backgroundColor: "#fff",
