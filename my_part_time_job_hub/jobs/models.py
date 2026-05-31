@@ -1,4 +1,5 @@
 from django.db import models
+from grpc import Status
 from onlinejobapp.models import BaseActiveModel, TimeStampedModel
 from django.utils import timezone
 from users.models import User
@@ -47,14 +48,12 @@ class Industry(BaseActiveModel, TimeStampedModel):
 
 class Job(BaseActiveModel, TimeStampedModel):
     class Status(models.TextChoices):
-        PENDING = "PENDING", "Chờ duyệt"
         OPENING = "OPENING", "Đã duyệt"
         CLOSED = "CLOSED", "Hết hạn"
 
     VALID_TRANSITIONS = {
-        Status.PENDING: [Status.OPENING, Status.CLOSED],
         Status.OPENING: [Status.CLOSED],
-        Status.CLOSED: [],
+        Status.CLOSED: [Status.OPENING],
     }
 
     employer = models.ForeignKey(
@@ -65,7 +64,7 @@ class Job(BaseActiveModel, TimeStampedModel):
     )
     title = models.CharField(max_length=150)
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.PENDING
+        max_length=20, choices=Status.choices, default=Status.OPENING
     )
     requirement = models.CharField(max_length=150)
     salary_min = models.DecimalField(max_digits=12, decimal_places=2)
@@ -73,7 +72,7 @@ class Job(BaseActiveModel, TimeStampedModel):
     benefits = models.TextField(null=True, blank=True)
     location = models.CharField(max_length=150)
     available_date = models.DateField()
-    max_applicants = models.IntegerField()
+    max_applicants = models.IntegerField(default=10)
     description = models.TextField(null=True, blank=True)
 
     def is_expired(self):

@@ -20,7 +20,7 @@ class JobViewSet(
     generics.DestroyAPIView,
     generics.UpdateAPIView,
 ):
-    queryset = Job.objects.filter(active=True)
+    queryset = Job.objects.all()
     pagination_class = ItemPaginator
 
     def get_permissions(self):
@@ -42,9 +42,9 @@ class JobViewSet(
         return serializers.JobSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = Job.objects.all()
         if not self.request.user.is_authenticated or self.request.user.role == "USER":
-            queryset = queryset.filter(status=Job.Status.OPENING)
+            queryset = queryset.filter(status=Job.Status.OPENING, active=True)
         elif self.request.user.role == "EMPLOYER":
             queryset = queryset.filter(employer__user=self.request.user)
         keyword = self.request.query_params.get("q")
@@ -67,12 +67,16 @@ class JobViewSet(
         max_salary = self.request.query_params.get("max_salary")
         if max_salary:
             queryset = queryset.filter(salary_max__lte=max_salary)
-        return queryset
+        return queryset.order_by("-created_at")
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.active = False
-        instance.status = Job.Status.CLOSED
+        if instance.active:
+            instance.active = False
+            instance.status = Job.Status.CLOSED
+        else:
+            instance.active = True
+            instance.status = Job.Status.OPENING
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -189,7 +193,7 @@ class EmployerViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
         permission_classes=[IsAuthenticated],
     )
     def profile(self, request):
-        employer = Employer.objects.get(user=request.user)
+        employer = get_object_or_404(Employer, user=request.user)
 
         if request.method == "PATCH":
             serializer = serializers.EmployerSerializer(

@@ -86,12 +86,14 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images = validated_data.pop("workplace_images")
+        user = self.context["request"].user
+        if Employer.objects.filter(user=user).exists():
+            raise serializers.ValidationError("User đã có hồ sơ nhà tuyển dụng rồi !")
         with transaction.atomic():
-            employer = super().create(validated_data)
-            arrImg = []
-            for img in images:
-                arrImg.append(img)
-            WorkplaceImage.objects.bulk_create(arrImg)
+            employer = Employer.objects.create(user=user, **validated_data)
+            WorkplaceImage.objects.bulk_create(
+                [WorkplaceImage(employer=employer, image=img) for img in images]
+            )
         return employer
 
     def update(self, instance, validated_data):
@@ -179,20 +181,15 @@ class JobCreateSerializer(serializers.ModelSerializer):
         return Job.objects.create(employer=user.employer_profile, **validated_data)
 
     def validate_max_applicant(self, value):
-        if value > 10:
+        if value > 20:
             raise serializers.ValidationError(
-                "Không được nhận quá 10 hồ sơ cho 1 công việc !"
+                "Không được tạo công việc với số lượng nhận hồ sơ quá 20 hồ sơ !"
             )
         return value
 
     def update(self, instance, validated_data):
-        if instance.status != "PENDING":
-            raise serializers.ValidationError(
-                "Chỉ có thể chỉnh sửa job khi ở trạng thái PENDING."
-            )
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
         instance.save()
         return instance
 
@@ -206,14 +203,19 @@ class IndustrSerializer(serializers.ModelSerializer):
 class ApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
-        fields = ["job", "cv_file"]
+        fields = ["job", "cv_file", "note"]
 
     def validate_job(self, value):
-        if Application.objects.filter(job=value).exists():
+        user = self.context["request"].user
+        if Application.objects.filter(job=value, candidate=user).exists():
             raise serializers.ValidationError("Đã ứng tuyển cho công việc này !")
+        return value
 
     def create(self, validated_data):
         validated_data["candidate"] = self.context["request"].user
+        job = validated_data["job"]
+        if job.applications.count() >= job.max_applicants:
+            raise serializers.ValidationError("Công việc này đã đủ ứng viên !")
         return super().create(validated_data)
 
 

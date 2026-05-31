@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from ..models import JobNotification
 import logging
+from django.conf import settings
 
 
 def send_job_opening_notification(notification: JobNotification):
@@ -23,18 +24,27 @@ def send_job_opening_notification(notification: JobNotification):
                 "available_date": job.available_date,
             },
         )
-        send_mail(
+        sent = send_mail(
             subject=f"[{employer.company_name}] Có việc làm mới: {job.title}",
             message="",
-            from_email=employer.user.email,
+            from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[candidate.email],
             html_message=html_body,
-            fail_silently=False,
+            fail_silently=True,
         )
-        notification.status = JobNotification.Status.SENT
-        notification.sent_at = timezone.now()
-        notification.save(update_fields=["status", "sent_at"])
-        return True
+
+        if sent:
+            notification.status = JobNotification.Status.SENT
+            notification.sent_at = timezone.now()
+            notification.save(update_fields=["status", "sent_at"])
+            return True
+        else:
+            notification.status = JobNotification.Status.FAILED
+            notification.save(update_fields=["status"])
+            logging.getLogger(__name__).error(
+                f"Failed to send notification id={notification.id}: mail not sent"
+            )
+        return False
     except Exception as e:
         notification.status = JobNotification.Status.FAILED
         notification.save(update_fields=["status"])

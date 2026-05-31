@@ -30,7 +30,7 @@ MEDIA_ROOT = BASE_DIR / "onlinejobapp/media/"
 SECRET_KEY = "django-insecure-am)vm971!*ge&5*)s&hltuu@m%@$fc8009o^!qe=@0#s_v#3@g"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "192.168.1.14",
@@ -95,13 +95,13 @@ AUTHENTICATION_BACKENDS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 
@@ -192,8 +192,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Ho_Chi_Minh"
 
 USE_I18N = True
 
@@ -203,7 +202,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
@@ -216,43 +215,40 @@ GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
 INTERNAL_BASE_URL = os.environ.get("INTERNAL_BASE_URL", "http://localhost:8000")
 
-# Config log để bắt lỗi
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "handlers": {
-#         "file": {
-#             "level": "ERROR",
-#             "class": "logging.FileHandler",
-#             "filename": BASE_DIR / "errors.log",
-#         },
-#     },
-#     "loggers": {
-#         "django": {
-#             "handlers": ["file"],
-#             "level": "ERROR",
-#             "propagate": True,
-#         },
-#         "jobs": {
-#             "handlers": ["file"],
-#             "level": "ERROR",
-#             "propagate": True,
-#         },
-#     },
-# }
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": "ERROR",
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+        "jobs": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+    },
+}
 
 # Dev: in mail ra console thay vì gửi thật
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Gửi maik thật
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_USER = "apikey"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-
-TIME_ZONE = "Asia/Ho_Chi_Minh"
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
 
 
 # FIREBASE_CREDENTIALS = BASE_DIR / "serviceAccountKey.json"

@@ -6,11 +6,12 @@ from .tasks import create_notifications_for_job, process_pending_notifications
 
 @receiver(pre_save, sender=Job)
 def on_job_status_change(sender, instance, **kwargs):
-    """
-    Khi Job chuyển từ PENDING → OPENING thì tạo + gửi notification.
-    """
     if not instance.pk:
-        return  # job mới tạo, chưa có status cũ
+        if instance.status == Job.Status.OPENING:
+            from django.db import transaction
+
+            transaction.on_commit(lambda: _notify(instance))
+        return
 
     try:
         old = Job.objects.get(pk=instance.pk)

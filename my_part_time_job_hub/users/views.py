@@ -154,14 +154,10 @@ class AuthViewSet(viewsets.ViewSet):
             token_data = json.loads(token_response.content)
 
             if token_response.status_code == 200:
-                response = requests.post(token_url, json=data_send_oauth)
-
-            if response.status_code == 200:
                 user = validated_data.get("user")
                 if user:
                     user.last_login = timezone.now()
                     user.save(update_fields=["last_login"])
-
             return Response(token_data, status=status.HTTP_200_OK)
         except AuthenticationFailed as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
